@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.andrehacker</groupId>
+  <artifactId>logreg</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Logistic Regression</name>
+  <repositories>
+    <repository>
+      <id>MavenCentral</id>
+      <url>http://repo1.maven.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <dependencies>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.8.1</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.mahout</groupId>
+  		<artifactId>mahout-core</artifactId>
+  		<version>0.7</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.mahout</groupId>
+  		<artifactId>mahout-math</artifactId>
+  		<version>0.7</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.mahout</groupId>
+  		<artifactId>mahout-integration</artifactId>
+  		<version>0.7</version>
+  	</dependency>
+  </dependencies>
+  <properties>
+  </properties>
+</project>
