@@ -1,25 +1,15 @@
-package com.andrehacker;
+package com.andrehacker.ml;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.mahout.classifier.sgd.CsvRecordFactory;
 import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.SingularValueDecomposition;
+import org.apache.mahout.math.Vector;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.Resources;
 
 /**
  * Inspired by org.apache.mahout.classifier.sgd.TrainLogistic
@@ -27,15 +17,10 @@ import com.google.common.io.Resources;
  * @author andre
  *
  */
-public class LinRegTrainer implements RegressionModel, ClassificationModel {
+public class LinearRegression implements RegressionModel, ClassificationModel {
   
-  public void train(String inputFile) throws IOException {
-    BufferedReader reader = new BufferedReader(IoUtils.open(inputFile));
-    
-    List<String> predictorNames = Lists.newArrayList(new String[] {
-       //"x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c", "bias"
-       "x", "y", "shape", "a", "b", "c"
-    });
+  public void train(String inputFile, List<String> predictorNames) throws IOException {
+    BufferedReader reader = new BufferedReader(MLUtils.open(inputFile));
     
     // Read numeric csv into dense matrix
     CsvReader csv = new CsvReader();
@@ -47,20 +32,17 @@ public class LinRegTrainer implements RegressionModel, ClassificationModel {
     Vector w = pseudoInverse(data).times(csv.getY());
     System.out.println("Learned weigths: " + w);
     
+    Matrix confusion = new DenseMatrix(2,2);
     System.out.println("Mean Deviation: " + Validation.computeMeanDeviation(data, csv.getY(), w, this));
-    System.out.println("Success-rate: " + Validation.computeSuccessRate(data, csv.getY(), w, this));
+    System.out.println("Success-rate: " + Validation.computeSuccessRate(data, csv.getY(), w, this, confusion));
   }
   
-  private void printDimensions(Matrix matrix) {
-    System.out.println("Size: " + matrix.rowSize() + "x" + matrix.columnSize());
-  }
-  
-  public double hypothesis(Vector x, Vector w, boolean debug) {
+  public double predict(Vector x, Vector w, boolean debug) {
     return x.dot(w);
   }
 
   public int classify(Vector x, Vector w, boolean debug) {
-    return (int) Math.round( hypothesis(x, w, debug) );
+    return (int) Math.round( predict(x, w, debug) );
   }
   
 //  public void trainold(String inputFile) throws IOException {

@@ -1,9 +1,8 @@
-package com.andrehacker;
+package com.andrehacker.ml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,10 +21,12 @@ public class CsvReader {
   
   private static final int BIAS_DEFAULT = 1;
   
-  private Map<String, String> predictorsAndTypes;
+  // predictorIndices and predictorNames have same order!
+  private boolean addBias;
   private List<Integer> predictorIndices;
+  Map<Integer, String> columnToNameMap;
   private int targetIndex;
-  private List<String> variableNames;
+  private List<String> allVariables;
   private Matrix data;
   private Vector y;
   
@@ -41,23 +42,43 @@ public class CsvReader {
    */
   public boolean csvNumericToDenseMatrix(BufferedReader reader, int rows, String targetName, List<String> predictorNames, boolean addBias) throws IOException {
     
+    this.addBias = addBias;
+
     // First line contains names
-    variableNames = Lists.newArrayList(splitter.split(reader.readLine()));
+    allVariables = Lists.newArrayList(splitter.split(reader.readLine()));
     // Find predictors and store indices
+    this.columnToNameMap = new HashMap<Integer, String>();
     Integer index = -1;
     predictorIndices = Lists.newArrayList();
-    for (String predictor : predictorNames) {
-      index = variableNames.indexOf(predictor);
-      if (index != -1) {
-        predictorIndices.add(index);
-      } else {
-        System.out.println("Could not find predictor in header: " + predictor);
+    int curTargetColumn = 0;    // column where to store in the matrix
+    for (int id = 0; id < allVariables.size() ; ++id) {
+      if ((index = predictorNames.indexOf(allVariables.get(id))) != -1) {
+        columnToNameMap.put(curTargetColumn + (addBias?1:0), predictorNames.get(index));
+        predictorIndices.add(id);
+        curTargetColumn++;
       }
     }
-    Collections.sort(predictorIndices);
+    
+//  // First line contains names
+//  allVariables = Lists.newArrayList(splitter.split(reader.readLine()));
+//  // Find predictors and store indices
+//  this.columnToNameMap = new HashMap<Integer, String>();
+//  Integer index = -1;
+//  predictorIndices = Lists.newArrayList();
+//  for (String predictor : predictorNames) {
+//    index = allVariables.indexOf(predictor);
+//    if (index != -1) {
+//      predictorIndices.add(index);
+//      columnToNameMap.put(index, predictor);
+//    } else {
+//      System.out.println("Could not find predictor in header: " + predictor);
+//      columnToNameMap.put(-1, predictor);
+//    }
+//  }
+//  Collections.sort(predictorIndices);
     
     // Find target name
-    targetIndex = variableNames.indexOf(targetName);
+    targetIndex = allVariables.indexOf(targetName);
     if (targetIndex == -1) {
       System.out.println("Could not find target in header: " + targetName);
       return false;
@@ -73,16 +94,15 @@ public class CsvReader {
     y = new DenseVector(rows);
     int id;
     int nextPredictorId;
-    int vecPosition;
+    int currentColumn;
     int row = 0;
     while ((line = reader.readLine()) != null) {
       id = 0;
       nextPredictorId = 0;
-      vecPosition = 0;
-      double[] vec = new double[numColumns];
+      currentColumn = 0;
       if (addBias) {
-        vec[0] = BIAS_DEFAULT;
-        vecPosition = 1;
+        data.set(row, 0, BIAS_DEFAULT);
+        currentColumn = 1;
       }
       for (String field : splitter.split(line)) {
         if (targetIndex == id) {
@@ -90,15 +110,14 @@ public class CsvReader {
           y.set(row, Double.parseDouble(field));
         }
         if (predictorIndices.get(nextPredictorId) == id) {
-          // read this
-          vec[vecPosition] = Double.parseDouble(field);
+          // this is a predictor value
+          data.set(row, currentColumn, Double.parseDouble(field));
           ++nextPredictorId;
-          ++vecPosition;
-          if (nextPredictorId >= getNumPredictors()) { 
+          ++currentColumn;
+          if (nextPredictorId >= getNumPredictors()) {
             break;
           }
         }
-        data.set(row, vec);
         ++id;
       }
       ++row;
@@ -106,6 +125,11 @@ public class CsvReader {
     
     return true;
     
+  }
+
+  public String getColumnName(int i) {
+    if (i == 0 && addBias) return "Bias";
+    return columnToNameMap.get(i);
   }
 
   public Vector getY() {

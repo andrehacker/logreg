@@ -1,4 +1,4 @@
-package com.andrehacker;
+package com.andrehacker.ml;
 
 import org.apache.mahout.math.Vector;
 
