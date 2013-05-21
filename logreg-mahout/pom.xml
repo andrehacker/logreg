@@ -37,6 +37,16 @@
   		<artifactId>mahout-integration</artifactId>
   		<version>0.7</version>
   	</dependency>
+  	<dependency>
+  		<groupId>org.apache.commons</groupId>
+  		<artifactId>commons-lang3</artifactId>
+  		<version>3.1</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.google.visualization</groupId>
+  		<artifactId>visualization-datasource</artifactId>
+  		<version>1.1.1</version>
+  	</dependency>
   </dependencies>
   <properties>
   </properties>

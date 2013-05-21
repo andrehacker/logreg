@@ -1,13 +1,10 @@
 package com.andrehacker.ml;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
-
-import com.andrehacker.ml.MLUtils;
-import com.mongodb.util.Util;
 
 
 public class UtilsTest {
@@ -20,14 +17,25 @@ public class UtilsTest {
     data.set(2, new double[] {3, 1});
     
     Vector mean = MLUtils.meanByColumns(data);
-    System.out.println("Mean: " + mean);
+//    System.out.println("Mean: " + mean);
     assertEquals(mean.get(0), 2, 0);
     assertEquals(mean.get(1), -1, 0);
     
     Vector range = MLUtils.rangeByColumns(data);
-    System.out.println("Range: " + range);
+//    System.out.println("Range: " + range);
     assertEquals(range.get(0), 2, 0);
     assertEquals(range.get(1), 4, 0);
+    
+    Matrix m = new DenseMatrix(2,2);
+    m.set(0, new double[] {2, 0});
+    m.set(1, new double[] {0, -4});
+    
+    Matrix inverse = MLUtils.inverse(m);
+    Matrix res = inverse.times(m);
+    assertEquals(res.get(0, 0), 1, 0);
+    assertEquals(res.get(1, 1), 1, 0);
+    assertEquals(res.get(0, 1), 0, 0);
+    assertEquals(res.get(1, 0), 0, 0);
   }
 
 }

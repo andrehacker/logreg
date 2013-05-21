@@ -4,12 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.Vector;
-
-import com.google.common.collect.Lists;
 
 /**
  * Inspired by org.apache.mahout.classifier.sgd.TrainLogistic
@@ -29,12 +25,13 @@ public class LinearRegression implements RegressionModel, ClassificationModel {
     Matrix data = csv.getData();
     
     // Least squares solution:
-    Vector w = pseudoInverse(data).times(csv.getY());
+    Vector w = MLUtils.pseudoInversebySVD(data).times(csv.getY());
     System.out.println("Learned weigths: " + w);
-    
-    Matrix confusion = new DenseMatrix(2,2);
-    System.out.println("Mean Deviation: " + Validation.computeMeanDeviation(data, csv.getY(), w, this));
-    System.out.println("Success-rate: " + Validation.computeSuccessRate(data, csv.getY(), w, this, confusion));
+
+    // TODO: Update this
+//    Matrix confusion = new DenseMatrix(2,2);
+//    System.out.println("Mean Deviation: " + Validation.computeMeanDeviation(data, csv.getY(), w, this));
+//    System.out.println("Success-rate: " + Validation.computeSuccessRate(data, csv.getY(), w, this, confusion));
   }
   
   public double predict(Vector x, Vector w, boolean debug) {
@@ -103,31 +100,4 @@ public class LinearRegression implements RegressionModel, ClassificationModel {
 //    //System.out.println(svd.toString());
 //  }
   
-  /**
-   * Computes pseudo inverse using SSVD (stochastical singular value decomposition)
-   * See http://en.wikipedia.org/wiki/Singular_value_decomposition#Applications_of_the_SVD
-   * 
-   * @param data Input Matrix
-   * @return pseudo-inverse of data matrix
-   */
-  private Matrix pseudoInverse(Matrix data) {
-    
-    SingularValueDecomposition svd = new SingularValueDecomposition(data);
-    
-    // Use SVD result to compute pseudoinverse of matrix
-    // Computation: pinv(data) = V pinv(S) U*
-    // where data = U S V* (this is the result of the svd)
-    // and   pinv(S) = replacing every non-zero diagonal entry in S by its reciprocal and transposing the resulting matrix
-    
-    Matrix S = svd.getS();
-    
-    for (int i=0; i<S.rowSize(); ++i) {
-      if (S.get(i, i) != 0) {
-        S.set(i, i, 1.0 / S.get(i, i));
-      }
-    }
-    
-    return svd.getV().times(S.transpose()).times(svd.getU().transpose());
-  }
-
 }
