@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.List;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -54,6 +55,20 @@ public class MLUtils {
     }
   }
   
+  static boolean compareVectors(Vector first, Vector second) {
+    if (first.size() != second.size()) {
+//      System.out.println("Vectors have different cardinality");
+      return false; 
+    }
+    for (int i=0; i<first.size(); ++i) {
+      if (first.get(i) != second.get(i)) {
+//        System.out.println("Vectors are not equal: " + first.get(i) + " vs. " + second.get(i));
+        return false;
+      }
+    }
+    return true;
+  }
+  
   static Vector meanByColumns(Matrix m) {
     Vector sums = m.aggregateColumns(new VectorFunction() {
       public double apply(Vector col) {
@@ -75,17 +90,6 @@ public class MLUtils {
       }
     });
     return max.minus(min);
-  }
-  
-  static void normalize(Matrix m) {
-    Vector means = MLUtils.meanByColumns(m);
-    Vector ranges = MLUtils.rangeByColumns(m);
-    // TODO: Handle the case where range is 0
-    
-    for (int col=1; col<m.numCols(); ++col) {
-      Vector newCol = m.viewColumn(col).assign(Functions.MINUS, means.get(col)).divide(ranges.get(col));
-      m.assignColumn(col, newCol);
-    }
   }
   
   static Vector ones(int d) {
@@ -140,6 +144,36 @@ public class MLUtils {
     }
     
     return svd.getV().times(S.transpose()).times(svd.getU().transpose());
+  }
+
+//  public static CsvReader readDataNormalized(String sampleFile, int rows, List<String> predictorNames, String targetName, double targetPositive, double targetNegative) throws Exception {
+//    CsvReader csv;
+//    // Read data into matrix
+//    BufferedReader reader = new BufferedReader(MLUtils.open(sampleFile));
+//    csv = new CsvReader();
+//    csv.numericToDenseMatrix(reader, rows, targetName, predictorNames, true);
+//    
+//    csv.normalize();
+//    csv.normalizeClassLabels(targetPositive, targetNegative);
+//    
+//    return csv;
+//  }
+
+  public static CsvReader readData(String sampleFile, int rows, List<String> predictorNames, String targetName) throws Exception {
+    CsvReader csv;
+    // Read data into matrix
+    BufferedReader reader = new BufferedReader(MLUtils.open(sampleFile));
+    csv = new CsvReader();
+    csv.numericToDenseMatrix(reader, rows, targetName, predictorNames, true);
+    
+    return csv;
+  }
+  
+  public static void printLinearModel(Vector w, CsvReader csv) {
+    System.out.println("Learned Model");
+    for (int i=0; i<w.size(); ++i) {
+      System.out.println(" - " + csv.getColumnName(i) + "\t" + w.get(i));
+    }
   }
   
   static Matrix inverse(Matrix data) {

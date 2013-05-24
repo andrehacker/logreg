@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 public class LinearRegressionTest {
 
   @Test
-  public void test() {
+  public void test() throws Exception {
     List<String> predictorNames = Lists.newArrayList(new String[] {
       //"x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c", "bias"
       //"x", "y", "shape", "a", "b", "c"

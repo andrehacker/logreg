@@ -1,102 +1,109 @@
 package com.andrehacker.ml;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 
+/**
+ * TODO Feature: Cross-validation
+ * TODO Feature: Stochastic GD
+ * TODO Feature: Regularization L1
+ */
 public class LogisticRegression implements RegressionModel, ClassificationModel {
   
-  private Vector means;
-  private Vector ranges;
-  private Matrix data;
   private Vector w;
-  private CsvReader csv;
   
-  /**
-   * TODO Regularization (L1 / L2 ?)
-   * TODO Validation on Testdata
-   * TODO Cross-validation
-   * TODO Stochastic GD
-   * TODO SFO
-   * 
-   * @param sampleFile
-   * @param predictorNames
-   * @throws IOException
-   */
-  public LogisticRegression(String sampleFile, List<String> predictorNames) throws IOException {
-
-    // Read data into matrix
-    BufferedReader reader = new BufferedReader(MLUtils.open(sampleFile));
-    csv = new CsvReader();
-    int rows = 40;
-    csv.csvNumericToDenseMatrix(reader, rows, "color", predictorNames, true);
-    data = csv.getData();
+  public void trainNewton(Matrix data, Vector y, int maxIterations, double initialWeight, double penalty) {
     
-    // TODO: Adopt class labels
-    csv.getY().assign(Functions.MINUS, 1);
-    
-    // Normalize data (std-dev 1 and mean 0)
-    // Without normalizing, the dot-product (w*x) in the hypothesis could become too big
-    normalize(data);
-    
-    // Empty model
-    w = new DenseVector(predictorNames.size()+1);
-  }
-  
-  public boolean trainNewton(int maxIterations, double initialWeight, double penalty) {
-    return train(maxIterations, 1, initialWeight, true, penalty);
-  }
-  
-  public boolean trainBatchGD(int maxIterations, double learningRate, double initialWeight) {
-    return train(maxIterations, learningRate, initialWeight, false, 0);
-  }
-
-  private boolean train(int maxIterations, double learningRate, double initialWeight, boolean useNewton, double penalty) {
+    w = new DenseVector(data.numCols());
+    w.assign(initialWeight);
 
     int rowCount = data.numRows();
-    Vector y = csv.getY();
     
     double penaltyDivN = penalty/rowCount;
-    
-    w.assign(initialWeight);
-    int it = 1;
+
+    int it = 0;
     // Other termination criteria: small delta in weights or good quality reached
-    while (it <= maxIterations) {
-      
+    while ((++it) <= maxIterations) {
       Vector batchGradient = new DenseVector(data.numCols());
       Matrix batchGradientSecond = new DenseMatrix(data.numCols(), data.numCols());
       // Batch GD: Iterate over all x
       for (int n=0; n<rowCount; ++n) {
-        Vector grad = computePartialGradient(data.viewRow(n), w, y.get(n));
-        if (useNewton) {
-          batchGradientSecond.assign(computeSecondPartialGradient(data.viewRow(n), w, y.get(n)), Functions.PLUS);
-        }
+        Vector xn = data.viewRow(n);
+        Vector grad = computePartialGradient(xn, w, y.get(n));
+        batchGradientSecond.assign(computeSecondPartialGradient(xn, w, y.get(n)), Functions.PLUS);
         batchGradient.assign(grad, Functions.PLUS);
       }
-      if (useNewton) {
-        // Add penalty to 1st derivation (using NG's derivation)
-        Vector mask = MLUtils.ones(data.numCols()); // Avoid penalty on bias
-        mask.set(0, 0);
-        batchGradient.assign(w.times(mask).times(penaltyDivN), Functions.PLUS);
-        // Add penalty to 2nd derivation
-        batchGradientSecond = batchGradientSecond.plus(MLUtils.diag(mask).times(penaltyDivN));
-        batchGradient = MLUtils.inverse(batchGradientSecond).times(batchGradient);
-        w.assign(batchGradient, Functions.MINUS);
-      } else {
-        // Weight update: w = w - 1/N * \gamma * grad
-        w.assign(batchGradient.assign(Functions.MULT, learningRate / rowCount), Functions.MINUS);
-      }
-
-      ++it;
+      // Add penalty to 1st derivation (using NG's derivation)
+      Vector mask = MLUtils.ones(data.numCols()); // Avoid penalty on bias
+      mask.set(0, 0);
+      batchGradient.assign(w.times(mask).times(penaltyDivN), Functions.PLUS);
+      
+      // Add penalty to 2nd derivation
+      batchGradientSecond = batchGradientSecond.plus(MLUtils.diag(mask).times(penaltyDivN));
+      
+      // Standard Newton Update
+      batchGradient = MLUtils.inverse(batchGradientSecond).times(batchGradient);
+      w.assign(batchGradient, Functions.MINUS);
     }
+  }
+  
+  public Vector trainNewtonSFO(Matrix X, Vector y, Vector w, int maxIterations, double initialWeight, double penalty) {
     
-    return true;
+    int rowCount = X.numRows();
+    
+    this.w = w; // TODO: Make this nicer
+    
+    double penaltyDivN = penalty/rowCount;
+    
+    int it = 0;
+    while ((++it) <= maxIterations) {
+      
+      double batchGradient = 0d;
+      double batchGradientSecond = 0d;
+      // Batch GD: Iterate over all x
+      for (int n=0; n<rowCount; ++n) {
+        Vector xn = X.viewRow(n);
+        double grad = computePartialGradientSFO(xn, w, y.get(n));
+        batchGradientSecond += computeSecondPartialGradientSFO(xn, w, y.get(n));
+        batchGradient += grad;
+      }
+      
+      // Add penalty to 1st derivation (using NG's derivation)
+      Vector mask = MLUtils.ones(X.numCols()); // Avoid penalty on bias
+      mask.set(0, 0);
+      batchGradient += penaltyDivN * w.getQuick(w.size()-1);
+      
+      // Add penalty to 2nd derivation
+      batchGradientSecond += penaltyDivN;
+      
+      // Standard Newton Update
+      batchGradient = batchGradient / batchGradientSecond;
+      w.setQuick(w.size()-1, w.getQuick(w.size()-1) - batchGradient);
+    }
+    return w;
+  }
+  
+  public void trainBatchGD(Matrix data, Vector y, int maxIterations, double learningRate, double initialWeight) {
+
+    w = new DenseVector(data.numCols());
+    w.assign(initialWeight);
+    int rowCount = data.numRows();
+    
+    int it = 0;
+    while ((++it) <= maxIterations) {
+      
+      Vector batchGradient = new DenseVector(data.numCols());
+      // Batch GD: Iterate over all x
+      for (int n=0; n<rowCount; ++n) {
+        Vector grad = computePartialGradient(data.viewRow(n), w, y.get(n));
+        batchGradient.assign(grad, Functions.PLUS);
+      }
+      // Weight update: w = w - 1/N * \gamma * grad
+        w.assign(batchGradient.assign(Functions.MULT, learningRate / rowCount), Functions.MINUS);
+    }
   }
   
   public double predict(Vector x, Vector w, boolean debug) {
@@ -116,13 +123,6 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
   public int classify(Vector x, Vector w, boolean debug) {
     return (int) Math.round( predict(x, w, debug) );
   }
-  
-  public void printLinearModel(Vector w) {
-    System.out.println("LEARNED MODEL");
-    for (int i=0; i<w.size(); ++i) {
-      System.out.println(" - " + csv.getColumnName(i) + "\t" + w.get(i));
-    }
-  }
 
   private Vector computePartialGradient(Vector x, Vector w, double y) {
     // Compute the partial gradient of negative log-likelihood function regarding a single data point x
@@ -131,7 +131,7 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     
     return x.times(diff);
   }
-  
+
   private Matrix computeSecondPartialGradient(Vector x, Vector w, double y) {
     //Returns: x x^T h(x) (1-h(x))
     double predicted = predict(x, w, false);
@@ -141,15 +141,28 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     return result;
   }
   
-  private void normalize(Matrix m) {
-    means = MLUtils.meanByColumns(m);
-    ranges = MLUtils.rangeByColumns(m);
-    // TODO: Handle the case where range is 0
+  /**
+   * Convention: The new feature to be optimized is in last column
+   */
+  private double computePartialGradientSFO(Vector x, Vector w, double y) {
+    // Compute the partial gradient of negative log-likelihood function
+    // regarding a single data point x and a single feature/dimension d
+    // = ( h(x) - y) * x_d
+    double diff = predict(x, w, false) - y;
     
-    for (int col=1; col<m.numCols(); ++col) {
-      Vector newCol = m.viewColumn(col).assign(Functions.MINUS, means.get(col)).divide(ranges.get(col));
-      m.assignColumn(col, newCol);
-    }
+    return x.getQuick(x.size()-1) * diff;
+  }
+  
+  /**
+   * Convention: The new feature to be optimized is in last column
+   */
+  private double computeSecondPartialGradientSFO(Vector x, Vector w, double y) {
+    //Returns: (x_d)^2 h(x) (1-h(x))
+    double predicted = predict(x, w, false);
+    double xdSquared = x.getQuick(x.size()-1);
+    xdSquared = xdSquared * xdSquared;
+    
+    return xdSquared * predicted * (1 - predicted);
   }
 
   public Vector getWeight() {

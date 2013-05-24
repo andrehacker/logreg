@@ -1,7 +1,6 @@
 package com.andrehacker.ml;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.mahout.math.Matrix;
@@ -15,13 +14,13 @@ import org.apache.mahout.math.Vector;
  */
 public class LinearRegression implements RegressionModel, ClassificationModel {
   
-  public void train(String inputFile, List<String> predictorNames) throws IOException {
+  public void train(String inputFile, List<String> predictorNames) throws Exception {
     BufferedReader reader = new BufferedReader(MLUtils.open(inputFile));
     
     // Read numeric csv into dense matrix
     CsvReader csv = new CsvReader();
     int rows = 40;
-    csv.csvNumericToDenseMatrix(reader, rows, "color", predictorNames, true);
+    csv.numericToDenseMatrix(reader, rows, "color", predictorNames, true);
     Matrix data = csv.getData();
     
     // Least squares solution:
