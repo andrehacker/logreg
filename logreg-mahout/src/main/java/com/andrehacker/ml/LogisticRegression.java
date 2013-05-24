@@ -54,7 +54,7 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     
     int rowCount = X.numRows();
     
-    this.w = w; // TODO: Make this nicer
+    this.w = w; // TODO Refactoring: Make this nicer
     
     double penaltyDivN = penalty/rowCount;
     
@@ -106,11 +106,8 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     }
   }
   
-  public double predict(Vector x, Vector w, boolean debug) {
+  public double predict(Vector x, Vector w) {
     // Computes the prediction, using our current hypothesis (logistic function)
-    if (debug) {
-//      System.out.println("   - hyp: " + 1d / (1d + Math.exp( - x.dot(w))) );
-    }
     // Overflow detection
     double xDotW = x.dot(w);
     double exp = Math.exp(xDotW);
@@ -120,21 +117,21 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     return 1d / (1d + Math.exp( - x.dot(w)));
   }
 
-  public int classify(Vector x, Vector w, boolean debug) {
-    return (int) Math.round( predict(x, w, debug) );
+  public int classify(Vector x, Vector w) {
+    return (int) Math.round( predict(x, w) );
   }
 
   private Vector computePartialGradient(Vector x, Vector w, double y) {
     // Compute the partial gradient of negative log-likelihood function regarding a single data point x
     // = ( h(x) - y) * x
-    double diff = predict(x, w, false) - y;
+    double diff = predict(x, w) - y;
     
     return x.times(diff);
   }
 
   private Matrix computeSecondPartialGradient(Vector x, Vector w, double y) {
     //Returns: x x^T h(x) (1-h(x))
-    double predicted = predict(x, w, false);
+    double predicted = predict(x, w);
     Matrix productOfx = MLUtils.vectorToColumnMatrix(x).times(MLUtils.vectorToRowMatrix(x));
     
     Matrix result = productOfx.times(predicted * (1 - predicted));
@@ -148,7 +145,7 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     // Compute the partial gradient of negative log-likelihood function
     // regarding a single data point x and a single feature/dimension d
     // = ( h(x) - y) * x_d
-    double diff = predict(x, w, false) - y;
+    double diff = predict(x, w) - y;
     
     return x.getQuick(x.size()-1) * diff;
   }
@@ -158,7 +155,7 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
    */
   private double computeSecondPartialGradientSFO(Vector x, Vector w, double y) {
     //Returns: (x_d)^2 h(x) (1-h(x))
-    double predicted = predict(x, w, false);
+    double predicted = predict(x, w);
     double xdSquared = x.getQuick(x.size()-1);
     xdSquared = xdSquared * xdSquared;
     

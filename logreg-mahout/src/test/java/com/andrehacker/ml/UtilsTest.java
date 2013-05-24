@@ -17,12 +17,10 @@ public class UtilsTest {
     data.set(2, new double[] {3, 1});
     
     Vector mean = MLUtils.meanByColumns(data);
-//    System.out.println("Mean: " + mean);
     assertEquals(mean.get(0), 2, 0);
     assertEquals(mean.get(1), -1, 0);
     
     Vector range = MLUtils.rangeByColumns(data);
-//    System.out.println("Range: " + range);
     assertEquals(range.get(0), 2, 0);
     assertEquals(range.get(1), 4, 0);
     

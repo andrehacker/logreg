@@ -94,12 +94,8 @@ public class SFO {
   
   public void findBestFeature() {
     
-//    List<Double> performance = Lists.newArrayListWithCapacity(model.getRemainingDimensions().size());
-//    List<Double> weights = Lists.newArrayListWithCapacity(model.getRemainingDimensions().size());
     Validation val = new Validation();
     
-    // Prepare base model with place for one more feature
-    Vector extendedW;
     
     // Measure performance of current base model
     Matrix XTestBase = transformMatrix(model.getUsedDimensions(), -1, csvTest.getData());
@@ -110,7 +106,7 @@ public class SFO {
     System.out.println(" - success: " + val.getSuccessRate());
     double baseMeanDeviation = val.getMeanDeviation();
 
-    // TODO: Optimization: Always keep an extended Matrix, where the last row can be exchanged (much faster!)
+    // TODO Optimization: Always keep an extended Matrix, where the last row can be exchanged (much faster!)
     int bestDimension = 0;
     double bestGain = Double.NEGATIVE_INFINITY;
     double bestWeight = 0;
@@ -123,16 +119,14 @@ public class SFO {
       
       // Train single feature
       System.out.println("Train " + csvTrain.getColumnName(d) + " (d=" + d + ")");
-      extendedW = model.getExtendedModel();
+      Vector extendedW = model.getExtendedModel();     // weight vector with place for one more feature
       System.out.println(" - Before: " + extendedW);
       extendedW = logReg.trainNewtonSFO(XTrain, csvTrain.getY(), extendedW, ITERATIONS, INITIAL_WEIGHT, PENALTY);
       System.out.println(" - After:  " + extendedW);
-//      weights.add(extendedW.getQuick(extendedW.size()-1));
 
       // Measure performance when adding dimension d to base model
       val.computeSuccessRate(XTest, csvTest.getY(), extendedW, logReg);
       val.computeMeanDeviation(XTest, csvTest.getY(), extendedW, logReg);
-//      performance.add(val.getSuccessRate());
       System.out.println(" - dev:     " + val.getMeanDeviation());
       System.out.println(" - success: " + val.getSuccessRate());
       

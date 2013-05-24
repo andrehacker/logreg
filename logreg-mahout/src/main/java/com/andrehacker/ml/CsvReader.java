@@ -17,17 +17,14 @@ import com.google.common.collect.Maps;
 
 public class CsvReader {
 
-  // TODO: Allow spaces as separator: "a", "b", ...
+  // TODO Minor: Allow spaces as separator: "a", "b", ...
   private static final Splitter splitter = Splitter.on(',').trimResults(CharMatcher.is('"'));
   
   private static final int BIAS_DEFAULT = 1;
   private static final String BIAS_NAME = "BIAS";
   
-  // predictorIndices and predictorNames have same order!
   private boolean addBias;
-//  private List<Integer> predictorIndices;
   private Map<Integer, Integer> internalToFileColumnMap;    // maps columns of internal matrix to file columns
-//  private Map<Integer, String> columnInternalToNameMap;
   private List<String> predictorNames;
   private List<String> allVariables;
   private Matrix data;
@@ -95,93 +92,19 @@ public class CsvReader {
     return true;
   }
   
-//  /**
-//   * Read a numeric csv to dense Matrix representation
-//   * For small matrices (has to fit into memory)
-//   * 
-//   * Result can be obtained using getters
-//   */
-//  public boolean numericToDenseMatrixOld(BufferedReader reader, int rows, String targetName, List<String> predictorNames, boolean addBias) throws IOException {
-//    
-//    this.addBias = addBias;
-//
-//    // First line contains names
-//    allVariables = Lists.newArrayList(splitter.split(reader.readLine()));
-//    // Find predictors and store indices
-//    this.columnInternalToNameMap = new HashMap<Integer, String>();
-//    Integer index = -1;
-//    List<Integer> predictorIndices = Lists.newArrayList();
-//    int curTargetColumn = 0;    // column where to store in the matrix
-//    for (int id = 0; id < allVariables.size() ; ++id) {
-//      if ((index = predictorNames.indexOf(allVariables.get(id))) != -1) {
-//        columnInternalToNameMap.put(curTargetColumn + (addBias?1:0), predictorNames.get(index));
-//        predictorIndices.add(id);
-//        curTargetColumn++;
-//      }
-//    }
-//    
-//    // Find target name
-//    targetIndex = allVariables.indexOf(targetName);
-//    if (targetIndex == -1) {
-//      System.out.println("Could not find target in header: " + targetName);
-//      return false;
-//    }
-//    
-//    // Construct empty matrix (with or without bias in first column)
-//    int numColumns = predictorIndices.size() + (addBias ? 1 : 0);
-//    data = new DenseMatrix(rows, numColumns);
-//    
-//    // Read lines and fill matrix
-//    // Read only the columns defined in predictorIndices (which is sorted)
-//    String line;
-//    y = new DenseVector(rows);
-//    int id;
-//    int nextPredictorId;
-//    int currentColumn;
-//    int row = 0;
-//    while ((line = reader.readLine()) != null) {
-//      id = 0;
-//      nextPredictorId = 0;
-//      currentColumn = 0;
-//      if (addBias) {
-//        data.set(row, 0, BIAS_DEFAULT);
-//        currentColumn = 1;
-//      }
-//      for (String field : splitter.split(line)) {
-//        if (targetIndex == id) {
-//          // This is the target value, add to y
-//          y.set(row, Double.parseDouble(field));
-//        }
-//        if (predictorIndices.get(nextPredictorId) == id) {
-//          // this is a predictor value
-//          data.set(row, currentColumn, Double.parseDouble(field));
-//          ++nextPredictorId;
-//          ++currentColumn;
-//          if (nextPredictorId >= getNumPredictors()) {
-//            break;
-//          }
-//        }
-//        ++id;
-//      }
-//      ++row;
-//    }
-//    
-//    return true;
-//  }
+  public void normalize() {
+    normalize(MLUtils.meanByColumns(data), MLUtils.rangeByColumns(data));
+  }
   
   public void normalize(Vector means, Vector ranges) {
     this.means = means;
     this.ranges = ranges;
 
-    // TODO: Handle the case where range is 0
+    // TODO Minor: Handle the case where range is 0
     for (int col=1; col<data.numCols(); ++col) {
       Vector newCol = data.viewColumn(col).assign(Functions.MINUS, means.get(col)).divide(ranges.get(col));
       data.assignColumn(col, newCol);
     }
-  }
-  
-  public void normalize() {
-    normalize(MLUtils.meanByColumns(data), MLUtils.rangeByColumns(data));
   }
   
   public Vector getMeans() {
@@ -207,7 +130,6 @@ public class CsvReader {
 
   public String getColumnName(int i) {
     if (i == 0 && addBias) return BIAS_NAME;
-//    return columnInternalToNameMap.get(i);
     return predictorNames.get(i-(addBias?1:0));
   }
 
@@ -220,7 +142,6 @@ public class CsvReader {
   }
   
   public int getNumPredictors() {
-//    return predictorIndices.size();
     return data.numCols()-(addBias?1:0);
   }
 }

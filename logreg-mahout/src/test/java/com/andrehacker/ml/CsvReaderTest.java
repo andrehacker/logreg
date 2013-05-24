@@ -39,8 +39,6 @@ public class CsvReaderTest {
     for (int i=0; i<=csv.getNumPredictors(); ++i) {
       System.out.println(" " + i + ": " + csv.getColumnName(i));    
     }
-//    csv.normalize();
-//    csv.normalizeClassLabels(targetPositive, targetNegative);
   }
 
 }

@@ -10,10 +10,11 @@ public class Validation {
   double successRate;
   double meanDeviation;
   
+  // TODO Refactoring: Redundant. Merge this with computeSuccessRate etc.
   public void computeMetrics(Matrix testData, Vector testY, Vector w, RegressionModel regressionModel, ClassificationModel classificationModel) {
     // How many do we classify correctly?
     
-    // TODO: Feature: Compute AUC
+    // TODO Feature: Compute AUC
     confusion = new DenseMatrix(2,2);
     int truePos = 0;
     int trueNeg = 0;
@@ -22,7 +23,7 @@ public class Validation {
     double dev = 0;     // deviation
     for (int n=0; n<testData.numRows(); ++n) {
       //System.out.println(data.viewRow(n));
-      double predictedClass = classificationModel.classify(testData.viewRow(n), w, true);
+      double predictedClass = classificationModel.classify(testData.viewRow(n), w);
 //      System.out.println("Is: " + prediction + " should: " + y.get(n));
       if (Math.round(predictedClass) == testY.get(n)) {
         if (testY.get(n) == 0)
@@ -36,7 +37,7 @@ public class Validation {
           ++falsePos;
       }
 
-      double prediction = regressionModel.predict(testData.viewRow(n), w, true);
+      double prediction = regressionModel.predict(testData.viewRow(n), w);
       dev += Math.abs((testY.get(n) - prediction));
     }
     confusion.set(0, 0, truePos);
@@ -51,7 +52,7 @@ public class Validation {
     double dev = 0;
     for (int n=0; n<data.numRows(); ++n) {
       //System.out.println(data.viewRow(n));
-      double prediction = model.predict(data.viewRow(n), w, true);
+      double prediction = model.predict(data.viewRow(n), w);
       dev += Math.abs((y.get(n) - prediction));
     
     //    System.out.println("Is: " + prediction + " should: " + y.get(n));
@@ -68,7 +69,7 @@ public class Validation {
     int falseNeg = 0;
     for (int n=0; n<data.numRows(); ++n) {
       //System.out.println(data.viewRow(n));
-      double prediction = model.classify(data.viewRow(n), w, true);
+      double prediction = model.classify(data.viewRow(n), w);
   //    System.out.println("Is: " + prediction + " should: " + y.get(n));
       if (Math.round(prediction) == y.get(n)) {
         if (y.get(n) == 0)

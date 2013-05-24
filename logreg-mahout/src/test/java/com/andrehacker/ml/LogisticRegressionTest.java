@@ -69,8 +69,6 @@ public class LogisticRegressionTest {
      for (double lambda : penalties) {
        logReg.trainNewton(csvTrain.getData(), csvTrain.getY(), iterations, initialWeight, lambda);   // breaks at 92 without regularization
 //         logReg.printLinearModel(logReg.getWeight());
-//         Validation valTest = new Validation(testFile, predictorNames, 2d, 1d);
-//         Validation valTraining = new Validation(trainingFile, predictorNames, 2d, 1d);
        Validation valTest = new Validation();
        Validation valTrain = new Validation();
        valTest.computeMetrics(csvTest.getData(), csvTest.getY(), logReg.getWeight(), logReg, logReg);
@@ -99,7 +97,6 @@ public class LogisticRegressionTest {
   @Test
   public void testBatchGD() {
     double initialWeight = 0;
-//    LogisticRegression logReg = new LogisticRegression("donut.csv", predictorNames);
     LogisticRegression logReg = new LogisticRegression();
     StopWatch sw = new StopWatch();
     sw.start();
