@@ -4,6 +4,53 @@
   <artifactId>logreg</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>Logistic Regression</name>
+  
+  <build>
+    <plugins>
+    <!--
+    Create hadoop job jar with all dependencies
+    Needed to run this jar in a distributed environment
+    Copied from https://github.com/tdunning/MiA/blob/master/pom.xml
+    See http://stackoverflow.com/questions/11479600/how-do-i-build-run-this-simple-mahout-program-without-getting-exceptions
+    
+    See http://maven.apache.org/guides/mini/guide-assemblies.html for assembly documentation 
+     -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>job</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/job.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+          <!-- don't need that one with all dependencies -->
+          <!-- 
+          <execution>
+            <id>my-jar-with-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+          </execution>
+          -->
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  
   <repositories>
     <repository>
       <id>MavenCentral</id>
@@ -15,6 +62,13 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>apache-snapshots</id>
+      <url>http://repository.apache.org/snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
   <dependencies>
   	<dependency>
@@ -23,25 +77,36 @@
   		<version>4.8.1</version>
   	</dependency>
   	<dependency>
+		<groupId>org.apache.hadoop</groupId>
+		<artifactId>hadoop-core</artifactId>
+		<version>1.1.2</version>
+	</dependency>
+            
+  	<dependency>
   		<groupId>org.apache.mahout</groupId>
   		<artifactId>mahout-core</artifactId>
-  		<version>0.7</version>
+  		<!-- <version>0.7</version> -->
+      	<version>0.8-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.apache.mahout</groupId>
   		<artifactId>mahout-math</artifactId>
-  		<version>0.7</version>
+  		<!-- <version>0.7</version> -->
+      	<version>0.8-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.apache.mahout</groupId>
   		<artifactId>mahout-integration</artifactId>
-  		<version>0.7</version>
+  		<!-- <version>0.7</version> -->
+      	<version>0.8-SNAPSHOT</version>
   	</dependency>
+  	<!-- 
   	<dependency>
   		<groupId>org.apache.commons</groupId>
   		<artifactId>commons-lang3</artifactId>
   		<version>3.1</version>
   	</dependency>
+  	 -->
   	<dependency>
   		<groupId>com.google.visualization</groupId>
   		<artifactId>visualization-datasource</artifactId>
@@ -50,8 +115,13 @@
   	<dependency>
   		<groupId>com.google.guava</groupId>
   		<artifactId>guava</artifactId>
-  		<version>13.0.1</version>
+  		<version>14.0.1</version>
   	</dependency>
+  	<dependency>
+		<groupId>log4j</groupId>
+		<artifactId>log4j</artifactId>
+		<version>1.2.17</version> <!-- Hadoop 1.0.4 has 1.2.15 included, latest version is 1.2.17 -->
+	</dependency>
   </dependencies>
   <properties>
   </properties>

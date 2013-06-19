@@ -1,13 +1,17 @@
 package com.andrehacker.ml;
 
 import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
+/**
+ * @author andre
+ */
 public class Validation {  
   
   Matrix confusion;
-  double successRate;
+  double accuracy;
   double meanDeviation;
   
   // TODO Refactoring: Redundant. Merge this with computeSuccessRate etc.
@@ -44,7 +48,7 @@ public class Validation {
     confusion.set(0, 1, falseNeg);
     confusion.set(1, 0, falsePos);
     confusion.set(1, 1, trueNeg);
-    successRate = ((double)truePos + trueNeg) / ((double)testData.numRows());
+    accuracy = ((double)truePos + trueNeg) / ((double)testData.numRows());
     meanDeviation = dev / testData.numRows();
   }
   
@@ -60,7 +64,7 @@ public class Validation {
     this.meanDeviation = dev / data.numRows(); 
   }
 
-  public void computeSuccessRate(Matrix data, Vector y, Vector w, ClassificationModel model) {
+  public void computeAccuracy(Matrix data, Vector y, Vector w, ClassificationModel model) {
     // How many do we classify correctly?
     confusion = new DenseMatrix(2,2);
     int truePos = 0;
@@ -87,7 +91,12 @@ public class Validation {
     confusion.set(0, 1, falseNeg);
     confusion.set(1, 0, falsePos);
     confusion.set(1, 1, trueNeg);
-    this.successRate = ((double)truePos + trueNeg) / ((double)data.numRows()); 
+    this.accuracy = ((double)truePos + trueNeg) / ((double)data.numRows()); 
+  }
+  
+  public Vector computeROC(Vector realOutput, Vector scores) {
+    Vector points = new DenseVector();
+    return points;
   }
   
   public Matrix getConfusion() {
@@ -98,8 +107,8 @@ public class Validation {
     return meanDeviation;
   }
   
-  public double getSuccessRate() {
-    return successRate;
+  public double getAccuracy() {
+    return accuracy;
   }
 
 }

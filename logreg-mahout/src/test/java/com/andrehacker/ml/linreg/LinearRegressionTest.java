@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.linreg;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+
+import com.andrehacker.ml.linreg.LinearRegression;
 import com.google.common.collect.Lists;
 
 public class LinearRegressionTest {

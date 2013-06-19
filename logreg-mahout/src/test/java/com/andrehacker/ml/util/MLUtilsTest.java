@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.util;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.mahout.math.DenseMatrix;
@@ -6,8 +6,10 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+import com.andrehacker.ml.util.MLUtils;
 
-public class UtilsTest {
+
+public class MLUtilsTest {
 
   @Test
   public void test() {

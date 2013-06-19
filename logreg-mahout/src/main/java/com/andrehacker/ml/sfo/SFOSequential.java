@@ -1,20 +1,22 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.sfo;
 
 import java.util.List;
 
 import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
-import com.google.common.collect.Lists;
+import com.andrehacker.ml.Validation;
+import com.andrehacker.ml.logreg.LogisticRegression;
+import com.andrehacker.ml.util.CsvReader;
+import com.andrehacker.ml.util.MLUtils;
 
-public class SFO {
+public class SFOSequential {
   
   private CsvReader csvTrain;
   private CsvReader csvTest;
   LogisticRegression logReg;
-  IncrementalModel model;
+  IncrementalModelOld model;
   
   private static final double BIAS_DEFAULT = 1;
   private static final String TARGET_NAME = "color";
@@ -26,7 +28,7 @@ public class SFO {
   private static final double INITIAL_WEIGHT = 1d;
   private static final double PENALTY = 1d;
   
-  public SFO(String trainingFile, String testFile, List<String> predictorNames) throws Exception {
+  public SFOSequential(String trainingFile, String testFile, List<String> predictorNames) throws Exception {
     this.logReg = new LogisticRegression();
     
     csvTrain = MLUtils.readData(trainingFile, 40, predictorNames, TARGET_NAME);
@@ -37,73 +39,20 @@ public class SFO {
     csvTest.normalizeClassLabels(TARGET_POSITIVE, TARGET_NEGATIVE);
     
     // Initiate an empty model, just with bias
-    model = new IncrementalModel(BIAS_DEFAULT, csvTrain.getNumPredictors());
-  }
-  
-  /**
-   * Keeps a model that can be extended feature by feature
-   * Needed for forward feature selection.
-   * Keeps track of the used dimensions
-   */
-  private static class IncrementalModel {
-    Vector w;
-    private List<Integer> usedDimensions;
-    private List<Integer> remainingDimensions;
-    
-    public IncrementalModel(double biasValue, int numDimensions) {
-      // All dimensions are unused at beginning
-      usedDimensions = Lists.newArrayList();
-      usedDimensions.add(0);    // Bias
-      remainingDimensions = Lists.newArrayListWithCapacity(numDimensions);
-      for (int i=1; i<=numDimensions; ++i) { remainingDimensions.add(i); }    // considers bias
-      
-      w = new DenseVector(1);
-      w.set(0, biasValue);
-    }
-
-    /**
-     * Return a copy of the base model with place for one more feature
-     */
-    public Vector getExtendedModel() {
-      Vector extended = new DenseVector(w.size()+1);
-      for (int i=0; i<w.size(); ++i) {
-        extended.setQuick(i, w.getQuick(i));
-      }
-      return extended; 
-    }
-    
-    public Vector getW() {
-      return w;
-    }
-    
-    public void addDimensionToModel(int d, double weight) {
-      remainingDimensions.remove(remainingDimensions.indexOf(d));
-      usedDimensions.add(d);
-      w = getExtendedModel();
-      w.setQuick(w.size()-1, weight);
-    }
-    
-    public List<Integer> getRemainingDimensions() {
-      return remainingDimensions;
-    }
-    
-    public List<Integer> getUsedDimensions() {
-      return usedDimensions;
-    }
+    model = new IncrementalModelOld(BIAS_DEFAULT, csvTrain.getNumPredictors());
   }
   
   public void findBestFeature() {
     
     Validation val = new Validation();
     
-    
     // Measure performance of current base model
     Matrix XTestBase = transformMatrix(model.getUsedDimensions(), -1, csvTest.getData());
-    val.computeSuccessRate(XTestBase, csvTest.getY(), model.getW(), logReg);
+    val.computeAccuracy(XTestBase, csvTest.getY(), model.getW(), logReg);
     val.computeMeanDeviation(XTestBase, csvTest.getY(), model.getW(), logReg);
     System.out.println("Base Model performance");
     System.out.println(" - dev:     " + val.getMeanDeviation());
-    System.out.println(" - success: " + val.getSuccessRate());
+    System.out.println(" - success: " + val.getAccuracy());
     double baseMeanDeviation = val.getMeanDeviation();
 
     // TODO Optimization: Always keep an extended Matrix, where the last row can be exchanged (much faster!)
@@ -111,7 +60,7 @@ public class SFO {
     double bestGain = Double.NEGATIVE_INFINITY;
     double bestWeight = 0;
     double gain = Double.NEGATIVE_INFINITY;
-    for (int d : model.getRemainingDimensions()) {
+    for (int d : model.getUnusedDimensions()) {
       
       // Get copy of matrix only with relevant dimensions
       Matrix XTrain = transformMatrix(model.getUsedDimensions(), d, csvTrain.getData());
@@ -125,10 +74,10 @@ public class SFO {
       System.out.println(" - After:  " + extendedW);
 
       // Measure performance when adding dimension d to base model
-      val.computeSuccessRate(XTest, csvTest.getY(), extendedW, logReg);
+      val.computeAccuracy(XTest, csvTest.getY(), extendedW, logReg);
       val.computeMeanDeviation(XTest, csvTest.getY(), extendedW, logReg);
       System.out.println(" - dev:     " + val.getMeanDeviation());
-      System.out.println(" - success: " + val.getSuccessRate());
+      System.out.println(" - success: " + val.getAccuracy());
       
       // Compute gain
       gain = baseMeanDeviation - val.getMeanDeviation();

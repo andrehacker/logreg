@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.logreg;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,11 @@ import org.apache.commons.lang.time.StopWatch;
 import org.junit.Before;
 import org.junit.Test;
 
+
+import com.andrehacker.ml.Validation;
+import com.andrehacker.ml.logreg.LogisticRegression;
+import com.andrehacker.ml.util.CsvReader;
+import com.andrehacker.ml.util.MLUtils;
 import com.google.common.collect.Lists;
 import com.google.visualization.datasource.base.TypeMismatchException;
 import com.google.visualization.datasource.datatable.ColumnDescription;
@@ -31,10 +36,10 @@ public class LogisticRegressionTest {
   public void before() throws Exception {
     predictorNames = Lists.newArrayList(new String[] {
 //      "x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c", "bias"
-//      "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"    // nice chart
+      "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"    // nice chart
 //      "x", "y", "shape", "a", "b", "c"
 //      "x", "y", "a", "b", "c"    // like Mahout page 252
-      "x", "c"    // Adding a or b is REALLY BAD. However x and y are good. Shape is okay.
+//      "x", "c"    // Adding a or b is REALLY BAD. However x and y are good. Shape is okay.
      });
     
     csvTrain = MLUtils.readData(trainingFile, 40, predictorNames, TARGET_NAME);
@@ -74,11 +79,11 @@ public class LogisticRegressionTest {
        valTest.computeMetrics(csvTest.getData(), csvTest.getY(), logReg.getWeight(), logReg, logReg);
        valTrain.computeMetrics(csvTrain.getData(), csvTrain.getY(), logReg.getWeight(), logReg, logReg);
        System.out.println("Regularization: " + lambda);
-       System.out.println("- Success-rate:\t\t" + valTest.getSuccessRate());
+       System.out.println("- Accuracy:\t\t" + valTest.getAccuracy());
        System.out.println("- Mean Deviation:\t" + valTest.getMeanDeviation());
 
        try {
-         data.addRowFromValues(lambda, valTrain.getSuccessRate(), valTest.getSuccessRate());
+         data.addRowFromValues(lambda, valTrain.getAccuracy(), valTest.getAccuracy());
        } catch (TypeMismatchException e) {
          System.out.println("Invalid type!");
        }
@@ -110,7 +115,7 @@ public class LogisticRegressionTest {
     System.out.println("\nBatch GD");
     MLUtils.printLinearModel(logReg.getWeight(), csvTrain);
     System.out.println("Evaluation");
-    System.out.println("- Success-rate:\t\t" + valTest.getSuccessRate());
+    System.out.println("- Accuracy:\t\t" + valTest.getAccuracy());
     System.out.println("- Mean Deviation:\t" + valTest.getMeanDeviation());
   }
 

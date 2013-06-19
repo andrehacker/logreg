@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.logreg;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -6,10 +6,14 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 
+import com.andrehacker.ml.ClassificationModel;
+import com.andrehacker.ml.RegressionModel;
+import com.andrehacker.ml.util.MLUtils;
+
 /**
  * TODO Feature: Cross-validation
  * TODO Feature: Stochastic GD
- * TODO Feature: Regularization L1
+ * TODO Feature: Regularization L1 (see mahout sgd or paper with differential L1 approximation)
  */
 public class LogisticRegression implements RegressionModel, ClassificationModel {
   
@@ -61,8 +65,9 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     int it = 0;
     while ((++it) <= maxIterations) {
       
-      double batchGradient = 0d;
-      double batchGradientSecond = 0d;
+      double batchGradient = 0;
+      double batchGradientSecond = 0;
+      double update = 0;
       // Batch GD: Iterate over all x
       for (int n=0; n<rowCount; ++n) {
         Vector xn = X.viewRow(n);
@@ -72,16 +77,16 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
       }
       
       // Add penalty to 1st derivation (using NG's derivation)
-      Vector mask = MLUtils.ones(X.numCols()); // Avoid penalty on bias
-      mask.set(0, 0);
+//      Vector mask = MLUtils.ones(X.numCols()); // Avoid penalty on bias
+//      mask.set(0, 0);
       batchGradient += penaltyDivN * w.getQuick(w.size()-1);
       
       // Add penalty to 2nd derivation
       batchGradientSecond += penaltyDivN;
       
       // Standard Newton Update
-      batchGradient = batchGradient / batchGradientSecond;
-      w.setQuick(w.size()-1, w.getQuick(w.size()-1) - batchGradient);
+      update = batchGradient / batchGradientSecond;
+      w.setQuick(w.size()-1, w.getQuick(w.size()-1) - update);
     }
     return w;
   }
@@ -106,17 +111,31 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     }
   }
   
+  @Override
   public double predict(Vector x, Vector w) {
     // Computes the prediction, using our current hypothesis (logistic function)
     // Overflow detection
     double xDotW = x.dot(w);
-    double exp = Math.exp(xDotW);
-    if (xDotW != 0 && (exp == 0 || Double.isInfinite(exp))) {
-      System.out.println(" - OVERFLOW? " + xDotW + "\t" + exp);
+    double negativeExp = Math.exp(-xDotW);
+    if (xDotW != 0 && (negativeExp == 0 || Double.isInfinite(negativeExp))) {
+      System.out.println(" - OVERFLOW? " + xDotW + "\t" + negativeExp);
     }
-    return 1d / (1d + Math.exp( - x.dot(w)));
+    return 1d / (1d + negativeExp);
   }
 
+  @Override
+  public double predict(Vector x, Vector w, double intercept) {
+    // Computes the prediction, using our current hypothesis (logistic function)
+    // Overflow detection
+    double xDotW = x.dot(w) + intercept;
+    double negativeExp = Math.exp(-xDotW);
+    if (xDotW != 0 && (negativeExp == 0 || Double.isInfinite(negativeExp))) {
+      System.out.println(" - OVERFLOW? " + xDotW + "\t" + negativeExp);
+    }
+    return 1d / (1d + negativeExp);
+  }
+
+  @Override
   public int classify(Vector x, Vector w) {
     return (int) Math.round( predict(x, w) );
   }

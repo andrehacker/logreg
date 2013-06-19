@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.util;
 
 import static org.junit.Assert.*;
 
@@ -9,6 +9,8 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+import com.andrehacker.ml.util.CsvReader;
+import com.andrehacker.ml.util.MLUtils;
 import com.google.common.collect.Lists;
 
 public class CsvReaderTest {

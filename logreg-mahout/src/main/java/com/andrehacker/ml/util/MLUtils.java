@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,7 +33,7 @@ public class MLUtils {
    * @return
    * @throws IOException
    */
-  static BufferedReader open(String inputFile) throws IOException {
+  public static BufferedReader open(String inputFile) throws IOException {
     InputStream in;
     try {
       in = Resources.getResource(inputFile).openStream();
@@ -43,7 +43,7 @@ public class MLUtils {
     return new BufferedReader(new InputStreamReader(in, Charsets.UTF_8));
   }
   
-  static void writeUtf(String text, String file) {
+  public static void writeUtf(String text, String file) {
     Writer out;
     try {
       out = new BufferedWriter(new OutputStreamWriter(
@@ -92,12 +92,12 @@ public class MLUtils {
     return max.minus(min);
   }
   
-  static Vector ones(int d) {
+  public static Vector ones(int d) {
     Vector v = new DenseVector(d);
     return v.assign(1);
   }
   
-  static Matrix diag(Vector diag) {
+  public static Matrix diag(Vector diag) {
     Matrix m = new DenseMatrix(diag.size(), diag.size());
     for (int i=0; i<diag.size(); ++i) {
       m.set(i, i, diag.get(i));
@@ -105,12 +105,12 @@ public class MLUtils {
     return m;
   }
   
-  static Matrix vectorToColumnMatrix(Vector vec) {
+  public static Matrix vectorToColumnMatrix(Vector vec) {
     Matrix m = new DenseMatrix(vec.size(), 1);
     return m.assignColumn(0, vec);
   }
   
-  static Matrix vectorToRowMatrix(Vector vec) {
+  public static Matrix vectorToRowMatrix(Vector vec) {
     Matrix m = new DenseMatrix(1, vec.size());
     return m.assignRow(0, vec);
   }
@@ -126,7 +126,7 @@ public class MLUtils {
    * @param data Input Matrix
    * @return pseudo-inverse of data matrix
    */
-  static Matrix pseudoInversebySVD(Matrix data) {
+  public static Matrix pseudoInversebySVD(Matrix data) {
     
     SingularValueDecomposition svd = new SingularValueDecomposition(data);
     
@@ -176,7 +176,7 @@ public class MLUtils {
     }
   }
   
-  static Matrix inverse(Matrix data) {
+  public static Matrix inverse(Matrix data) {
     
     SingularValueDecomposition svd = new SingularValueDecomposition(data);
     

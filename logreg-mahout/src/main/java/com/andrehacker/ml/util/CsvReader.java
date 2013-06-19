@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.util;
 
 import java.io.BufferedReader;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.sfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -6,9 +6,11 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+
+import com.andrehacker.ml.sfo.SFOSequential;
 import com.google.common.collect.Lists;
 
-public class SFOTest {
+public class SFOSequentialTest {
   public static List<String> predictorNames;
   
   public static final String TESTFILE = "donut-test.csv";
@@ -31,7 +33,7 @@ public class SFOTest {
   @Test
   public void test() throws Exception {
     try {
-      SFO sfo = new SFO(TRAININGFILE, TESTFILE, predictorNames);
+      SFOSequential sfo = new SFOSequential(TRAININGFILE, TESTFILE, predictorNames);
       
       sfo.findBestFeature();
       sfo.findBestFeature();
