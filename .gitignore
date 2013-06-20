@@ -1,0 +1,19 @@
+*.class
+
+# backup files
+*~
+
+*metastore_db/*
+
+*.tbl
+
+# Package Files #
+#*.jar
+*.war
+*.ear
+
+# Eclipse and maven
+.classpath
+.project
+.settings
+target
