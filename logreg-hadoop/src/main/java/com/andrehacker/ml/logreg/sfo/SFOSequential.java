@@ -1,4 +1,4 @@
-package com.andrehacker.ml.sfo;
+package com.andrehacker.ml.logreg.sfo;
 
 import java.util.List;
 
@@ -11,6 +11,11 @@ import com.andrehacker.ml.logreg.LogisticRegression;
 import com.andrehacker.ml.util.CsvReader;
 import com.andrehacker.ml.util.MLUtils;
 
+/**
+ * Sequential version of SFO algorithm.
+ * 
+ * Works with a csv input, internally represents data as Matrix
+ */
 public class SFOSequential {
   
   private CsvReader csvTrain;
@@ -24,17 +29,18 @@ public class SFOSequential {
   private static final double TARGET_NEGATIVE = 1d;
   
   // Training Parameters
-  private static final int ITERATIONS = 20;
+  private static final int ITERATIONS = 5;
   private static final double INITIAL_WEIGHT = 1d;
-  private static final double PENALTY = 1d;
+//  private static final double PENALTY = 1d;
+  private static final double PENALTY = 0d; // No regularization
   
   public SFOSequential(String trainingFile, String testFile, List<String> predictorNames) throws Exception {
     this.logReg = new LogisticRegression();
     
-    csvTrain = MLUtils.readData(trainingFile, 40, predictorNames, TARGET_NAME);
+    csvTrain = MLUtils.readData(trainingFile, 40, predictorNames, TARGET_NAME, true);
     csvTrain.normalize();
     csvTrain.normalizeClassLabels(TARGET_POSITIVE, TARGET_NEGATIVE);
-    csvTest = MLUtils.readData(testFile, 40, predictorNames, TARGET_NAME);
+    csvTest = MLUtils.readData(testFile, 40, predictorNames, TARGET_NAME, true);
     csvTest.normalize(csvTrain.getMeans(), csvTrain.getRanges());
     csvTest.normalizeClassLabels(TARGET_POSITIVE, TARGET_NEGATIVE);
     
@@ -43,6 +49,10 @@ public class SFOSequential {
   }
   
   public void findBestFeature() {
+    
+    System.out.println("-------------------");
+    System.out.println("SFO Iteration");
+    System.out.println("-------------------");
     
     Validation val = new Validation();
     
@@ -69,11 +79,11 @@ public class SFOSequential {
       // Train single feature
       System.out.println("Train " + csvTrain.getColumnName(d) + " (d=" + d + ")");
       Vector extendedW = model.getExtendedModel();     // weight vector with place for one more feature
-      System.out.println(" - Before: " + extendedW);
-      extendedW = logReg.trainNewtonSFO(XTrain, csvTrain.getY(), extendedW, ITERATIONS, INITIAL_WEIGHT, PENALTY);
-      System.out.println(" - After:  " + extendedW);
+      extendedW = logReg.trainNewtonSFO(XTrain, csvTrain.getY(), extendedW, ITERATIONS, INITIAL_WEIGHT, PENALTY, (d==1 ? true : false));
+      System.out.println(" - Trained beta_d:  " + extendedW.get(extendedW.size()-1));
 
       // Measure performance when adding dimension d to base model
+      // TODO: Real SFO would probably evaluate the model here on training data (to avoid separate mapred iteration?)
       val.computeAccuracy(XTest, csvTest.getY(), extendedW, logReg);
       val.computeMeanDeviation(XTest, csvTest.getY(), extendedW, logReg);
       System.out.println(" - dev:     " + val.getMeanDeviation());

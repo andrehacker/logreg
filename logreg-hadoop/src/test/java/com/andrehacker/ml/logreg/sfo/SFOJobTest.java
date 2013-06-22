@@ -1,9 +1,9 @@
-package com.andrehacker.ml.sfo;
+package com.andrehacker.ml.logreg.sfo;
 
 import org.apache.hadoop.util.ToolRunner;
 import org.junit.Test;
 
-import com.andrehacker.ml.sfo.SFOJob;
+import com.andrehacker.ml.logreg.sfo.SFOJob;
 
 public class SFOJobTest {
 

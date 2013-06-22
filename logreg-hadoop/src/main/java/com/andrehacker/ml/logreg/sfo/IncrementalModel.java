@@ -1,4 +1,4 @@
-package com.andrehacker.ml.sfo;
+package com.andrehacker.ml.logreg.sfo;
 
 import java.util.List;
 

@@ -54,7 +54,7 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     }
   }
   
-  public Vector trainNewtonSFO(Matrix X, Vector y, Vector w, int maxIterations, double initialWeight, double penalty) {
+  public Vector trainNewtonSFO(Matrix X, Vector y, Vector w, int maxIterations, double initialWeight, double penalty, boolean debug) {
     
     int rowCount = X.numRows();
     
@@ -68,25 +68,34 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
       double batchGradient = 0;
       double batchGradientSecond = 0;
       double update = 0;
+      double pi=0;  // Current prediction
       // Batch GD: Iterate over all x
-      for (int n=0; n<rowCount; ++n) {
-        Vector xn = X.viewRow(n);
-        double grad = computePartialGradientSFO(xn, w, y.get(n));
-        batchGradientSecond += computeSecondPartialGradientSFO(xn, w, y.get(n));
-        batchGradient += grad;
+      double debugSumPi=0;
+      for (int i=0; i<rowCount; ++i) {
+        Vector xi = X.viewRow(i);
+        //batchGradient += computePartialGradientSFO(xn, w, y.get(n));
+        pi = predict(xi, w);
+        debugSumPi += pi;
+        batchGradient += computePartialGradientSFO(xi.getQuick(xi.size()-1), pi, y.get(i));
+        batchGradientSecond += computeSecondPartialGradientSFO(xi.getQuick(xi.size()-1), pi);
       }
       
-      // Add penalty to 1st derivation (using NG's derivation)
-//      Vector mask = MLUtils.ones(X.numCols()); // Avoid penalty on bias
-//      mask.set(0, 0);
+      // Apply regularization to 1st derivation
+      // using NG's derivation from http://openclassroom.stanford.edu/MainFolder/DocumentPage.php?course=MachineLearning&doc=exercises/ex5/ex5.html
+      // Apply only to the the dimension under training
+      // TODO Avoid penalty on bias and apply real formula (also normalizes before)
       batchGradient += penaltyDivN * w.getQuick(w.size()-1);
       
-      // Add penalty to 2nd derivation
+      // Apply regularization to 2nd derivation
       batchGradientSecond += penaltyDivN;
       
       // Standard Newton Update
       update = batchGradient / batchGradientSecond;
       w.setQuick(w.size()-1, w.getQuick(w.size()-1) - update);
+      
+      if (debug) {
+        System.out.println("- it " + it + ": grad: " + batchGradient + " gradSecond: " + batchGradientSecond + " new betad: " + w.getQuick(w.size()-1) + " sumPi: " + debugSumPi);
+      }
     }
     return w;
   }
@@ -160,25 +169,32 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
   /**
    * Convention: The new feature to be optimized is in last column
    */
-  private double computePartialGradientSFO(Vector x, Vector w, double y) {
+  public static double computePartialGradientSFO(double xid, double pi, double y) {
     // Compute the partial gradient of negative log-likelihood function
     // regarding a single data point x and a single feature/dimension d
     // = ( h(x) - y) * x_d
-    double diff = predict(x, w) - y;
-    
-    return x.getQuick(x.size()-1) * diff;
+    return (pi - y) * xid;
   }
   
   /**
    * Convention: The new feature to be optimized is in last column
    */
-  private double computeSecondPartialGradientSFO(Vector x, Vector w, double y) {
+  public static double computeSecondPartialGradientSFO(double xid, double pi) {
     //Returns: (x_d)^2 h(x) (1-h(x))
-    double predicted = predict(x, w);
-    double xdSquared = x.getQuick(x.size()-1);
-    xdSquared = xdSquared * xdSquared;
+    double xidSquared = Math.pow(xid, 2);
     
-    return xdSquared * predicted * (1 - predicted);
+    return xidSquared * pi * (1 - pi);
+  }
+
+  // TODO Refactoring: Make this static and put at a better place
+  public static double logisticFunction(double exponent) {
+    // Computes the prediction, using our current hypothesis (logistic function)
+    // Overflow detection
+    double negativeExp = Math.exp(-exponent);
+    if (exponent != 0 && (negativeExp == 0 || Double.isInfinite(negativeExp))) {
+      System.out.println(" - OVERFLOW? " + exponent + "\t" + negativeExp);
+    }
+    return 1d / (1d + negativeExp);
   }
 
   public Vector getWeight() {

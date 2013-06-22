@@ -1,6 +1,7 @@
-package com.andrehacker.ml.sfo;
+package com.andrehacker.ml.logreg.sfo;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -13,21 +14,23 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 
-import com.andrehacker.ml.AbstractVectorReader;
-import com.andrehacker.ml.inputreader.RCV1VectorReader;
+import com.andrehacker.ml.ModelInfo;
 import com.andrehacker.ml.util.IOUtils;
+import com.google.common.collect.Lists;
 
 /**
+ * Parallel implementation of Single Feature Optimization algorithm
+ * Based on Paper "Parallel Large Scale Feature Selection for Logistic Regression" by Singh et al. 
+ * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.188.3782
  * 
- *  Assumption: Requires total number of features
+ * Assumption: Requires total number of features
  */
 public class SFOJob extends Configured implements Tool {
 
   static final boolean RUN_LOCAL_MODE = true;
   
 //  static final int FEATURES = 47237;
-  static final int FEATURES = 11;
-  static final double INTERCEPT = 0;    // TODO What to set this to? Train it?
+  static final double INTERCEPT = 1;    // TODO What to set this to? Train it?
   // Stats for RCV1-v2:
   // - 47236 is highest term id
   // - 381327 points labeled with CCAT (RCV1-v2)
@@ -37,8 +40,10 @@ public class SFOJob extends Configured implements Tool {
   
   static final int REDUCE_TASKS = 4;
   
-//  static final AbstractVectorReader vectorReader = new RCV1VectorReader();
-  static final AbstractVectorReader vectorReader = new RCV1VectorReader();
+  private static List<String> predictorNames = Lists.newArrayList(new String[] {
+      "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"
+   });
+  static ModelInfo modelInfo = new ModelInfo(predictorNames);
   
 //  private static final String LABEL_FILE_LOCAL = "/home/andre/dev/datasets/RCV1-v2/rcv1-v2.topics_ccat.qrels";
 //  private static final String LABEL_FILE_HDFS = "rcv1-v2/rcv1-v2.topics_ccat.qrels";

@@ -17,15 +17,9 @@ public class CSVToSequenceFileTest {
   
   @Test
   public void test() throws Exception {
+    
     List<String> predictorNames = Lists.newArrayList(new String[] {
-//      "x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c", "bias"   // k, k0 not in testfile!
-//      "x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c"
-        "x", "y", "shape", "color", "xx", "xy", "yy", "a", "b", "c"
-//      "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"    // nice chart
-//      "x", "y", "shape", "a", "b", "c"
-//      "x", "y", "a", "b", "c"    // like Mahout page 252
-//      "x", "c"    // Adding a or b is REALLY BAD. However x and y are good. Shape is okay.
-//        "y", "x"
+        "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"     // All relevant fields which are in both, training and test file
      });
     
     String testFile = "donut-test.csv";
@@ -38,18 +32,24 @@ public class CSVToSequenceFileTest {
     CSVToSequenceFile.transform(
         testFile, 
         testFile.concat(".seq"), 
+        testFile.concat(".normalized"), 
         rows, 
-        predictorNames, 
+        predictorNames,
         targetName, 
+        true,
+        true,
         targetPositive, 
         targetNegative);
     
     CSVToSequenceFile.transform(
-        trainingFile, 
-        trainingFile.concat(".seq"), 
-        rows, 
-        predictorNames, 
-        targetName, 
+        trainingFile,
+        trainingFile.concat(".seq"),
+        trainingFile.concat(".normalized"),
+        rows,
+        predictorNames,
+        targetName,
+        true,
+        true,
         targetPositive, 
         targetNegative);
     

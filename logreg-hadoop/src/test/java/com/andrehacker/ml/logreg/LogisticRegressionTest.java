@@ -34,18 +34,19 @@ public class LogisticRegressionTest {
   
   @Before
   public void before() throws Exception {
+    
+    // See SFOSequentialTest for info
     predictorNames = Lists.newArrayList(new String[] {
-//      "x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c", "bias"
       "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"    // nice chart
 //      "x", "y", "shape", "a", "b", "c"
 //      "x", "y", "a", "b", "c"    // like Mahout page 252
 //      "x", "c"    // Adding a or b is REALLY BAD. However x and y are good. Shape is okay.
      });
     
-    csvTrain = MLUtils.readData(trainingFile, 40, predictorNames, TARGET_NAME);
+    csvTrain = MLUtils.readData(trainingFile, 40, predictorNames, TARGET_NAME, true);
     csvTrain.normalize();
     csvTrain.normalizeClassLabels(TARGET_POSITIVE, TARGET_NEGATIVE);
-    csvTest = MLUtils.readData(testFile, 40, predictorNames, TARGET_NAME);
+    csvTest = MLUtils.readData(testFile, 40, predictorNames, TARGET_NAME, true);
     csvTest.normalize(csvTrain.getMeans(), csvTrain.getRanges());
 //    csvTest.normalize();
     csvTest.normalizeClassLabels(TARGET_POSITIVE, TARGET_NEGATIVE);

@@ -101,7 +101,7 @@ public class CsvReader {
     this.ranges = ranges;
 
     // TODO Minor: Handle the case where range is 0
-    for (int col=1; col<data.numCols(); ++col) {
+    for (int col=(addBias?1:0); col<data.numCols(); ++col) {
       Vector newCol = data.viewColumn(col).assign(Functions.MINUS, means.get(col)).divide(ranges.get(col));
       data.assignColumn(col, newCol);
     }

@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-import com.andrehacker.ml.AbstractVectorReader;
 import com.andrehacker.ml.util.MLUtils;
 import com.google.common.base.Splitter;
 

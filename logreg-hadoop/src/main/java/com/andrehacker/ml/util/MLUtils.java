@@ -159,12 +159,12 @@ public class MLUtils {
 //    return csv;
 //  }
 
-  public static CsvReader readData(String sampleFile, int rows, List<String> predictorNames, String targetName) throws Exception {
+  public static CsvReader readData(String sampleFile, int rows, List<String> predictorNames, String targetName, boolean addBias) throws Exception {
     CsvReader csv;
     // Read data into matrix
     BufferedReader reader = new BufferedReader(MLUtils.open(sampleFile));
     csv = new CsvReader();
-    csv.numericToDenseMatrix(reader, rows, targetName, predictorNames, true);
+    csv.numericToDenseMatrix(reader, rows, targetName, predictorNames, addBias);
     
     return csv;
   }

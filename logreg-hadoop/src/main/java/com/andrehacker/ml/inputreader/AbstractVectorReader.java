@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.inputreader;
 
 import java.io.IOException;
 

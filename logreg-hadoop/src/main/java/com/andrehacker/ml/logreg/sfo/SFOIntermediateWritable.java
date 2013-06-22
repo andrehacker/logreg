@@ -1,4 +1,4 @@
-package com.andrehacker.ml.sfo;
+package com.andrehacker.ml.logreg.sfo;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -26,6 +26,15 @@ public class SFOIntermediateWritable implements Writable
     this.pi = prob;
   }
   
+  /**
+   * Copy constructor
+   */
+  public SFOIntermediateWritable(SFOIntermediateWritable other) {
+    this.xid = other.xid;
+    this.yi = other.yi;
+    this.pi = other.pi;
+  }
+
   public void readFields(DataInput in) throws IOException {
     xid = in.readDouble();
     yi = in.readInt();

@@ -1,4 +1,4 @@
-package com.andrehacker.ml.sfo;
+package com.andrehacker.ml.logreg.sfo;
 
 import java.io.IOException;
 
@@ -25,7 +25,7 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     // TODO Read Base Model!
-    model = new IncrementalModel(SFOJob.FEATURES);
+    model = new IncrementalModel(SFOJob.modelInfo.getNumFeatures());
   }
   
   
@@ -35,10 +35,10 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
     // Compute prediction for current x_i using the base model
     // TODO Improvement: Why not just compute and transmit beta * x_i ??
     double pi = logreg.predict(xi.get(), model.getW(), SFOJob.INTERCEPT);
+//    double xDotW = xi.get().dot(model.getW()) + SFOJob.INTERCEPT;
     
     // Go through all features in x, emit value.
     // TODO Improvement: Why always transmit p_i ?? Because we need p_i for the specific x_i in reducer for each feature! Still lot of redundant traffic...
-    int count=0;
     for (Vector.Element feature : xi.get().nonZeroes()) {
       // New feature?
       if (! model.getUsedDimensions().contains(feature.get())) {
@@ -46,10 +46,9 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
         outputValue.setLabel(y.get());
         outputValue.setXid(feature.get());
         outputValue.setPi(pi);
+//        outputValue.setPi(xDotW);
         context.write(outputKey, outputValue);
-        ++count;
       }
     }
-    System.out.println("Mapper done. Processed " + count + " features. Basemodel prediction (pi): " + pi);
   }
 }

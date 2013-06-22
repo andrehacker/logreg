@@ -1,4 +1,4 @@
-package com.andrehacker.ml.sfo;
+package com.andrehacker.ml.logreg.sfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-import com.andrehacker.ml.sfo.SFOSequential;
+import com.andrehacker.ml.logreg.sfo.SFOSequential;
 import com.google.common.collect.Lists;
 
 public class SFOSequentialTest {
@@ -18,15 +18,21 @@ public class SFOSequentialTest {
   
   @Before
   public void before() throws IOException {
+    /**
+     * Usable features: "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"
+     * 
+     * Unusable features
+     * - color is the label
+     * - k, k0 are only in training file, not in test file!
+     * - bias is static value (1)
+     * 
+     * Experiences
+     * - Best feature: c
+     * - Adding a or b (to c) is REALLY BAD. However x and y are good
+     * - like Mahout page 252: "x", "y", "a", "b", "c"
+     */
     predictorNames = Lists.newArrayList(new String[] {
-//      "x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c", "bias"   // k, k0 not in testfile!
-//      "x", "y", "shape", "k", "k0", "xx", "xy", "yy", "a", "b", "c"
-//        "x", "y", "shape", "color", "xx", "xy", "yy", "a", "b", "c"
       "x", "y", "shape", "xx", "xy", "yy", "a", "b", "c"    // nice chart
-//      "x", "y", "shape", "a", "b", "c"
-//      "x", "y", "a", "b", "c"    // like Mahout page 252
-//      "x", "c"    // Adding a or b is REALLY BAD. However x and y are good. Shape is okay.
-//        "y", "x"
      });
   }
   
@@ -36,7 +42,7 @@ public class SFOSequentialTest {
       SFOSequential sfo = new SFOSequential(TRAININGFILE, TESTFILE, predictorNames);
       
       sfo.findBestFeature();
-      sfo.findBestFeature();
+//      sfo.findBestFeature();
       /*
        * First row training: "x","y","shape","color","k","k0","xx","xy","yy","a","b","c","bias"
        * First row test: "x","y","shape","color","xx","xy","yy","c","a","b"
