@@ -11,7 +11,11 @@ public class SFOJobTest {
   public void test() throws Exception {
 //    String[] args = new String[] { inputPath, outputPath };
     ToolRunner.run(new SFOJob(), null);
-    System.out.println("Done");
+    System.out.println("Done training");
+    
+
+    ToolRunner.run(new EvalJob(), null);
+    System.out.println("Done validation");
   }
 
 }

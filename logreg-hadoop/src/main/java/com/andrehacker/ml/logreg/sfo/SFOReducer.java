@@ -3,17 +3,17 @@ package com.andrehacker.ml.logreg.sfo;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.mahout.math.VectorWritable;
 
 import com.andrehacker.ml.logreg.LogisticRegression;
 import com.andrehacker.ml.util.AdaptiveLogger;
 import com.google.common.collect.Lists;
 
-public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, IntWritable, VectorWritable> {
+public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, IntWritable, DoubleWritable> {
   
 //  private IncrementalModel model;
   
@@ -23,6 +23,8 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
       SFOJob.RUN_LOCAL_MODE, Logger.getLogger(SFOReducer.class.getName()), Level.DEBUG);
   
   private static int MAX_ITERATIONS = 5;
+  
+  private static int DEBUG_DIMENSION = -1;
   
   @Override
   protected void setup(Context context)
@@ -42,9 +44,9 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
    * We could avoid this by learning with Online SGD in one pass, but for many dimensions we will have few data and this will be probably hard.
    */
   @Override
-  public void reduce(IntWritable key, Iterable<SFOIntermediateWritable> values, Context context) throws IOException, InterruptedException {
+  public void reduce(IntWritable dim, Iterable<SFOIntermediateWritable> values, Context context) throws IOException, InterruptedException {
     
-    log.debug("Reducer for d=" + key.get() + " (" + SFOJob.modelInfo.getFeatureName(key.get()) + ")");
+    log.debug("Reducer for d=" + dim.get() + " (" + SFOJob.modelInfo.getFeatureName(dim.get()) + ")");
     
     List<SFOIntermediateWritable> cache = Lists.newArrayList();
     
@@ -59,7 +61,7 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
       Iterable<SFOIntermediateWritable> currentIterable = (iteration==1 ? values : cache);
       for (SFOIntermediateWritable element : currentIterable) {
         if (iteration == 1) {
-          cache.add(new SFOIntermediateWritable(element));   // We need to copy the object - uses copy constructor
+          cache.add(new SFOIntermediateWritable(element));   // copy via copy constructor
         }
         double xDotw = Math.log(element.getPi() / (1 - element.getPi()));
 //        xDotw = element.getPi();
@@ -74,16 +76,17 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
       
       // TODO Apply penalty. Probably we have to divide by true N (not only non-zeros)
 //      double penaltyDivN = PENALTY / cache.size();
-//      firstDeri *= penaltyDivN;
-//      secondDeri += penaltyDivN;
       
       // Newton update
       double update = (batchGradient / batchGradientSecond);
       betad -= update;
       
-      if (key.get() == 0)
+      if (dim.get() == DEBUG_DIMENSION)
         log.debug("- it " + iteration + ": grad: " + batchGradient + " gradSecond: " + batchGradientSecond + " new beta_d: " + betad + " sumPi: " + debugSumPi);
     }   // while (!trainingDone)
+    
+    // Write trained coefficient
+    context.write(dim, new DoubleWritable(betad));
     
     log.debug("- Processed " + cache.size() + " records, new beta: " + betad);
   }

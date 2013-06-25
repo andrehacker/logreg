@@ -11,6 +11,8 @@ import com.andrehacker.ml.RegressionModel;
 import com.andrehacker.ml.util.MLUtils;
 
 /**
+ * Contains functions related to Logistic Regression, mostly for training and evaluation
+ * 
  * TODO Feature: Cross-validation
  * TODO Feature: Stochastic GD
  * TODO Feature: Regularization L1 (see mahout sgd or paper with differential L1 approximation)
@@ -80,8 +82,9 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
         batchGradientSecond += computeSecondPartialGradientSFO(xi.getQuick(xi.size()-1), pi);
       }
       
-      // Apply regularization to 1st derivation
+      // Apply Regularization to 1st derivation
       // using NG's derivation from http://openclassroom.stanford.edu/MainFolder/DocumentPage.php?course=MachineLearning&doc=exercises/ex5/ex5.html
+      // equal to Singhs definition, except the division by n
       // Apply only to the the dimension under training
       // TODO Avoid penalty on bias and apply real formula (also normalizes before)
       batchGradient += penaltyDivN * w.getQuick(w.size()-1);
@@ -144,6 +147,21 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     return 1d / (1d + negativeExp);
   }
 
+  // TODO Refactoring: Make this static and put at a better place
+  public static double logisticFunction(double exponent) {
+    // Computes the prediction, using our current hypothesis (logistic function)
+    // Overflow detection
+    double negativeExp = Math.exp(-exponent);
+    if (exponent != 0 && (negativeExp == 0 || Double.isInfinite(negativeExp))) {
+      System.out.println(" - OVERFLOW? " + exponent + "\t" + negativeExp);
+    }
+    return 1d / (1d + negativeExp);
+  }
+
+  public Vector getWeight() {
+    return w;
+  }
+
   @Override
   public int classify(Vector x, Vector w) {
     return (int) Math.round( predict(x, w) );
@@ -184,21 +202,6 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     double xidSquared = Math.pow(xid, 2);
     
     return xidSquared * pi * (1 - pi);
-  }
-
-  // TODO Refactoring: Make this static and put at a better place
-  public static double logisticFunction(double exponent) {
-    // Computes the prediction, using our current hypothesis (logistic function)
-    // Overflow detection
-    double negativeExp = Math.exp(-exponent);
-    if (exponent != 0 && (negativeExp == 0 || Double.isInfinite(negativeExp))) {
-      System.out.println(" - OVERFLOW? " + exponent + "\t" + negativeExp);
-    }
-    return 1d / (1d + negativeExp);
-  }
-
-  public Vector getWeight() {
-    return w;
   }
 
 }
