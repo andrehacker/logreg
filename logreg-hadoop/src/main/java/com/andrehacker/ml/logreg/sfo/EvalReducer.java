@@ -8,8 +8,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.andrehacker.ml.DoublePairWritable;
 import com.andrehacker.ml.util.AdaptiveLogger;
+import com.andrehacker.ml.writables.DoublePairWritable;
 
 public class EvalReducer extends Reducer<IntWritable, DoublePairWritable, IntWritable, DoubleWritable> {
   

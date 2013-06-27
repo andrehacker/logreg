@@ -25,7 +25,7 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     // TODO Read Base Model!
-    model = new IncrementalModel(SFOJob.modelInfo.getNumFeatures());
+    model = new IncrementalModel((int)SFOJob.modelInfo.getVectorSize());
   }
   
   

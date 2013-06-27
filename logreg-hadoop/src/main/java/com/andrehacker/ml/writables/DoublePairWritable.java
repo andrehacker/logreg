@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.writables;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -13,6 +13,9 @@ import org.apache.hadoop.io.Writable;
  * - Didn't find a generic pair. Implementing hashCode() might be tricky
  * - See discussion: http://comments.gmane.org/gmane.comp.apache.mahout.devel/8711
  * - Other implementation: https://github.com/sagemintblue/cmu-commons/tree/master/hadoop/src/main/java/cmu/edu/commons/hadoop/tuple
+ * 
+ * @author andre
+ *
  */
 public class DoublePairWritable implements Writable
 {

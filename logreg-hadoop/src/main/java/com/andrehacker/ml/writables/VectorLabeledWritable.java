@@ -1,4 +1,4 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.writables;
 
 import java.io.DataInput;
 import java.io.DataOutput;

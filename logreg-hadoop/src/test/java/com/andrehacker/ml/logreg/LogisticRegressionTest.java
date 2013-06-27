@@ -8,10 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-import com.andrehacker.ml.Validation;
 import com.andrehacker.ml.logreg.LogisticRegression;
 import com.andrehacker.ml.util.CsvReader;
 import com.andrehacker.ml.util.MLUtils;
+import com.andrehacker.ml.validation.Validation;
 import com.google.common.collect.Lists;
 import com.google.visualization.datasource.base.TypeMismatchException;
 import com.google.visualization.datasource.datatable.ColumnDescription;

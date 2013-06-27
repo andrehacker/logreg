@@ -14,23 +14,34 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 
-import com.andrehacker.ml.DoublePairWritable;
 import com.andrehacker.ml.util.IOUtils;
+import com.andrehacker.ml.writables.DoublePairWritable;
 
-/**
- * Parallel implementation of Single Feature Optimization algorithm
- * Based on Paper "Parallel Large Scale Feature Selection for Logistic Regression" by Singh et al. 
- * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.188.3782
- * 
- * Assumption: Requires total number of features
- */
 public class EvalJob extends Configured implements Tool {
 
-  static final int REDUCE_TASKS = 4;
+  private static final String JOB_NAME = "sfo-eval";
   
-  private static final String JOB_NAME = "SFO-EVAL";
+  private String inputFileLocal;
+  private String inputFileHdfs;
+  private String jarPath;
+  private String configFilePath;
+  private String outputPath;
+  private int reducers;
   
-  private static final String OUTPUT_PATH = "output-sfo-eval";
+  public EvalJob(
+      String inputFileLocal,
+      String inputFileHdfs,
+      String outputPath,
+      String jarPath,
+      String configFilePath,
+      int reducers) {
+    this.inputFileLocal = inputFileLocal;
+    this.inputFileHdfs = inputFileHdfs;
+    this.outputPath = outputPath;
+    this.jarPath = jarPath;
+    this.configFilePath = configFilePath;
+    this.reducers = reducers;
+  }
   
   /**
    * Will be called from ToolRunner internally
@@ -46,6 +57,10 @@ public class EvalJob extends Configured implements Tool {
   
   private Job prepareJob() throws IOException {
     
+    System.out.println("-----------------");
+    System.out.println("Prepare Job: " + JOB_NAME);
+    System.out.println("-----------------");
+    
     Job job = new Job(getConf(), JOB_NAME);
     Configuration conf = job.getConfiguration();
     job.setJarByClass(getClass());
@@ -53,19 +68,19 @@ public class EvalJob extends Configured implements Tool {
     String inputFile = "";
     if (SFOJob.RUN_LOCAL_MODE) {
       System.out.println("RUN IN LOCAL MODE");
-      IOUtils.deleteRecursively(OUTPUT_PATH);
-      inputFile = SFOJob.INPUT_FILE_LOCAL;
+      IOUtils.deleteRecursively(outputPath);
+      inputFile = inputFileLocal;
     } else {
       System.out.println("RUN IN PSEUDO-DISTRIBUTED/CLUSTER MODE");
-      inputFile = SFOJob.INPUT_FILE_HDFS;
-      conf.addResource(new Path(SFOJob.CONFIG_FILE_PATH));
+      inputFile = inputFileHdfs;
+      conf.addResource(new Path(configFilePath));
       
-      conf.set("mapred.jar", SFOJob.JAR_PATH);
+      conf.set("mapred.jar", jarPath);
       
-      conf.setInt("mapred.reduce.tasks", REDUCE_TASKS);
+      conf.setInt("mapred.reduce.tasks", reducers);
       
       FileSystem hdfs = FileSystem.get(conf);
-      Path path = new Path(OUTPUT_PATH);
+      Path path = new Path(outputPath);
       hdfs.delete(path, true);
     }
     System.out.println("Jar path: " + job.getJar());
@@ -84,7 +99,7 @@ public class EvalJob extends Configured implements Tool {
   
     // configure the used input/output format class.
     FileInputFormat.addInputPath(job, new Path(inputFile));
-    FileOutputFormat.setOutputPath(job, new Path(OUTPUT_PATH));
+    FileOutputFormat.setOutputPath(job, new Path(outputPath));
     
     return job;
   }

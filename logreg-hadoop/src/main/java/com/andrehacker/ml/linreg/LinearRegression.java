@@ -8,9 +8,9 @@ import org.apache.mahout.math.Vector;
 
 import com.andrehacker.ml.ClassificationModel;
 import com.andrehacker.ml.RegressionModel;
-import com.andrehacker.ml.Validation;
 import com.andrehacker.ml.util.CsvReader;
 import com.andrehacker.ml.util.MLUtils;
+import com.andrehacker.ml.validation.Validation;
 
 public class LinearRegression implements RegressionModel, ClassificationModel {
   

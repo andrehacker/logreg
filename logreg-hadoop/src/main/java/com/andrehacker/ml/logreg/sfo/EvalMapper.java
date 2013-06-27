@@ -15,8 +15,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import com.andrehacker.ml.DoublePairWritable;
 import com.andrehacker.ml.logreg.LogisticRegression;
+import com.andrehacker.ml.writables.DoublePairWritable;
 import com.google.common.io.Closeables;
 
 public class EvalMapper extends Mapper<IntWritable, VectorWritable, IntWritable, DoublePairWritable> {
@@ -37,12 +37,12 @@ public class EvalMapper extends Mapper<IntWritable, VectorWritable, IntWritable,
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     // TODO Read Base Model!
-    model = new IncrementalModel(SFOJob.modelInfo.getNumFeatures());
+    model = new IncrementalModel((int)SFOJob.modelInfo.getVectorSize());
     
     // Read trained coefficients into map: dimension -> coefficient
-    coefficients = Arrays.asList(new Double[SFOJob.modelInfo.getHighestFeatureId()+1]);
+    coefficients = Arrays.asList(new Double[(int)SFOJob.modelInfo.getVectorSize()+1]);
     
-    Path dir = new Path(SFOJob.TRAIN_OUTPUT_PATH);
+    Path dir = new Path(SFOJobTest.TRAIN_OUTPUT_PATH);
     FileSystem fs = FileSystem.get(context.getConfiguration());
     FileStatus[] statusList = fs.listStatus(dir, new PathFilter() {
       @Override

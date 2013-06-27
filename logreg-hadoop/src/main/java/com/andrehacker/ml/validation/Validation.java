@@ -1,9 +1,12 @@
-package com.andrehacker.ml;
+package com.andrehacker.ml.validation;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+
+import com.andrehacker.ml.ClassificationModel;
+import com.andrehacker.ml.RegressionModel;
 
 /**
  * @author andre

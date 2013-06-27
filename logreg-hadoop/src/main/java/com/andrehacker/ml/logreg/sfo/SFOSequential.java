@@ -6,10 +6,10 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
-import com.andrehacker.ml.Validation;
 import com.andrehacker.ml.logreg.LogisticRegression;
 import com.andrehacker.ml.util.CsvReader;
 import com.andrehacker.ml.util.MLUtils;
+import com.andrehacker.ml.validation.Validation;
 
 /**
  * Sequential version of SFO algorithm.
