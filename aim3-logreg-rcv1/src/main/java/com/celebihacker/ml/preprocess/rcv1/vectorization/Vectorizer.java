@@ -208,7 +208,7 @@ public class Vectorizer {
         writer.append(key, val);
     }
 
-    public Vector getFeatureVector(int docId, int numDocs) throws IOException {
+    private Vector getFeatureVector(int docId, int numDocs) throws IOException {
         RandomAccessSparseVector docVector = new RandomAccessSparseVector(this.termDict.numTerms());
 
         Terms terms = this.reader.getTermVector(docId, NewsItemFeatureExtraction.TEXT);
@@ -252,7 +252,7 @@ public class Vectorizer {
         return vector;
     }
 
-    public Vector getLabelVector(int docId) throws IOException {
+    private Vector getLabelVector(int docId) throws IOException {
         Vector topicVector = new DenseVector(RCV1.TOP_LEVEL_TOPICS.size());
 
         Terms terms = this.reader.getTermVector(docId, NewsItemFeatureExtraction.TOPICS);
