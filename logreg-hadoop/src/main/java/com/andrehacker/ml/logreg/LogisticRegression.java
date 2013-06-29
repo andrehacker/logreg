@@ -147,17 +147,6 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     return 1d / (1d + negativeExp);
   }
 
-  // TODO Refactoring: Make this static and put at a better place
-  public static double logisticFunction(double exponent) {
-    // Computes the prediction, using our current hypothesis (logistic function)
-    // Overflow detection
-    double negativeExp = Math.exp(-exponent);
-    if (exponent != 0 && (negativeExp == 0 || Double.isInfinite(negativeExp))) {
-      System.out.println(" - OVERFLOW? " + exponent + "\t" + negativeExp);
-    }
-    return 1d / (1d + negativeExp);
-  }
-
   public Vector getWeight() {
     return w;
   }
@@ -184,6 +173,27 @@ public class LogisticRegression implements RegressionModel, ClassificationModel 
     return result;
   }
   
+  /**
+   * Computes the log-likelihood for a single data point
+   * Uses the natural logarithm
+   * 
+   * See Hastie p.120 (equation 4.20) for explanation
+   */
+  public static double logLikelihood(double actual, double prediction) {
+    return (actual * Math.log(prediction)) + ((1 - actual) * (1 - Math.log(prediction)));
+  }
+  
+  // TODO Refactoring: Make this static and put at a better place
+  public static double logisticFunction(double exponent) {
+    // Computes the prediction, using our current hypothesis (logistic function)
+    // Overflow detection
+    double negativeExp = Math.exp(-exponent);
+    if (exponent != 0 && (negativeExp == 0 || Double.isInfinite(negativeExp))) {
+      System.out.println(" - OVERFLOW? " + exponent + "\t" + negativeExp);
+    }
+    return 1d / (1d + negativeExp);
+  }
+
   /**
    * Convention: The new feature to be optimized is in last column
    */

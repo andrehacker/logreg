@@ -17,6 +17,25 @@ import org.apache.hadoop.util.Tool;
 import com.andrehacker.ml.util.IOUtils;
 import com.andrehacker.ml.writables.DoublePairWritable;
 
+/**
+ * Validates the previously built models
+ * Computes the gain regarding a metric (here log-likelihood) for all models
+ * compared to the base model.
+ * Afterwards we can choose the model with the highest gain.
+ * Choosing multiple models is probably a bad idea, if there are many correlated 
+ * features.
+ * 
+ * Some remarks, how we (efficiently) compute the gain:
+ * There are many models (as many as remaining features), so it is infeasible 
+ * to compute the complete metric (e.g. log-likelihood) for all models.
+ * So we only compute the gain regarding log-likelihood compared to the base model.
+ * To compute the gain for a model, which differs from base model just in on additional
+ * coefficient, we only need to compute the likelihood for the items that actually
+ * have this feature. In sparse models (text), this safes a lot of time. 
+ * 
+ * @author Andre Hacker
+ * 
+ */
 public class EvalJob extends Configured implements Tool {
 
   private static final String JOB_NAME = "sfo-eval";

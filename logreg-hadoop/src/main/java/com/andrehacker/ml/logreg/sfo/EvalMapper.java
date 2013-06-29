@@ -70,10 +70,12 @@ public class EvalMapper extends Mapper<IntWritable, VectorWritable, IntWritable,
   @Override
   public void map(IntWritable y, VectorWritable xi, Context context) throws IOException, InterruptedException {
 
-    // Emit prediction for new and old model
-    // 1) Compute prediction for current x_i using the base model (without new coefficient)
-    // 2) Compute prediction
+    // Emit log-likelihood for new and old model (not prediction as in sfo-paper)
+    // See SFOJob comments for description
+    // 1) Compute log-likelihood for current x_i using the base model (without new coefficient)
+    // 2) Compute log-likelihood for all unused features in xi using the related new models
     double piBase = logreg.predict(xi.get(), model.getW(), SFOJob.INTERCEPT);
+    double llBase = LogisticRegression.logLikelihood(y.get(), piBase); 
       // New feature?
     for (Vector.Element feature : xi.get().nonZeroes()) {
       if (! model.getUsedDimensions().contains(feature.get())) {
@@ -82,10 +84,14 @@ public class EvalMapper extends Mapper<IntWritable, VectorWritable, IntWritable,
         model.getW().set(dim, coefficients.get(dim));
         double piNew = LogisticRegression.logisticFunction(xi.get().dot(model.getW()) + SFOJob.INTERCEPT);
         model.getW().set(dim, 0d);    // reset to base model
+
+        double llNew = LogisticRegression.logLikelihood(y.get(), piNew);
         
         outputKey.set(feature.index());
-        outputValue.setFirst(piBase);
-        outputValue.setSecond(piNew);
+//        outputValue.setFirst(piBase);
+//        outputValue.setSecond(piNew);
+        outputValue.setFirst(llBase);
+        outputValue.setSecond(llNew);
         context.write(outputKey, outputValue);
       }
     }

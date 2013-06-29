@@ -22,18 +22,17 @@ public class EvalReducer extends Reducer<IntWritable, DoublePairWritable, IntWri
     log.debug("Eval Reducer for d=" + dim.get() + " (" + SFOJob.modelInfo.getFeatureName(dim.get()) + ")");
     
     int count=0;
-    double sumPiBase=0;
-    double sumPiNew=0;
+    double sumLlBase=0;
+    double sumLlNew=0;
     for (DoublePairWritable element : values) {
-//      log.debug(" - " + element.getFirst() + " " + element.getSecond());
-      sumPiBase += element.getFirst();
-      sumPiNew += element.getSecond();
+      sumLlBase += element.getFirst();
+      sumLlNew += element.getSecond();
       ++count;
     }
-    double gain = sumPiNew - sumPiBase;
+    double gain = sumLlNew - sumLlBase;
     context.write(dim, new DoubleWritable(gain));
 
-    log.debug("Pi_base: " + sumPiBase + " Pi_new: " + sumPiNew + " Gain: " + gain);
-    log.debug("=> Processed " + count + " records");
+    log.debug("- ll_base: " + sumLlBase + " ll_new: " + sumLlNew + " GAIN: " + gain);
+    log.debug("- Processed " + count + " records");
   }
 }
