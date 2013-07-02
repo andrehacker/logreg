@@ -132,6 +132,11 @@
 		<artifactId>log4j</artifactId>
 		<version>1.2.17</version> <!-- Hadoop 1.0.4 has 1.2.15 included, latest version is 1.2.17 -->
 	</dependency>
+  	<dependency>
+  		<groupId>edu.stanford.nlp</groupId>
+  		<artifactId>stanford-corenlp</artifactId>
+  		<version>1.3.5</version>
+  	</dependency>
   </dependencies>
   <properties>
   </properties>

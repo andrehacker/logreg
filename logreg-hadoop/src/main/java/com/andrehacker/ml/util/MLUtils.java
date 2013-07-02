@@ -170,7 +170,7 @@ public class MLUtils {
   }
   
   public static void printLinearModel(Vector w, CsvReader csv) {
-    System.out.println("Learned Model");
+    System.out.println("Model");
     for (int i=0; i<w.size(); ++i) {
       System.out.println(" - " + csv.getColumnName(i) + "\t" + w.get(i));
     }

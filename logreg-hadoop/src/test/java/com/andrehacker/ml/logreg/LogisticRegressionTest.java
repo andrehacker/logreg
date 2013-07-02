@@ -1,14 +1,16 @@
 package com.andrehacker.ml.logreg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.Vector;
 import org.junit.Before;
 import org.junit.Test;
 
-
-import com.andrehacker.ml.logreg.LogisticRegression;
 import com.andrehacker.ml.util.CsvReader;
 import com.andrehacker.ml.util.MLUtils;
 import com.andrehacker.ml.validation.Validation;
@@ -18,6 +20,8 @@ import com.google.visualization.datasource.datatable.ColumnDescription;
 import com.google.visualization.datasource.datatable.DataTable;
 import com.google.visualization.datasource.datatable.value.ValueType;
 import com.google.visualization.datasource.render.JsonRenderer;
+
+import edu.stanford.nlp.optimization.QNMinimizer;
 
 public class LogisticRegressionTest {
   
@@ -53,8 +57,12 @@ public class LogisticRegressionTest {
   }
   
   @Test
-  public void test() {
-     
+  public void testTrainNewton() {
+
+    System.out.println("-----------------");
+    System.out.println("Train Newton");
+    System.out.println("-----------------");
+    
      double initialWeight = 0;
 //     LogisticRegression logReg = new LogisticRegression("donut.csv", predictorNames);
      LogisticRegression logReg = new LogisticRegression();
@@ -64,7 +72,7 @@ public class LogisticRegressionTest {
 //       sw.stop();
 
      int iterations = 20;
-     List<Double> penalties = Lists.newArrayList(new Double[] {0d, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1d, 2d, 5d, 10d, 20d, 50d, 100d, 500d, 1001d});
+     List<Double> penalties = Lists.newArrayList(new Double[] {0d, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1d, 2d, 5d, 10d, 20d, 50d, 100d, 500d, 1000d});
      
      DataTable data = new DataTable();
      ArrayList<ColumnDescription> cd = new ArrayList<ColumnDescription>();
@@ -102,6 +110,11 @@ public class LogisticRegressionTest {
 //  @Ignore
   @Test
   public void testBatchGD() {
+
+    System.out.println("\n-----------------");
+    System.out.println("Train Batch GD");
+    System.out.println("-----------------");
+    
     double initialWeight = 0;
     LogisticRegression logReg = new LogisticRegression();
     StopWatch sw = new StopWatch();
@@ -113,11 +126,52 @@ public class LogisticRegressionTest {
     valTest.computeMetrics(csvTest.getData(), csvTest.getY(), logReg.getWeight(), logReg, logReg);
     valTrain.computeMetrics(csvTrain.getData(), csvTrain.getY(), logReg.getWeight(), logReg, logReg);
     
-    System.out.println("\nBatch GD");
     MLUtils.printLinearModel(logReg.getWeight(), csvTrain);
     System.out.println("Evaluation");
     System.out.println("- Accuracy:\t\t" + valTest.getAccuracy());
     System.out.println("- Mean Deviation:\t" + valTest.getMeanDeviation());
   }
-
+  
+    @Test
+    // Test Logistic Regression with L-BFGS minimizer from edu.stanford.nlp.optimization.QNMinimizer
+    public void testLBFGS() {
+      
+      System.out.println("\n-----------------");
+      System.out.println("Train L-BFGS:");
+      System.out.println("-----------------");
+    
+      // Input
+      double[] initial = new double[this.csvTrain.getData().numCols()];
+      Arrays.fill(initial, 1);
+      
+      Matrix input = this.csvTrain.getData();
+      Vector labels = this.csvTrain.getY();
+      LogisticRegressionDiffFunction f = new LogisticRegressionDiffFunction(input, labels);
+      
+      // Different arguments (e.g. 0.001 and 21) yield comparable results (accuracy and mean dev)  
+      double eps = 0.1;
+      int maxIterations = 13;
+      
+      //  Training
+      QNMinimizer qn = new QNMinimizer(15, true);
+      Vector model = new DenseVector(qn.minimize(f, eps, initial, maxIterations));
+      
+      // Validation
+      Validation validationTest = new Validation();
+      Validation validationTraining = new Validation();
+      LogisticRegression logRegValidation = new LogisticRegression();
+      
+      validationTest.computeMetrics(this.csvTest.getData(), this.csvTest.getY(),
+              model, logRegValidation, logRegValidation);
+      validationTraining.computeMetrics(this.csvTest.getData(), this.csvTrain.getY(),
+              model, logRegValidation, logRegValidation);
+      
+      MLUtils.printLinearModel(model, this.csvTrain);
+      System.out.println("Evaluation:");
+      System.out.println("- Accuracy: " + validationTest.getAccuracy());
+      System.out.println("- Mean Deviation: " + validationTest.getMeanDeviation());
+      System.out.println("Statistics");
+      System.out.println("- DeriveAt counter: " + f.getCountDeriveAt());
+      System.out.println("- ValueAt counter: " + f.getCountValueAt());
+  }
 }
