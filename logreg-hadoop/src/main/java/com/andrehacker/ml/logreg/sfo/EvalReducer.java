@@ -14,12 +14,12 @@ import com.andrehacker.ml.writables.DoublePairWritable;
 public class EvalReducer extends Reducer<IntWritable, DoublePairWritable, IntWritable, DoubleWritable> {
   
   private static AdaptiveLogger log = new AdaptiveLogger(
-      SFOJob.RUN_LOCAL_MODE, Logger.getLogger(EvalReducer.class.getName()), Level.DEBUG);
+      GlobalJobSettings.RUN_LOCAL_MODE, Logger.getLogger(EvalReducer.class.getName()), Level.DEBUG);
   
   @Override
   public void reduce(IntWritable dim, Iterable<DoublePairWritable> values, Context context) throws IOException, InterruptedException {
     
-    log.debug("Eval Reducer for d=" + dim.get() + " (" + SFOJob.modelInfo.getFeatureName(dim.get()) + ")");
+    log.debug("Eval Reducer for d=" + dim.get() + " (" + GlobalJobSettings.datasetInfo.getFeatureName(dim.get()) + ")");
     
     int count=0;
     double sumLlBase=0;

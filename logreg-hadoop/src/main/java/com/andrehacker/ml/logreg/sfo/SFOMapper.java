@@ -16,16 +16,13 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
   
   private LogisticRegression logreg = new LogisticRegression();
   
-  private IncrementalModel model;
-  
-//  private static AdaptiveLogger log = new AdaptiveLogger(
-//      SFOJob.RUN_LOCAL_MODE, Logger.getLogger(SFOMapper.class.getName()), Level.DEBUG); 
+  private IncrementalModel baseModel;
   
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    // TODO Read Base Model!
-    model = new IncrementalModel((int)SFOJob.modelInfo.getVectorSize());
+    
+    baseModel = SFOJobTools.readBaseModel(context.getConfiguration());
   }
   
   
@@ -34,14 +31,14 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
 
     // Compute prediction for current x_i using the base model
     // TODO Improvement: Why not just compute and transmit beta * x_i ??
-    double pi = logreg.predict(xi.get(), model.getW(), SFOJob.INTERCEPT);
+    double pi = logreg.predict(xi.get(), baseModel.getW(), GlobalJobSettings.INTERCEPT);
 //    double xDotW = xi.get().dot(model.getW()) + SFOJob.INTERCEPT;
     
     // Go through all features in x, emit value.
     // TODO Improvement: Why always transmit p_i ?? Because we need p_i for the specific x_i in reducer for each feature! Still lot of redundant traffic...
     for (Vector.Element feature : xi.get().nonZeroes()) {
       // New feature?
-      if (! model.getUsedDimensions().contains(feature.get())) {
+      if (! baseModel.isFeatureUsed(feature.index())) {
         outputKey.set(feature.index());
         outputValue.setLabel(y.get());
         outputValue.setXid(feature.get());

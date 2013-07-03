@@ -15,8 +15,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 
-import com.andrehacker.ml.datasets.DatasetInfo;
-import com.andrehacker.ml.datasets.DonutDatasetInfo;
 import com.andrehacker.ml.util.IOUtils;
 
 /**
@@ -29,31 +27,20 @@ import com.andrehacker.ml.util.IOUtils;
 public class SFOJob extends Configured implements Tool {
   
   private static final String JOB_NAME = "sfo-train";
-
-  static final boolean RUN_LOCAL_MODE = true;
-  
-  static final double INTERCEPT = 1;    // TODO What to set this to? Train it?
-  
-  static DatasetInfo modelInfo = DonutDatasetInfo.get();
   
   private String inputFileLocal;
   private String inputFileHdfs;
-  private String jarPath;
-  private String configFilePath;
   private String outputPath;
+  
   private int reducers;
   
   public SFOJob(String inputFileLocal,
       String inputFileHdfs,
       String outputPath,
-      String jarPath,
-      String configFilePath,
       int reducers) {
     this.inputFileLocal = inputFileLocal;
     this.inputFileHdfs = inputFileHdfs;
     this.outputPath = outputPath;
-    this.jarPath = jarPath;
-    this.configFilePath = configFilePath;
     this.reducers = reducers;
   }
   
@@ -66,36 +53,51 @@ public class SFOJob extends Configured implements Tool {
   }
   
   private Job prepareJob() throws IOException {
-
+    
     System.out.println("-----------------");
     System.out.println("Prepare Job: " + JOB_NAME);
     System.out.println("-----------------");
+
+    if (GlobalJobSettings.RUN_LOCAL_MODE) {
+      System.out.println("RUN IN LOCAL MODE");
+    } else {
+      System.out.println("RUN IN PSEUDO-DISTRIBUTED/CLUSTER MODE");
+    }
     
     Job job = new Job(getConf(), JOB_NAME);
     Configuration conf = job.getConfiguration();
-    job.setJarByClass(getClass());
     
-    String inputFile = "";
+    // ---------- Set Configuration options -----------
+
+    conf.addResource(new Path(GlobalJobSettings.CONFIG_FILE_PATH));
     
-    if (RUN_LOCAL_MODE) {
-      System.out.println("RUN IN LOCAL MODE");
-      IOUtils.deleteRecursively(outputPath);
-      inputFile = inputFileLocal;
-    } else {
-      System.out.println("RUN IN PSEUDO-DISTRIBUTED/CLUSTER MODE");
-      inputFile = inputFileHdfs;
-      conf.addResource(new Path(configFilePath));
-      
+    if (!GlobalJobSettings.RUN_LOCAL_MODE) {
       // This jar has all required dependencies in it. Must be built first (mvn package)!
-      conf.set("mapred.jar", jarPath);
+      conf.set("mapred.jar", GlobalJobSettings.JAR_PATH);
       
 //      job.setNumReduceTasks(4);
       conf.setInt("mapred.reduce.tasks", reducers);
-      
-      // Delete old output dir
+    }
+    
+    // ---------- Cleanup output directory ------------
+
+    if (GlobalJobSettings.RUN_LOCAL_MODE) {
+      IOUtils.deleteRecursively(outputPath);
+    } else {
       FileSystem hdfs = FileSystem.get(conf);
       Path path = new Path(outputPath);
       hdfs.delete(path, true);
+    }
+    
+    // ---------- Set Job options ---------------------
+    
+    job.setJarByClass(getClass());
+    
+    String inputFile = "";
+    if (GlobalJobSettings.RUN_LOCAL_MODE) {
+      inputFile = inputFileLocal;
+    } else {
+      inputFile = inputFileHdfs;
     }
     System.out.println("Jar path: " + job.getJar());
     

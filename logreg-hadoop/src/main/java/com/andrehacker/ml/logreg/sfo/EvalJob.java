@@ -42,8 +42,6 @@ public class EvalJob extends Configured implements Tool {
   
   private String inputFileLocal;
   private String inputFileHdfs;
-  private String jarPath;
-  private String configFilePath;
   private String outputPath;
   private int reducers;
   
@@ -51,14 +49,10 @@ public class EvalJob extends Configured implements Tool {
       String inputFileLocal,
       String inputFileHdfs,
       String outputPath,
-      String jarPath,
-      String configFilePath,
       int reducers) {
     this.inputFileLocal = inputFileLocal;
     this.inputFileHdfs = inputFileHdfs;
     this.outputPath = outputPath;
-    this.jarPath = jarPath;
-    this.configFilePath = configFilePath;
     this.reducers = reducers;
   }
   
@@ -85,16 +79,16 @@ public class EvalJob extends Configured implements Tool {
     job.setJarByClass(getClass());
 
     String inputFile = "";
-    if (SFOJob.RUN_LOCAL_MODE) {
+    if (GlobalJobSettings.RUN_LOCAL_MODE) {
       System.out.println("RUN IN LOCAL MODE");
       IOUtils.deleteRecursively(outputPath);
       inputFile = inputFileLocal;
     } else {
       System.out.println("RUN IN PSEUDO-DISTRIBUTED/CLUSTER MODE");
       inputFile = inputFileHdfs;
-      conf.addResource(new Path(configFilePath));
+      conf.addResource(new Path(GlobalJobSettings.CONFIG_FILE_PATH));
       
-      conf.set("mapred.jar", jarPath);
+      conf.set("mapred.jar", GlobalJobSettings.JAR_PATH);
       
       conf.setInt("mapred.reduce.tasks", reducers);
       

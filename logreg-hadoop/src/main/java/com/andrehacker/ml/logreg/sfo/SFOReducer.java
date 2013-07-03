@@ -20,33 +20,24 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
 //  private static final double PENALTY = 1d;
   
   private static AdaptiveLogger log = new AdaptiveLogger(
-      SFOJob.RUN_LOCAL_MODE, Logger.getLogger(SFOReducer.class.getName()), Level.DEBUG);
+      GlobalJobSettings.RUN_LOCAL_MODE, Logger.getLogger(SFOReducer.class.getName()), Level.DEBUG);
   
   private static int MAX_ITERATIONS = 5;
   
   private static int DEBUG_DIMENSION = -1;
-  
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    super.setup(context);
-    // TODO Read Base Model!
-//    model = new IncrementalModel(SFOJob.FEATURES);
-    
-    // TODO Read model information
-  }
 
   /**
    * Notes: To iterate multiple times over data, we cache all data on heap
-   * For each dimension, this stores as many objects in memory as documents have this word.
+   * For each dimension, this stores as many objects in memory as documents containing this word
    * Assumption: Should always fit into memory
    * 
-   * We could avoid this by learning with Online SGD in one pass, but for many dimensions we will have few data and this will be probably hard.
+   * We could avoid this by learning with Online SGD in one pass, 
+   * but for many dimensions we will have few data and I am unsure if this works well
    */
   @Override
   public void reduce(IntWritable dim, Iterable<SFOIntermediateWritable> values, Context context) throws IOException, InterruptedException {
     
-    log.debug("Reducer for d=" + dim.get() + " (" + SFOJob.modelInfo.getFeatureName(dim.get()) + ")");
+    log.debug("Reducer for d=" + dim.get() + " (" + GlobalJobSettings.datasetInfo.getFeatureName(dim.get()) + ")");
     
     List<SFOIntermediateWritable> cache = Lists.newArrayList();
     
@@ -83,7 +74,7 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
       
       if (dim.get() == DEBUG_DIMENSION)
         log.debug("- it " + iteration + ": grad: " + batchGradient + " gradSecond: " + batchGradientSecond + " new beta_d: " + betad + " sumPi: " + debugSumPi);
-    }   // while (!trainingDone)
+    }
     
     // Write trained coefficient
     context.write(dim, new DoubleWritable(betad));

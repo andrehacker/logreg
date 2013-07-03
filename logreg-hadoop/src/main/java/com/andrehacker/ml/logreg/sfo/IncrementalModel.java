@@ -24,38 +24,21 @@ class IncrementalModel {
   
   private Vector w;
   private List<Integer> usedDimensions;
-  private List<Integer> unusedDimensions;
 
   /**
    * Create empty model where all dimensions are unused
    */
   public IncrementalModel(int numDimensions) {
     usedDimensions = Lists.newArrayList();
-    
-    unusedDimensions = Lists.newArrayListWithCapacity(numDimensions);
-    for (int i=0; i<=numDimensions; ++i) { unusedDimensions.add(i); }
-    
     w = new RandomAccessSparseVector(numDimensions);
   }
   
-  /**
-   * Create empty model where all dimensions are unused
-   */
-  public IncrementalModel(List<Integer> remainingDimensions, int numDimensions) {
-    usedDimensions = Lists.newArrayList();
-    this.unusedDimensions = remainingDimensions;
-
-    w = new RandomAccessSparseVector(numDimensions);
-  }
-  
-  public IncrementalModel(List<Integer> usedDimensions, List<Integer> remainingDimensions, Vector w) {
+  public IncrementalModel(List<Integer> usedDimensions, Vector w) {
     this.usedDimensions = usedDimensions;
-    this.unusedDimensions = remainingDimensions;
     this.w = w;
   }
   
   public void addDimensionToModel(int d, double weight) {
-    unusedDimensions.remove(unusedDimensions.indexOf(d));
     usedDimensions.add(d);
     w.setQuick(d, weight);
   }
@@ -64,11 +47,12 @@ class IncrementalModel {
     return w;
   }
   
-  public List<Integer> getUnusedDimensions() {
-    return unusedDimensions;
+  public boolean isFeatureUsed(int id) {
+    return usedDimensions.contains(id);
   }
   
   public List<Integer> getUsedDimensions() {
     return usedDimensions;
   }
+  
 }

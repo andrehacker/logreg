@@ -119,7 +119,7 @@ public class LogisticRegressionTest {
     LogisticRegression logReg = new LogisticRegression();
     StopWatch sw = new StopWatch();
     sw.start();
-    logReg.trainBatchGD(csvTrain.getData(), csvTrain.getY(), 200, 1, initialWeight);
+    logReg.trainBatchGD(csvTrain.getData(), csvTrain.getY(), 10, 1, initialWeight);
 
     Validation valTest = new Validation();
     Validation valTrain = new Validation();

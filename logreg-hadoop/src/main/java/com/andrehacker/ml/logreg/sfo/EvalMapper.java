@@ -26,21 +26,23 @@ public class EvalMapper extends Mapper<IntWritable, VectorWritable, IntWritable,
   
   private LogisticRegression logreg = new LogisticRegression();
   
-  private IncrementalModel model;
+  private IncrementalModel baseModel;
   
   List<Double> coefficients;
-  
-//  private static AdaptiveLogger log = new AdaptiveLogger(
-//      SFOJob.RUN_LOCAL_MODE, Logger.getLogger(SFOMapper.class.getName()), Level.DEBUG); 
   
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    // TODO Read Base Model!
-    model = new IncrementalModel((int)SFOJob.modelInfo.getVectorSize());
+    
+    baseModel = SFOJobTools.readBaseModel(context.getConfiguration());
+    
+    readTrainedCoefficients(context);
+  }
+  
+  private void readTrainedCoefficients(Context context) throws IOException {
     
     // Read trained coefficients into map: dimension -> coefficient
-    coefficients = Arrays.asList(new Double[(int)SFOJob.modelInfo.getVectorSize()+1]);
+    coefficients = Arrays.asList(new Double[(int)GlobalJobSettings.datasetInfo.getVectorSize()+1]);
     
     Path dir = new Path(SFOJobTest.TRAIN_OUTPUT_PATH);
     FileSystem fs = FileSystem.get(context.getConfiguration());
@@ -74,16 +76,15 @@ public class EvalMapper extends Mapper<IntWritable, VectorWritable, IntWritable,
     // See SFOJob comments for description
     // 1) Compute log-likelihood for current x_i using the base model (without new coefficient)
     // 2) Compute log-likelihood for all unused features in xi using the related new models
-    double piBase = logreg.predict(xi.get(), model.getW(), SFOJob.INTERCEPT);
+    double piBase = logreg.predict(xi.get(), baseModel.getW(), GlobalJobSettings.INTERCEPT);
     double llBase = LogisticRegression.logLikelihood(y.get(), piBase); 
       // New feature?
     for (Vector.Element feature : xi.get().nonZeroes()) {
-      if (! model.getUsedDimensions().contains(feature.get())) {
-        int dim = feature.index();
-        
-        model.getW().set(dim, coefficients.get(dim));
-        double piNew = LogisticRegression.logisticFunction(xi.get().dot(model.getW()) + SFOJob.INTERCEPT);
-        model.getW().set(dim, 0d);    // reset to base model
+      int dim = feature.index();
+      if (! baseModel.isFeatureUsed(dim)) {
+        baseModel.getW().set(dim, coefficients.get(dim));
+        double piNew = LogisticRegression.logisticFunction(xi.get().dot(baseModel.getW()) + GlobalJobSettings.INTERCEPT);
+        baseModel.getW().set(dim, 0d);    // reset to base model
 
         double llNew = LogisticRegression.logLikelihood(y.get(), piNew);
         
