@@ -1,15 +1,6 @@
 package com.andrehacker.ml.logreg.sfo;
 
-import java.io.IOException;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
-
-import com.google.common.io.Closeables;
 
 /**
  * Implements the Single Feature Optimization Algorithm as proposed by Singh et al. [1]
@@ -69,7 +60,7 @@ public class SFODriver {
   public void runSFO() throws Exception {
     
     // Make base model available for train/test mappers
-    broadcastBaseModel();
+    SFOJobTools.writeBaseModel(baseModel);
     
     // Make current model available for Mappers of Train and Test job
     SFOJob jobTrain = new SFOJob(
@@ -88,30 +79,6 @@ public class SFODriver {
         outputPathTest,
         reducersTest), null);
     System.out.println("Done validation");
-  }
-  
-  /**
-   * Makes the current base model available to mappers/reducers via hdfs
-   * 
-   * We use hdfs (and not distributed cache) because the base model remains
-   * the same for train and test job.
-   * 
-   * TODO Improvement: Appending only every single added dimension would be nice
-   * to reduce startup costs
-   */
-  private void broadcastBaseModel() throws IOException {
-    Configuration conf = new Configuration();
-    conf.addResource(new Path(GlobalJobSettings.CONFIG_FILE_PATH));
-    
-    FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Writer writer = null;
-    try {
-      writer = SequenceFile.createWriter(fs, conf, new Path(GlobalJobSettings.BASE_MODEL_PATH),
-          IncrementalModelWritable.class, NullWritable.class);
-      writer.append(new IncrementalModelWritable(baseModel), NullWritable.get());
-    } finally {
-      Closeables.close(writer, true);
-    }
   }
 
 }
