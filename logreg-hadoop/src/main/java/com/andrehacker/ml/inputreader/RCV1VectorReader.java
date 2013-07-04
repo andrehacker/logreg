@@ -39,6 +39,7 @@ public class RCV1VectorReader implements AbstractVectorReader {
     }
     return docId;
   }
+  
 
   /**
    * TODO Refactoring: Get rid of this method. Use single files instead
@@ -49,9 +50,9 @@ public class RCV1VectorReader implements AbstractVectorReader {
    * GCAT(Government/Social)
    * MCAT(Markets)
    */
-  public void readTargets(Vector yC, Vector yE, Vector yG, Vector yM) throws IOException {
+  public static void readLabels(String path, Vector yC, Vector yE, Vector yG, Vector yM) throws IOException {
     // Line format: ECAT 2286 1
-    BufferedReader reader = MLUtils.open("/home/andre/dev/datasets/RCV1-v2/rcv1-v2.topics.qrels");
+    BufferedReader reader = MLUtils.open(path);
     String line;
     String cat;
     while ((line = reader.readLine()) != null) {

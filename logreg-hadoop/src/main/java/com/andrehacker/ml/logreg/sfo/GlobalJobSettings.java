@@ -1,5 +1,7 @@
 package com.andrehacker.ml.logreg.sfo;
 
+import org.apache.log4j.Level;
+
 import com.andrehacker.ml.datasets.DatasetInfo;
 import com.andrehacker.ml.datasets.DonutDatasetInfo;
 
@@ -12,9 +14,12 @@ import com.andrehacker.ml.datasets.DonutDatasetInfo;
  */
 public class GlobalJobSettings {
   
+  // TODO Minor: Remove this redundancy
   static final boolean RUN_LOCAL_MODE = true;
   static final String CONFIG_FILE_PATH = "core-site-local.xml";
 //  static final String CONFIG_FILE_PATH = "core-site-pseudo-distributed.xml";
+
+  static final Level LOG_LEVEL = Level.WARN;
 
   static final String BASE_MODEL_PATH = "sfo-base-model.seq";
   

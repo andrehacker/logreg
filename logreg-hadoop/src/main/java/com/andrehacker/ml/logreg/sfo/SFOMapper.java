@@ -22,7 +22,7 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     
-    baseModel = SFOJobTools.readBaseModel(context.getConfiguration());
+    baseModel = SFOTools.readBaseModel(context.getConfiguration());
   }
   
   

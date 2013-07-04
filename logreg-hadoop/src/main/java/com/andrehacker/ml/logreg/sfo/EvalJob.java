@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 
 import com.andrehacker.ml.util.IOUtils;
@@ -108,6 +109,7 @@ public class EvalJob extends Configured implements Tool {
     
 //    job.setInputFormatClass(KeyValueTextInputFormat.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
 //    job.setOutputFormatClass(TextOutputFormat.class);
   
     // configure the used input/output format class.

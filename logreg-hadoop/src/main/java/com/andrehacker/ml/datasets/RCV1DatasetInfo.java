@@ -1,9 +1,17 @@
 package com.andrehacker.ml.datasets;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import com.andrehacker.ml.util.MLUtils;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Closeables;
 
 /**
  * Provides information about RCV1-v2 dataset [1]
@@ -34,8 +42,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public class RCV1DatasetInfo {
 
-  private static final int NUM_FEATURES = 47237;
-  private static final int VECTOR_SIZE = NUM_FEATURES;
+  private static final int NUM_FEATURES = 47237;    // we already added 1 here
   private static final int TOTAL = 810935;
   
   private static final Map<Integer, String> labelMap = ImmutableMap.of(
@@ -45,10 +52,49 @@ public class RCV1DatasetInfo {
       4, "MCAT"
       );
 
-  private static DatasetInfo datasetInfo = new DatasetInfo(NUM_FEATURES, VECTOR_SIZE, TOTAL, new ArrayList<String>(), labelMap);
+  private static DatasetInfo datasetInfo = new DatasetInfo.Builder(NUM_FEATURES, TOTAL).
+      labelMap(labelMap).build();
   
   public static DatasetInfo get() {
     return datasetInfo;
+  }
+
+  private static Splitter SPACE_SPLITTER = Splitter.on(Pattern.compile(" "));
+  
+  /**
+   * Loads the map (feature-id -> feature name) from local file
+   * and adds it to the datasetInfo
+   * 
+   * The file is available on the website (see above):
+   * stem.termid.idf.map.txt
+   */
+  public static void readPredictorNames(String path) throws IOException {
+    
+    // Line format: stem term-id idf
+    // e.g. profit 33191 2.01767426583078
+    List<String> names = Arrays.asList(new String[NUM_FEATURES]);
+    
+    BufferedReader reader = null;
+    
+    int count=0;
+    try {
+      reader = MLUtils.open(path);
+      String line;
+      String stem;
+      String termid;
+      while ((line = reader.readLine()) != null) {
+        Iterator<String> iter = SPACE_SPLITTER.split(line).iterator();
+        stem = iter.next();
+        termid = iter.next();
+        names.set(Integer.parseInt(termid), stem);
+        ++count;
+      }
+    } finally {
+      Closeables.close(reader, true);
+    }
+    System.out.println("Read Termid->stem map (" + count + " items)");
+    
+    datasetInfo.setPredictorNames(names);
   }
   
 }

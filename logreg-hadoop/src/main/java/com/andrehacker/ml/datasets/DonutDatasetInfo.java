@@ -19,10 +19,10 @@ public class DonutDatasetInfo {
    });
   
   private static final Map<Integer, String> labelMap = ImmutableMap.of(
-      0, "color"
-      );
+      0, "color");
 
-  private static DatasetInfo datasetInfo = new DatasetInfo(predictorNames, labelMap, TOTAL);
+  private static DatasetInfo datasetInfo = new DatasetInfo.Builder(predictorNames.size(), TOTAL).
+      labelMap(labelMap).predictorNames(predictorNames).build();
   
   public static DatasetInfo get() {
     return datasetInfo;

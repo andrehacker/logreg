@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.andrehacker.ml.logreg.LogisticRegression;
@@ -20,7 +19,7 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
 //  private static final double PENALTY = 1d;
   
   private static AdaptiveLogger log = new AdaptiveLogger(
-      GlobalJobSettings.RUN_LOCAL_MODE, Logger.getLogger(SFOReducer.class.getName()), Level.DEBUG);
+      GlobalJobSettings.RUN_LOCAL_MODE, Logger.getLogger(SFOReducer.class.getName()), GlobalJobSettings.LOG_LEVEL);
   
   private static int MAX_ITERATIONS = 5;
   

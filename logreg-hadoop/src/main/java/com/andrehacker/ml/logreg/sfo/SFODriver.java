@@ -1,6 +1,15 @@
 package com.andrehacker.ml.logreg.sfo;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
+
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Doubles;
 
 /**
  * Implements the Single Feature Optimization Algorithm as proposed by Singh et al. [1]
@@ -20,6 +29,7 @@ public class SFODriver {
   
   private String inputFileLocal;
   private String inputFileHdfs;
+  
   private String outputPathTrain;
   private String outputPathTest;
   
@@ -27,6 +37,8 @@ public class SFODriver {
   private int reducersTest;
   
   private IncrementalModel baseModel;
+  
+  private List<FeatureGain> gains = Lists.newArrayList();
   
   /**
    * Initializes a new empty base model
@@ -45,7 +57,7 @@ public class SFODriver {
     this.reducersTest = reducersTest;
     
     // Create empty model
-    baseModel = new IncrementalModel((int)GlobalJobSettings.datasetInfo.getVectorSize());
+    baseModel = new IncrementalModel((int)GlobalJobSettings.datasetInfo.getNumFeatures());
   }
   
   /**
@@ -60,25 +72,84 @@ public class SFODriver {
   public void runSFO() throws Exception {
     
     // Make base model available for train/test mappers
-    SFOJobTools.writeBaseModel(baseModel);
+    SFOTools.writeBaseModel(baseModel);
     
-    // Make current model available for Mappers of Train and Test job
-    SFOJob jobTrain = new SFOJob(
+    // ----- TRAIN -----
+    ToolRunner.run(new SFOJob(
         inputFileLocal,
         inputFileHdfs,
         outputPathTrain,
-        reducersTrain);
-    
-    ToolRunner.run(jobTrain, null);
+        reducersTrain), null);
     
     System.out.println("Done training");
-
+    
+    // ----- TEST -----
     ToolRunner.run(new EvalJob(
         inputFileLocal,
         inputFileHdfs,
         outputPathTest,
         reducersTest), null);
     System.out.println("Done validation");
+    
+    // ----- Postprocess -----
+    readGains();
   }
+
+  public void addBestFeature() throws IOException {
+    // Read coefficients
+    // TODO Optimization: Don't read all into memory, just search the single coefficient
+    Configuration conf = new Configuration();
+    conf.addResource(new Path(GlobalJobSettings.CONFIG_FILE_PATH));
+    List<Double> coefficients = SFOTools.readTrainedCoefficients(conf);
+    
+    // Add best to base model
+    int bestDimension = gains.get(0).getDimension();
+    baseModel.addDimensionToModel(bestDimension, coefficients.get(bestDimension));
+    
+    // Write updated model to hdfs
+    SFOTools.writeBaseModel(baseModel);
+    
+    System.out.println("Added dimension " + bestDimension + " to base model with coefficient: " + coefficients.get(bestDimension));
+    System.out.println("- New base model: " + baseModel.getW().toString());
+  }
+  
+  public void retrainBaseModel() {
+    // TODO Major: Retrain Base Model!
+    System.out.println("Retraining base model not yet implemented");
+  }
+  
+  private void readGains() throws IOException {
+    // Read results from hdfs into memory
+    gains = SFOTools.readEvalResult(outputPathTest);
+    
+    // Sort by gain
+    Collections.sort(gains, Collections.reverseOrder());
+  }
+  
+  public List<FeatureGain> getGains() {
+    return gains;
+  }
+  
+  static class FeatureGain implements Comparable<FeatureGain> {
+    private int dimension;
+    private double gain;    // currently log-likelihood gain
+    
+    public FeatureGain(int dimension, double gain) {
+      this.dimension = dimension;
+      this.gain = gain;
+    }
+    
+    @Override
+    public int compareTo(FeatureGain other) {
+      return Doubles.compare(this.gain, other.gain);
+    }
+    public int getDimension() {
+      return dimension;
+    }
+    public double getGain() {
+      return gain;
+    }
+  }
+
 
 }
