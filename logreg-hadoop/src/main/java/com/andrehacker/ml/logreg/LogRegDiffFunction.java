@@ -7,15 +7,18 @@ import org.apache.mahout.math.function.Functions;
 
 import edu.stanford.nlp.optimization.DiffFunction;
 
-public class LogisticRegressionDiffFunction implements DiffFunction {
+/**
+ * Required for stanford-nlp L-BFGS Optimizer
+ * (package edu.stanford.nlp.optimization)
+ */
+public class LogRegDiffFunction implements DiffFunction {
 
     private final Matrix input;
     private final Vector labels;
     private int countValueAt = 0;
     private int countDeriveAt = 0;
 
-    public LogisticRegressionDiffFunction(Matrix input, Vector labels) {
-
+    public LogRegDiffFunction(Matrix input, Vector labels) {
         this.input = input;
         this.labels = labels;
     }

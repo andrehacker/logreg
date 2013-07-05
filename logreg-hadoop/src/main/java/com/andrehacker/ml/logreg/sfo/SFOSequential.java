@@ -6,7 +6,7 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
-import com.andrehacker.ml.logreg.LogisticRegression;
+import com.andrehacker.ml.logreg.LogRegModel;
 import com.andrehacker.ml.util.CsvReader;
 import com.andrehacker.ml.util.MLUtils;
 import com.andrehacker.ml.validation.Validation;
@@ -20,7 +20,6 @@ public class SFOSequential {
   
   private CsvReader csvTrain;
   private CsvReader csvTest;
-  LogisticRegression logReg;
   IncrementalModelOld model;
   
   private static final double BIAS_DEFAULT = 1;
@@ -35,7 +34,6 @@ public class SFOSequential {
   private static final double PENALTY = 0d; // No regularization
   
   public SFOSequential(String trainingFile, String testFile, List<String> predictorNames) throws Exception {
-    this.logReg = new LogisticRegression();
     
     csvTrain = MLUtils.readData(trainingFile, 40, predictorNames, TARGET_NAME, true);
     csvTrain.normalize();
@@ -58,8 +56,9 @@ public class SFOSequential {
     
     // Measure performance of current base model
     Matrix XTestBase = transformMatrix(model.getUsedDimensions(), -1, csvTest.getData());
-    val.computeAccuracy(XTestBase, csvTest.getY(), model.getW(), logReg);
-    val.computeMeanDeviation(XTestBase, csvTest.getY(), model.getW(), logReg);
+    LogRegModel logRegModel = new LogRegModel(model.getW());
+    val.computeAccuracy(XTestBase, csvTest.getY(), logRegModel);
+    val.computeMeanDeviation(XTestBase, csvTest.getY(), logRegModel);
     System.out.println("Base Model performance");
     System.out.println(" - dev:     " + val.getMeanDeviation());
     System.out.println(" - success: " + val.getAccuracy());
@@ -70,6 +69,7 @@ public class SFOSequential {
     double bestGain = Double.NEGATIVE_INFINITY;
     double bestWeight = 0;
     double gain = Double.NEGATIVE_INFINITY;
+    LogRegModel extendedModel = new LogRegModel(null);
     for (int d : model.getUnusedDimensions()) {
       
       // Get copy of matrix only with relevant dimensions
@@ -79,13 +79,14 @@ public class SFOSequential {
       // Train single feature
       System.out.println("Train " + csvTrain.getColumnName(d) + " (d=" + d + ")");
       Vector extendedW = model.getExtendedModel();     // weight vector with place for one more feature
-      extendedW = logReg.trainNewtonSFO(XTrain, csvTrain.getY(), extendedW, ITERATIONS, INITIAL_WEIGHT, PENALTY, (d==1 ? true : false));
+      extendedW = LogRegSFOTraining.trainNewtonSFO(XTrain, csvTrain.getY(), extendedW, ITERATIONS, INITIAL_WEIGHT, PENALTY, (d==1 ? true : false));
       System.out.println(" - Trained beta_d:  " + extendedW.get(extendedW.size()-1));
 
       // Measure performance when adding dimension d to base model
       // TODO: Real SFO would probably evaluate the model here on training data (to avoid separate mapred iteration?)
-      val.computeAccuracy(XTest, csvTest.getY(), extendedW, logReg);
-      val.computeMeanDeviation(XTest, csvTest.getY(), extendedW, logReg);
+      extendedModel.setW(extendedW);
+      val.computeAccuracy(XTest, csvTest.getY(), extendedModel);
+      val.computeMeanDeviation(XTest, csvTest.getY(), extendedModel);
       System.out.println(" - dev:     " + val.getMeanDeviation());
       System.out.println(" - success: " + val.getAccuracy());
       

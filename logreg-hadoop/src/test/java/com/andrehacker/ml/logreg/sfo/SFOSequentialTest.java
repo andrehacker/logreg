@@ -41,8 +41,10 @@ public class SFOSequentialTest {
     try {
       SFOSequential sfo = new SFOSequential(TRAININGFILE, TESTFILE, predictorNames);
       
-      sfo.findBestFeature();
-//      sfo.findBestFeature();
+      int iterations = 1;
+      for (int i=1; i<=iterations; ++i) {
+        sfo.findBestFeature();
+      }
       /*
        * First row training: "x","y","shape","color","k","k0","xx","xy","yy","a","b","c","bias"
        * First row test: "x","y","shape","color","xx","xy","yy","c","a","b"

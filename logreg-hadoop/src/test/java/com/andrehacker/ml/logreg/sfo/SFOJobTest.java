@@ -50,7 +50,7 @@ public class SFOJobTest {
         DonutDatasetInfo.get(),
         inputFileLocal, 
         inputFileHdfs,
-        37664   // shar 
+        37664   // shar
         );
   }
   

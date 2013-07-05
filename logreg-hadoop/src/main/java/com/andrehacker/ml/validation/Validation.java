@@ -1,7 +1,6 @@
 package com.andrehacker.ml.validation;
 
 import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
@@ -9,7 +8,7 @@ import com.andrehacker.ml.ClassificationModel;
 import com.andrehacker.ml.RegressionModel;
 
 /**
- * @author andre
+ * Several Validation methods for Matrix based implementations
  */
 public class Validation {  
   
@@ -18,7 +17,7 @@ public class Validation {
   double meanDeviation;
   
   // TODO Refactoring: Redundant. Merge this with computeSuccessRate etc.
-  public void computeMetrics(Matrix testData, Vector testY, Vector w, RegressionModel regressionModel, ClassificationModel classificationModel) {
+  public void computeMetrics(Matrix testData, Vector testY, RegressionModel regressionModel, ClassificationModel classificationModel) {
     // How many do we classify correctly?
     
     // TODO Feature: Compute AUC
@@ -30,7 +29,7 @@ public class Validation {
     double dev = 0;     // deviation
     for (int n=0; n<testData.numRows(); ++n) {
       //System.out.println(data.viewRow(n));
-      double predictedClass = classificationModel.classify(testData.viewRow(n), w);
+      double predictedClass = classificationModel.classify(testData.viewRow(n));
 //      System.out.println("Is: " + prediction + " should: " + y.get(n));
       if (Math.round(predictedClass) == testY.get(n)) {
         if (testY.get(n) == 0)
@@ -44,7 +43,7 @@ public class Validation {
           ++falsePos;
       }
 
-      double prediction = regressionModel.predict(testData.viewRow(n), w);
+      double prediction = regressionModel.predict(testData.viewRow(n));
       dev += Math.abs((testY.get(n) - prediction));
     }
     confusion.set(0, 0, truePos);
@@ -55,11 +54,11 @@ public class Validation {
     meanDeviation = dev / testData.numRows();
   }
   
-  public void computeMeanDeviation(Matrix data, Vector y, Vector w, RegressionModel model) {
+  public void computeMeanDeviation(Matrix data, Vector y, RegressionModel model) {
     double dev = 0;
     for (int n=0; n<data.numRows(); ++n) {
       //System.out.println(data.viewRow(n));
-      double prediction = model.predict(data.viewRow(n), w);
+      double prediction = model.predict(data.viewRow(n));
       dev += Math.abs((y.get(n) - prediction));
     
     //    System.out.println("Is: " + prediction + " should: " + y.get(n));
@@ -67,7 +66,7 @@ public class Validation {
     this.meanDeviation = dev / data.numRows(); 
   }
 
-  public void computeAccuracy(Matrix data, Vector y, Vector w, ClassificationModel model) {
+  public void computeAccuracy(Matrix data, Vector y, ClassificationModel model) {
     // How many do we classify correctly?
     confusion = new DenseMatrix(2,2);
     int truePos = 0;
@@ -76,7 +75,7 @@ public class Validation {
     int falseNeg = 0;
     for (int n=0; n<data.numRows(); ++n) {
       //System.out.println(data.viewRow(n));
-      double prediction = model.classify(data.viewRow(n), w);
+      double prediction = model.classify(data.viewRow(n));
   //    System.out.println("Is: " + prediction + " should: " + y.get(n));
       if (Math.round(prediction) == y.get(n)) {
         if (y.get(n) == 0)
@@ -95,11 +94,6 @@ public class Validation {
     confusion.set(1, 0, falsePos);
     confusion.set(1, 1, trueNeg);
     this.accuracy = ((double)truePos + trueNeg) / ((double)data.numRows()); 
-  }
-  
-  public Vector computeROC(Vector realOutput, Vector scores) {
-    Vector points = new DenseVector();
-    return points;
   }
   
   public Matrix getConfusion() {

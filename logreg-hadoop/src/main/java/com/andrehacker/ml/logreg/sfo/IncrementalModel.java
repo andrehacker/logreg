@@ -5,6 +5,9 @@ import java.util.List;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
+import com.andrehacker.ml.ClassificationModel;
+import com.andrehacker.ml.RegressionModel;
+import com.andrehacker.ml.logreg.LogRegMath;
 import com.google.common.collect.Lists;
 
 /**
@@ -20,7 +23,7 @@ import com.google.common.collect.Lists;
  * V1 (big w): No costs for extraction of used features in w. Requires knowledge of total features. Might take longer to multiply (depends on implementation of sparse vector)
  * V2 (small w): Use DenseVector. Fast to multiply (if basemodel is small). If basemodel is big
  */
-class IncrementalModel {
+class IncrementalModel implements RegressionModel, ClassificationModel {
   
   private Vector w;
   private List<Integer> usedDimensions;
@@ -53,6 +56,21 @@ class IncrementalModel {
   
   public List<Integer> getUsedDimensions() {
     return usedDimensions;
+  }
+
+  @Override
+  public int classify(Vector x) {
+    return LogRegMath.classify(x, w, 0);
+  }
+
+  @Override
+  public double predict(Vector x) {
+    return LogRegMath.predict(x, w);
+  }
+
+  @Override
+  public double predict(Vector x, double intercept) {
+    return LogRegMath.predict(x, w, intercept);
   }
   
 }

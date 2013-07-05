@@ -8,13 +8,11 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 
-import com.andrehacker.ml.logreg.LogisticRegression;
+import com.andrehacker.ml.logreg.LogRegMath;
 import com.andrehacker.ml.util.AdaptiveLogger;
 import com.google.common.collect.Lists;
 
 public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, IntWritable, DoubleWritable> {
-  
-//  private IncrementalModel model;
   
 //  private static final double PENALTY = 1d;
   
@@ -58,10 +56,10 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
         
         // TODO Improvement: Why not compute and transfer beta_d * x_id ?
         // TODO Bug: Why does Singh not use (xDotw + element.getXid() * betad)?? This is the general derivation!
-        double piNew = LogisticRegression.logisticFunction(xDotw + (element.getXid() * betad));
+        double piNew = LogRegMath.logisticFunction(xDotw + (element.getXid() * betad));
         debugSumPi += piNew;
-        batchGradient += LogisticRegression.computePartialGradientSFO(element.getXid(), piNew, element.getLabel());
-        batchGradientSecond += LogisticRegression.computeSecondPartialGradientSFO(element.getXid(), piNew);
+        batchGradient += LogRegSFOTraining.computePartialGradientSFO(element.getXid(), piNew, element.getLabel());
+        batchGradientSecond += LogRegSFOTraining.computeSecondPartialGradientSFO(element.getXid(), piNew);
       }
       
       // TODO Apply penalty. Probably we have to divide by true N (not only non-zeros)

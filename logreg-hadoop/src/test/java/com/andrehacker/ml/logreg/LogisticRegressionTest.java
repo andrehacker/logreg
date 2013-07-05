@@ -65,7 +65,6 @@ public class LogisticRegressionTest {
     
      double initialWeight = 0;
 //     LogisticRegression logReg = new LogisticRegression("donut.csv", predictorNames);
-     LogisticRegression logReg = new LogisticRegression();
 
 //       StopWatch sw = new StopWatch();
 //       sw.start();
@@ -81,12 +80,13 @@ public class LogisticRegressionTest {
      cd.add(new ColumnDescription("Success_out", ValueType.NUMBER, "out-of-sample success"));
      data.addColumns(cd);
      for (double lambda : penalties) {
-       logReg.trainNewton(csvTrain.getData(), csvTrain.getY(), iterations, initialWeight, lambda);   // breaks at 92 without regularization
-//         logReg.printLinearModel(logReg.getWeight());
+       Vector w = LogRegTraining.trainNewton(csvTrain.getData(), csvTrain.getY(), iterations, initialWeight, lambda);   // breaks at 92 without regularization
+//         logReg.printLinearModel(w);
        Validation valTest = new Validation();
        Validation valTrain = new Validation();
-       valTest.computeMetrics(csvTest.getData(), csvTest.getY(), logReg.getWeight(), logReg, logReg);
-       valTrain.computeMetrics(csvTrain.getData(), csvTrain.getY(), logReg.getWeight(), logReg, logReg);
+       LogRegModel logReg = new LogRegModel(w);
+       valTest.computeMetrics(csvTest.getData(), csvTest.getY(), logReg, logReg);
+       valTrain.computeMetrics(csvTrain.getData(), csvTrain.getY(), logReg, logReg);
        System.out.println("Regularization: " + lambda);
        System.out.println("- Accuracy:\t\t" + valTest.getAccuracy());
        System.out.println("- Mean Deviation:\t" + valTest.getMeanDeviation());
@@ -116,17 +116,18 @@ public class LogisticRegressionTest {
     System.out.println("-----------------");
     
     double initialWeight = 0;
-    LogisticRegression logReg = new LogisticRegression();
     StopWatch sw = new StopWatch();
     sw.start();
-    logReg.trainBatchGD(csvTrain.getData(), csvTrain.getY(), 10, 1, initialWeight);
+    int iterations = 50;
+    Vector w = LogRegTraining.trainBatchGD(csvTrain.getData(), csvTrain.getY(), iterations, 1, initialWeight);
 
     Validation valTest = new Validation();
     Validation valTrain = new Validation();
-    valTest.computeMetrics(csvTest.getData(), csvTest.getY(), logReg.getWeight(), logReg, logReg);
-    valTrain.computeMetrics(csvTrain.getData(), csvTrain.getY(), logReg.getWeight(), logReg, logReg);
+    LogRegModel logRegValidation = new LogRegModel(w);
+    valTest.computeMetrics(csvTest.getData(), csvTest.getY(), logRegValidation, logRegValidation);
+    valTrain.computeMetrics(csvTrain.getData(), csvTrain.getY(), logRegValidation, logRegValidation);
     
-    MLUtils.printLinearModel(logReg.getWeight(), csvTrain);
+    MLUtils.printLinearModel(w, csvTrain);
     System.out.println("Evaluation");
     System.out.println("- Accuracy:\t\t" + valTest.getAccuracy());
     System.out.println("- Mean Deviation:\t" + valTest.getMeanDeviation());
@@ -146,7 +147,7 @@ public class LogisticRegressionTest {
       
       Matrix input = this.csvTrain.getData();
       Vector labels = this.csvTrain.getY();
-      LogisticRegressionDiffFunction f = new LogisticRegressionDiffFunction(input, labels);
+      LogRegDiffFunction f = new LogRegDiffFunction(input, labels);
       
       // Different arguments (e.g. 0.001 and 21) yield comparable results (accuracy and mean dev)  
       double eps = 0.1;
@@ -159,12 +160,12 @@ public class LogisticRegressionTest {
       // Validation
       Validation validationTest = new Validation();
       Validation validationTraining = new Validation();
-      LogisticRegression logRegValidation = new LogisticRegression();
+      LogRegModel logRegValidation = new LogRegModel(model);
       
       validationTest.computeMetrics(this.csvTest.getData(), this.csvTest.getY(),
-              model, logRegValidation, logRegValidation);
+              logRegValidation, logRegValidation);
       validationTraining.computeMetrics(this.csvTest.getData(), this.csvTrain.getY(),
-              model, logRegValidation, logRegValidation);
+              logRegValidation, logRegValidation);
       
       MLUtils.printLinearModel(model, this.csvTrain);
       System.out.println("Evaluation:");

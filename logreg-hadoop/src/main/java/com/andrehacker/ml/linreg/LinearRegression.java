@@ -14,6 +14,8 @@ import com.andrehacker.ml.validation.Validation;
 
 public class LinearRegression implements RegressionModel, ClassificationModel {
   
+  Vector w = null;
+  
   public void train(String inputFile, List<String> predictorNames) throws Exception {
     BufferedReader reader = new BufferedReader(MLUtils.open(inputFile));
     
@@ -24,26 +26,26 @@ public class LinearRegression implements RegressionModel, ClassificationModel {
     Matrix data = csv.getData();
     
     // Least squares solution:
-    Vector w = MLUtils.pseudoInversebySVD(data).times(csv.getY());
+    w = MLUtils.pseudoInversebySVD(data).times(csv.getY());
     System.out.println("Learned weigths: " + w);
 
     Validation val = new Validation();
-    val.computeMeanDeviation(data, csv.getY(), w, this);
-    val.computeAccuracy(data, csv.getY(), w, this);
+    val.computeMeanDeviation(data, csv.getY(), this);
+    val.computeAccuracy(data, csv.getY(), this);
     System.out.println("Mean Deviation: " + val.getMeanDeviation());
     System.out.println("Success-rate: " + val.getAccuracy());
   }
   
-  public double predict(Vector x, Vector w) {
+  public double predict(Vector x) {
     return x.dot(w);
   }
   
-  public double predict(Vector x, Vector w, double intercept) {
+  public double predict(Vector x, double intercept) {
     return x.dot(w) + intercept;
   }
 
-  public int classify(Vector x, Vector w) {
-    return (int) Math.round( predict(x, w) );
+  public int classify(Vector x) {
+    return (int) Math.round( predict(x) );
   }
   
 }

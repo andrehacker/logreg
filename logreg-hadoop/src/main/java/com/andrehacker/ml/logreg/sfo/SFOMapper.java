@@ -7,14 +7,12 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import com.andrehacker.ml.logreg.LogisticRegression;
+import com.andrehacker.ml.logreg.LogRegMath;
 
 public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, SFOIntermediateWritable> {
   
   private static IntWritable outputKey = new IntWritable();
   private static SFOIntermediateWritable outputValue = new SFOIntermediateWritable();
-  
-  private LogisticRegression logreg = new LogisticRegression();
   
   private IncrementalModel baseModel;
   
@@ -31,7 +29,7 @@ public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, 
 
     // Compute prediction for current x_i using the base model
     // TODO Improvement: Why not just compute and transmit beta * x_i ??
-    double pi = logreg.predict(xi.get(), baseModel.getW(), GlobalJobSettings.INTERCEPT);
+    double pi = LogRegMath.predict(xi.get(), baseModel.getW(), GlobalJobSettings.INTERCEPT);
 //    double xDotW = xi.get().dot(model.getW()) + SFOJob.INTERCEPT;
     
     // Go through all features in x, emit value.
