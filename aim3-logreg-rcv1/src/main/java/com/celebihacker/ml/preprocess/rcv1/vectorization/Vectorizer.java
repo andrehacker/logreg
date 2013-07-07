@@ -100,12 +100,17 @@ public class Vectorizer {
      * CONSTRUCTORS
      **************************************************************************/
     public Vectorizer(String pathToIndex) throws IOException {
-        this(pathToIndex, DEFAULT_MIN_DF);
+        this(pathToIndex, DEFAULT_MIN_DF, DEFAULT_WEIGHTING);
+    }
+    
+    public Vectorizer(String pathToIndex, int minDf) throws IOException {
+        this(pathToIndex, minDf, DEFAULT_WEIGHTING);
     }
 
-    public Vectorizer(String pathToIndex, int minDf) throws IOException {
+    public Vectorizer(String pathToIndex, int minDf, Weighting weighting) throws IOException {
         this.reader = DirectoryReader.open(new SimpleFSDirectory(new File(pathToIndex)));
         this.termDict = computeTermDict(minDf);
+        this.weighting = weighting;
     }
 
     /**************************************************************************
