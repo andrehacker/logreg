@@ -50,7 +50,7 @@ public class CliFrontend {
 
   private static final Option VEC_SPLIT_RATIO_OPT = new Option("sr", "splitratio", true,
       "Training split ratio, e.g. 0.8 (default)");
- 
+
   private static final Option VEC_SPLIT_TYPE_OPT = new Option("st", "splittype", true,
       "Split type to use\n" +
           "* date (default): split chronologically\n" +
@@ -127,7 +127,7 @@ public class CliFrontend {
       return;
 
     if (line.hasOption(INDEX_NUMBER_FILTER_OPT.getOpt())) {
-      String val = INDEX_NUMBER_FILTER_OPT.getValue();
+      String val = line.getOptionValue(INDEX_NUMBER_FILTER_OPT.getOpt()).toUpperCase();
 
       try {
         numberFilterMethod = NumberFilterMethod.valueOf(val);
@@ -136,13 +136,15 @@ public class CliFrontend {
       }
     }
 
-    System.out.println("Running index()");
+    System.out.println("Running index with options:\n" +
+        "numberFilterMethod: " + numberFilterMethod);
     try {
       Indexer.index(this.inputPath, this.outputPath, numberFilterMethod);
     } catch (IOException e) {
       e.printStackTrace();
     }
     System.out.println("Finished.");
+    System.out.println("Output in " + this.outputPath);
   }
 
   private void vectorize(String[] args) {
@@ -155,7 +157,7 @@ public class CliFrontend {
     // Parse command line options
     CommandLine line = null;
     try {
-      line = this.parser.parse(this.options.get(ACTION_INDEX), args, false);
+      line = this.parser.parse(this.options.get(ACTION_VECTORIZE), args, false);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -164,7 +166,7 @@ public class CliFrontend {
       return;
 
     if (line.hasOption(VEC_MIN_DF_OPT.getOpt())) {
-      String val = VEC_MIN_DF_OPT.getValue();
+      String val = line.getOptionValue(VEC_MIN_DF_OPT.getOpt()).toUpperCase();
 
       try {
         minDf = Integer.parseInt(val);
@@ -174,7 +176,7 @@ public class CliFrontend {
     }
 
     if (line.hasOption(VEC_WEIGHTING_OPT.getOpt())) {
-      String val = VEC_WEIGHTING_OPT.getValue();
+      String val = line.getOptionValue(VEC_WEIGHTING_OPT.getOpt()).toUpperCase();
 
       try {
         weighting = Weighting.valueOf(val);
@@ -184,7 +186,7 @@ public class CliFrontend {
     }
 
     if (line.hasOption(VEC_SPLIT_RATIO_OPT.getOpt())) {
-      String val = VEC_SPLIT_RATIO_OPT.getValue();
+      String val = line.getOptionValue(VEC_SPLIT_RATIO_OPT.getOpt()).toUpperCase();
 
       try {
         trainingRatio = Double.parseDouble(val);
@@ -194,7 +196,7 @@ public class CliFrontend {
     }
 
     if (line.hasOption(VEC_SPLIT_TYPE_OPT.getOpt())) {
-      String val = VEC_SPLIT_TYPE_OPT.getValue();
+      String val = line.getOptionValue(VEC_SPLIT_TYPE_OPT.getOpt()).toUpperCase();
 
       try {
         splitBy = SplitType.valueOf(val);
@@ -204,7 +206,12 @@ public class CliFrontend {
     }
 
     // vectorize
-    System.out.println("Running vectorize()");
+    System.out.println("Running vectorize with options: " +
+        "minDf: " + minDf + "\n" +
+        "weighting: " + weighting + "\n" +
+        "trainingRatio: " + trainingRatio + "\n" +
+        "splitBy: " + splitBy);
+
     try {
       Vectorizer vectorizer = new Vectorizer(this.inputPath, minDf, weighting);
       vectorizer.vectorize(this.outputPath, splitBy, trainingRatio);
@@ -212,6 +219,7 @@ public class CliFrontend {
       e.printStackTrace();
     }
     System.out.println("Finished.");
+    System.out.println("Output in " + this.outputPath);
   }
 
   private void printHelp() {
@@ -242,12 +250,12 @@ public class CliFrontend {
       return line.getArgs();
 
     } catch (MissingOptionException e) {
-      
+
       System.err.println("Please provide missing required arguments for input/output!");
-      
+
       printHelp();
       System.exit(1);
-      
+
     } catch (ParseException e) {
       e.printStackTrace();
       System.exit(1);
@@ -277,7 +285,7 @@ public class CliFrontend {
     if (action.equals(ACTION_INDEX)) {
       index(params);
     } else if (action.equals(ACTION_VECTORIZE)) {
-      vectorize(args);
+      vectorize(params);
     } else {
       System.out.println("Invalid action!");
       printHelp();
