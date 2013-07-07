@@ -36,7 +36,7 @@ public class EnglishWithNumberFilterAnalyzer extends Analyzer {
 
     public enum NumberFilterMethod {
         KEEP(null), // Keep numbers
-        REMOVE(Pattern.compile("^[0-9,.]+$")), // Remove numbers
+        REMOVE(Pattern.compile("^([0-9]+)([,.0-9a-z]*)$")), // Remove numbers
         ROUND(Pattern.compile("^([0-9]+)([,.0-9a-z]*)$")); // Remove part after ',' or '.'
 
         public final Pattern filterPattern;
