@@ -137,7 +137,7 @@ public class CliFrontend {
     }
 
     System.out.println("Running index with options:\n" +
-        "numberFilterMethod: " + numberFilterMethod);
+        "* numberFilterMethod: " + numberFilterMethod);
     try {
       Indexer.index(this.inputPath, this.outputPath, numberFilterMethod);
     } catch (IOException e) {
@@ -206,11 +206,11 @@ public class CliFrontend {
     }
 
     // vectorize
-    System.out.println("Running vectorize with options: " +
-        "minDf: " + minDf + "\n" +
-        "weighting: " + weighting + "\n" +
-        "trainingRatio: " + trainingRatio + "\n" +
-        "splitBy: " + splitBy);
+    System.out.println("Running vectorize with options: \n" +
+        "* minDf: " + minDf + "\n" +
+        "* weighting: " + weighting + "\n" +
+        "* trainingRatio: " + trainingRatio + "\n" +
+        "* splitBy: " + splitBy);
 
     try {
       Vectorizer vectorizer = new Vectorizer(this.inputPath, minDf, weighting);
