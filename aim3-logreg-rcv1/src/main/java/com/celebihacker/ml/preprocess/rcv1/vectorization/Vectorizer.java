@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.NewsItemFeatureExtraction;
 import com.celebihacker.ml.preprocess.rcv1.indexing.types.RCV1;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.types.IdAndLabels;
+import com.celebihacker.ml.writables.IDAndLabels;
 import com.google.common.io.Closeables;
 
 public class Vectorizer {
@@ -160,13 +160,13 @@ public class Vectorizer {
                 (1 - trainingRatio), numTestDocs, this.weighting.toString());
 
         SequenceFile.Writer trainingWriter = SequenceFile.createWriter(fs, conf,
-                new Path(pathToOutput, trainingFilename), IdAndLabels.class, VectorWritable.class);
+                new Path(pathToOutput, trainingFilename), IDAndLabels.class, VectorWritable.class);
 
         SequenceFile.Writer testWriter = SequenceFile.createWriter(fs, conf,
-                new Path(pathToOutput, testFilename), IdAndLabels.class, VectorWritable.class);
+                new Path(pathToOutput, testFilename), IDAndLabels.class, VectorWritable.class);
 
         // Output
-        IdAndLabels idAndLabels = new IdAndLabels();
+        IDAndLabels idAndLabels = new IDAndLabels();
         VectorWritable featureVector = new VectorWritable();
 
         int numDocsVectorized = 0;
@@ -200,7 +200,7 @@ public class Vectorizer {
     /**************************************************************************
      * WRITE SEQUENCE FILES AND GET VECTORS FROM INDEX
      **************************************************************************/
-    private void writeVector(int docId, int numDocs, IdAndLabels key, VectorWritable val,
+    private void writeVector(int docId, int numDocs, IDAndLabels key, VectorWritable val,
             SequenceFile.Writer writer)
             throws IOException {
         Document doc = this.reader.document(docId);

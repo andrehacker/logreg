@@ -8,9 +8,9 @@
 		<artifactId>aim3</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>aim3-logreg-rcv1</artifactId>
-	
+
 	<name>aim3-logreg-rcv1</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -65,6 +65,13 @@
 			<artifactId>guava</artifactId>
 			<version>14.0.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.celebihacker</groupId>
+			<artifactId>aim3-logreg</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -81,7 +88,7 @@
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 					<finalName>rcv1-client</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
+					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 			</plugin>
 		</plugins>
