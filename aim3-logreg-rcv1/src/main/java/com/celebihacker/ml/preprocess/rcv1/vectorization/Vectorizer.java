@@ -93,6 +93,7 @@ public class Vectorizer {
 
     private final DirectoryReader reader;
     private final TermDict termDict;
+    private final int minDf;
 
     private Weighting weighting = DEFAULT_WEIGHTING;
 
@@ -109,8 +110,11 @@ public class Vectorizer {
 
     public Vectorizer(String pathToIndex, int minDf, Weighting weighting) throws IOException {
         this.reader = DirectoryReader.open(new SimpleFSDirectory(new File(pathToIndex)));
-        this.termDict = computeTermDict(minDf);
+        this.minDf = minDf;
         this.weighting = weighting;
+        
+        //
+        this.termDict = computeTermDict();
     }
 
     /**************************************************************************
@@ -153,11 +157,11 @@ public class Vectorizer {
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.getLocal(conf);
 
-        String trainingFilename = String.format("training-%1.1f-%d_docs-%s.seq",
-                trainingRatio, numTrainingDocs, this.weighting.toString());
+        String trainingFilename = String.format("training-%1.1f-%s-%d_docs-%s-%s_mindf.seq",
+                trainingRatio, splitBy.toString(), numTrainingDocs, this.weighting.toString(), this.minDf);
 
-        String testFilename = String.format("test-%1.1f-%d_docs-%s.seq",
-                (1 - trainingRatio), numTestDocs, this.weighting.toString());
+        String testFilename = String.format("test-%1.1f-%s-%d_docs-%s-%s_mindf.seq",
+                (1 - trainingRatio), splitBy.toString(), numTestDocs, this.weighting.toString(), this.minDf);
 
         SequenceFile.Writer trainingWriter = SequenceFile.createWriter(fs, conf,
                 new Path(pathToOutput, trainingFilename), IDAndLabels.class, VectorWritable.class);
@@ -331,7 +335,7 @@ public class Vectorizer {
     /**************************************************************************
      * TERM DICTIONARY
      **************************************************************************/
-    private TermDict computeTermDict(int minDf) throws IOException {
+    private TermDict computeTermDict() throws IOException {
         TermDict dict = new TermDict();
 
         Terms terms = MultiFields.getFields(this.reader).terms(NewsItemFeatureExtraction.TEXT);
@@ -342,7 +346,7 @@ public class Vectorizer {
             Term t = new Term(NewsItemFeatureExtraction.TEXT, termBytes);
             int df = this.reader.docFreq(t);
 
-            if (df < minDf)
+            if (df < this.minDf)
                 continue;
 
             dict.add(termBytes.utf8ToString(), df);
