@@ -9,6 +9,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.andrehacker.ml.util.CsvReader;
@@ -57,6 +58,7 @@ public class LogisticRegressionTest {
   }
   
   @Test
+  @Ignore
   public void testTrainNewton() {
 
     System.out.println("-----------------");
@@ -107,7 +109,7 @@ public class LogisticRegressionTest {
      MLUtils.writeUtf(json, "results.json");
   }
 
-//  @Ignore
+  @Ignore
   @Test
   public void testBatchGD() {
 

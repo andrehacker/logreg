@@ -17,3 +17,11 @@
 .project
 .settings
 target
+
+# Sequence file
+*.seq
+*.crc
+
+# output folders
+*/output-aim3*
+*/output-sfo*

@@ -5,25 +5,28 @@ import org.apache.log4j.Logger;
 
 /**
  * Wrapper class for Logger
- * Prints to stdout if we run in local mode (makes debugging easier)
+ * 
+ * Detects if we run in localmode and logs to System.out in this case
+ * Eclipse will highlight the output then (easy to see)
+ * Otherwise it logs to log4j
+ * 
+ * TODO Finish! Need a reference to Configuration instance to detect local mode.
  * 
  * Would be nice to get rid of this class and use sl4j only  
  */
 public class AdaptiveLogger {
   
-  private boolean runLocal; // True in standalone/local mode
+  private boolean runLocal = false;
 
   private Logger logger;
   private Level level;
   
-  public AdaptiveLogger(boolean runLocal, Logger logger, Level level) {
-    this.runLocal = runLocal;
+  public AdaptiveLogger(Logger logger, Level level) {
     this.logger = logger;
     setLevel(level);
   }
   
-  public AdaptiveLogger(boolean runLocal, Logger logger) {
-    this.runLocal = runLocal;
+  public AdaptiveLogger(Logger logger) {
     this.logger = logger;
   }
 

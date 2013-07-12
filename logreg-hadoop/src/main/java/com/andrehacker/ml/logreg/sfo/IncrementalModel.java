@@ -60,7 +60,7 @@ class IncrementalModel implements RegressionModel, ClassificationModel {
 
   @Override
   public int classify(Vector x) {
-    return LogRegMath.classify(x, w, 0);
+    return LogRegMath.classify(x, w, 0, 0.5);
   }
 
   @Override

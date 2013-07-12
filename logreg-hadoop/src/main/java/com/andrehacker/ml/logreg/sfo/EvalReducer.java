@@ -7,18 +7,19 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 
+import com.andrehacker.ml.GlobalSettings;
 import com.andrehacker.ml.util.AdaptiveLogger;
 import com.andrehacker.ml.writables.DoublePairWritable;
 
 public class EvalReducer extends Reducer<IntWritable, DoublePairWritable, IntWritable, DoubleWritable> {
   
   private static AdaptiveLogger log = new AdaptiveLogger(
-      GlobalJobSettings.RUN_LOCAL_MODE, Logger.getLogger(EvalReducer.class.getName()), GlobalJobSettings.LOG_LEVEL);
+      Logger.getLogger(EvalReducer.class.getName()), GlobalSettings.LOG_LEVEL);
   
   @Override
   public void reduce(IntWritable dim, Iterable<DoublePairWritable> values, Context context) throws IOException, InterruptedException {
     
-    log.debug("Eval Reducer for d=" + dim.get() + " (" + GlobalJobSettings.datasetInfo.getFeatureName(dim.get()) + ")");
+    log.debug("Eval Reducer for d=" + dim.get());
     
     int count=0;
     double sumLlBase=0;

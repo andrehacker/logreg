@@ -31,6 +31,9 @@ import com.google.common.io.Closeables;
  * - 804,414    total (training + test)
  * - 810,935    highest document-id
  * - 381,327    points labeled with CCAT (RCV1-v2)
+ * - 119,920    points labeled with ECAT (RCV1-v2)
+ * - 239,267    points labeled with GCAT (RCV1-v2)
+ * - 204,820    points labeled with MCAT (RCV1-v2)
  * 
  * REFERENCES:
  * [1] Lewis, D. D.; Yang, Y.; Rose, T.; and Li, F. RCV1: 
@@ -58,8 +61,6 @@ public class RCV1DatasetInfo {
   public static DatasetInfo get() {
     return datasetInfo;
   }
-
-  private static Splitter SPACE_SPLITTER = Splitter.on(Pattern.compile(" "));
   
   /**
    * Loads the map (feature-id -> feature name) from local file
@@ -69,6 +70,8 @@ public class RCV1DatasetInfo {
    * stem.termid.idf.map.txt
    */
   public static void readPredictorNames(String path) throws IOException {
+
+    Splitter spaceSplitter = Splitter.on(Pattern.compile(" "));
     
     // Line format: stem term-id idf
     // e.g. profit 33191 2.01767426583078
@@ -83,7 +86,7 @@ public class RCV1DatasetInfo {
       String stem;
       String termid;
       while ((line = reader.readLine()) != null) {
-        Iterator<String> iter = SPACE_SPLITTER.split(line).iterator();
+        Iterator<String> iter = spaceSplitter.split(line).iterator();
         stem = iter.next();
         termid = iter.next();
         names.set(Integer.parseInt(termid), stem);

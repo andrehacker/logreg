@@ -14,11 +14,14 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 
+import com.andrehacker.ml.GlobalSettings;
 import com.andrehacker.ml.logreg.sfo.SFODriver.FeatureGain;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
 public class SFOTools {
+  
+  private static final String BASE_MODEL_PATH = "sfo-base-model.seq";
   
   /**
    * Makes the current base model available to mappers/reducers via hdfs
@@ -31,12 +34,12 @@ public class SFOTools {
    */
   static void writeBaseModel(IncrementalModel baseModel) throws IOException {
     Configuration conf = new Configuration();
-    conf.addResource(new Path(GlobalJobSettings.CONFIG_FILE_PATH));
+    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
     
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer writer = null;
     try {
-      writer = SequenceFile.createWriter(fs, conf, new Path(GlobalJobSettings.BASE_MODEL_PATH),
+      writer = SequenceFile.createWriter(fs, conf, new Path(BASE_MODEL_PATH),
           IncrementalModelWritable.class, NullWritable.class);
       writer.append(new IncrementalModelWritable(baseModel), NullWritable.get());
     } finally {
@@ -47,7 +50,7 @@ public class SFOTools {
   static IncrementalModel readBaseModel(Configuration conf) throws IOException {
     IncrementalModel baseModel = null;
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(GlobalJobSettings.BASE_MODEL_PATH), conf);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(BASE_MODEL_PATH), conf);
     try {
       IncrementalModelWritable baseModelWritable = new IncrementalModelWritable();
       // model is stored in key
@@ -65,7 +68,7 @@ public class SFOTools {
     List<FeatureGain> list = Lists.newArrayList();
     
     Configuration conf = new Configuration();
-    conf.addResource(new Path(GlobalJobSettings.CONFIG_FILE_PATH));
+    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
     
     Path dir = new Path(path);
     FileSystem fs = FileSystem.get(conf);
@@ -93,12 +96,12 @@ public class SFOTools {
     return list;
   }
   
-  static List<Double> readTrainedCoefficients(Configuration conf) throws IOException {
+  static List<Double> readTrainedCoefficients(Configuration conf, int numFeatures, String trainOutputPath) throws IOException {
     
     // Read trained coefficients into map: dimension -> coefficient
-    List<Double> coefficients = Arrays.asList(new Double[(int)GlobalJobSettings.datasetInfo.getNumFeatures()+1]);
+    List<Double> coefficients = Arrays.asList(new Double[numFeatures]);
     
-    Path dir = new Path(SFOJobTest.TRAIN_OUTPUT_PATH);
+    Path dir = new Path(trainOutputPath);
     FileSystem fs = FileSystem.get(conf);
     FileStatus[] statusList = fs.listStatus(dir, new PathFilter() {
       @Override

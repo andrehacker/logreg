@@ -28,7 +28,7 @@ public class LogRegTraining {
       Vector batchGradient = new DenseVector(data.numCols());
       // Batch GD: Iterate over all x
       for (int n=0; n<rowCount; ++n) {
-        Vector grad = computePartialGradient(data.viewRow(n), w, y.get(n));
+        Vector grad = LogRegMath.computePartialGradient(data.viewRow(n), w, y.get(n));
         batchGradient.assign(grad, Functions.PLUS);
       }
       // Weight update: w = w - 1/N * \gamma * grad
@@ -54,8 +54,8 @@ public class LogRegTraining {
       // Batch GD: Iterate over all x
       for (int n=0; n<rowCount; ++n) {
         Vector xn = data.viewRow(n);
-        Vector grad = computePartialGradient(xn, w, y.get(n));
-        batchGradientSecond.assign(computeSecondPartialGradient(xn, w, y.get(n)), Functions.PLUS);
+        Vector grad = LogRegMath.computePartialGradient(xn, w, y.get(n));
+        batchGradientSecond.assign(LogRegMath.computeSecondPartialGradient(xn, w, y.get(n)), Functions.PLUS);
         batchGradient.assign(grad, Functions.PLUS);
       }
       // Add penalty to 1st derivation (using NG's derivation)
@@ -72,23 +72,6 @@ public class LogRegTraining {
     }
     
     return w;
-  }
-
-  private static Vector computePartialGradient(Vector x, Vector w, double y) {
-    // Compute the partial gradient of negative log-likelihood function regarding a single data point x
-    // = ( h(x) - y) * x
-    double diff = LogRegMath.predict(x, w) - y;
-    
-    return x.times(diff);
-  }
-
-  private static Matrix computeSecondPartialGradient(Vector x, Vector w, double y) {
-    //Returns: x x^T h(x) (1-h(x))
-    double predicted = LogRegMath.predict(x, w);
-    Matrix productOfx = MLUtils.vectorToColumnMatrix(x).times(MLUtils.vectorToRowMatrix(x));
-    
-    Matrix result = productOfx.times(predicted * (1 - predicted));
-    return result;
   }
   
 }

@@ -8,6 +8,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 
+import com.andrehacker.ml.GlobalSettings;
 import com.andrehacker.ml.logreg.LogRegMath;
 import com.andrehacker.ml.util.AdaptiveLogger;
 import com.google.common.collect.Lists;
@@ -17,7 +18,7 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
 //  private static final double PENALTY = 1d;
   
   private static AdaptiveLogger log = new AdaptiveLogger(
-      GlobalJobSettings.RUN_LOCAL_MODE, Logger.getLogger(SFOReducer.class.getName()), GlobalJobSettings.LOG_LEVEL);
+      Logger.getLogger(SFOReducer.class.getName()), GlobalSettings.LOG_LEVEL);
   
   private static int MAX_ITERATIONS = 5;
   
@@ -34,7 +35,7 @@ public class SFOReducer extends Reducer<IntWritable, SFOIntermediateWritable, In
   @Override
   public void reduce(IntWritable dim, Iterable<SFOIntermediateWritable> values, Context context) throws IOException, InterruptedException {
     
-    log.debug("Reducer for d=" + dim.get() + " (" + GlobalJobSettings.datasetInfo.getFeatureName(dim.get()) + ")");
+    log.debug("Reducer for d=" + dim.get());
     
     List<SFOIntermediateWritable> cache = Lists.newArrayList();
     
