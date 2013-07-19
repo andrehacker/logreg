@@ -10,8 +10,9 @@
   <packaging>pom</packaging>
   
   <modules>
-    <module>logreg</module>
-    <module>logreg-ozone</module>
+    <module>logreg-common</module>
+    <module>logreg-mapred</module>
+    <module>logreg-pact</module>
     <module>rcv1-preprocess</module>
   </modules>
 

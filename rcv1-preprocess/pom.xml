@@ -17,6 +17,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>de.tuberlin.dima</groupId>
+			<artifactId>logreg-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -66,12 +73,6 @@
 			<version>14.0.1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.celebihacker</groupId>
-			<artifactId>aim3-logreg</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -81,7 +82,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>com.celebihacker.ml.preprocess.rcv1.CliFrontend</mainClass>
+							<mainClass>de.tuberlin.dima.ml.preprocess.rcv1.CliFrontend</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

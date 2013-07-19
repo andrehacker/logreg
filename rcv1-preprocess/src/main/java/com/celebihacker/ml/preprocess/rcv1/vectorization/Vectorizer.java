@@ -33,8 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.NewsItemFeatureExtraction;
 import com.celebihacker.ml.preprocess.rcv1.indexing.types.RCV1;
-import com.celebihacker.ml.writables.IDAndLabels;
 import com.google.common.io.Closeables;
+
+import de.tuberlin.dima.ml.writables.IDAndLabels;
 
 public class Vectorizer {
 
