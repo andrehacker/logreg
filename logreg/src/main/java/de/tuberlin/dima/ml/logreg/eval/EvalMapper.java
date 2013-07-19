@@ -15,7 +15,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.mahout.common.IntPairWritable;
-import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import com.google.common.collect.Lists;
@@ -66,7 +66,7 @@ public class EvalMapper extends Mapper<IDAndLabels, VectorWritable, Text, IntPai
       }
     });
 
-    ArrayList<RandomAccessSparseVector> ensembleModels = Lists.newArrayList();
+    ArrayList<Vector> ensembleModels = Lists.newArrayList();
     
     System.out.println("- Read trained models from " + statusList.length + " files");
     for (FileStatus status : statusList) {
@@ -75,7 +75,7 @@ public class EvalMapper extends Mapper<IDAndLabels, VectorWritable, Text, IntPai
         IntWritable partitionId = new IntWritable();
         VectorWritable ensembleModel = new VectorWritable();
         while (reader.next(partitionId, ensembleModel)) {
-          ensembleModels.add((RandomAccessSparseVector)ensembleModel.get());
+          ensembleModels.add((Vector)ensembleModel.get());
           System.out.println("- Ensemble-Model " + partitionId.get() + ": Non zeros: " + ensembleModel.get().getNumNonZeroElements());
         }
       } finally {

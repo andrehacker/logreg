@@ -3,7 +3,6 @@ package de.tuberlin.dima.ml.logreg.ensemble;
 import java.util.List;
 
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 
@@ -19,7 +18,7 @@ import de.tuberlin.dima.ml.util.MLUtils;
  */
 public class LogRegEnsembleModel implements ClassificationModel, RegressionModel {
   
-  List<RandomAccessSparseVector> models;
+  List<Vector> models;
   double threshold;
   VotingSchema votingSchema;
   Vector wMergedModel;   // only used if votingSchema is merge_model
@@ -29,7 +28,7 @@ public class LogRegEnsembleModel implements ClassificationModel, RegressionModel
     MERGED_MODEL
   }
 
-  public LogRegEnsembleModel(List<RandomAccessSparseVector> models, double threshold, VotingSchema votingSchema) {
+  public LogRegEnsembleModel(List<Vector> models, double threshold, VotingSchema votingSchema) {
     this.models = models;
     this.threshold = threshold;
     this.votingSchema = votingSchema;
@@ -37,7 +36,7 @@ public class LogRegEnsembleModel implements ClassificationModel, RegressionModel
     if (votingSchema == VotingSchema.MERGED_MODEL) {
       // TODO Interesting: How much vary the features between the models? How much sparsity is removed on merging?
       
-      RandomAccessSparseVector[] modelArray = models.toArray(new RandomAccessSparseVector[models.size()]);
+      Vector[] modelArray = models.toArray(new Vector[models.size()]);
       Matrix modelsMatrix = new SparseRowMatrix(models.size(), models.get(0).size(), modelArray);
       wMergedModel = MLUtils.meanByColumns(modelsMatrix);
     }

@@ -35,10 +35,13 @@ public class LBFGSDriver extends Configured implements Tool {
   @Override
   public int run(String[] args) throws Exception {
     
+    // This code was not finished. See sequential implementation
+    
     LBFGSDiffFunction f = new LBFGSDiffFunction(this.trainingErrorJob, this.gradientJob);
     
     QNMinimizer qn = new QNMinimizer(15, true);
     
+    @SuppressWarnings("unused")
     double[] model;
     
     if (this.maxIterations == 0) {
