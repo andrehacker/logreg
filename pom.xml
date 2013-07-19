@@ -12,7 +12,7 @@
   <modules>
     <module>logreg</module>
     <module>logreg-ozone</module>
-    <!--<module>rcv1</module>-->
+    <module>rcv1-preprocess</module>
   </modules>
 
   <build>

@@ -4,14 +4,14 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.celebihacker</groupId>
-		<artifactId>aim3</artifactId>
+		<groupId>de.tuberlin.dima</groupId>
+		<artifactId>ml</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>aim3-logreg-rcv1</artifactId>
+	<artifactId>rcv1-preprocess</artifactId>
+	<name>rcv1-preprocess</name>
 
-	<name>aim3-logreg-rcv1</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
