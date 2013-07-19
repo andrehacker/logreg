@@ -22,5 +22,11 @@ public class IOUtils {
       return false;
     }
   }
+  
+  public static String getDirectoryOfJarOrClass(Class<?> clazz) {
+    // System.out.println("Classpath: " + System.getProperty("java.class.path"));
+    return (new File(clazz.getProtectionDomain().getCodeSource()
+        .getLocation().getPath())).getParent();
+  }
 
 }

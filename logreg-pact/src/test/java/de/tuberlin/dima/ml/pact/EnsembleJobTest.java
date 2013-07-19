@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.pact.logreg.ensemble.EnsembleJob;
+import de.tuberlin.dima.ml.util.IOUtils;
 import eu.stratosphere.pact.client.LocalExecutor;
 import eu.stratosphere.pact.common.plan.Plan;
 
@@ -20,16 +21,30 @@ public class EnsembleJobTest {
     String outputFile = "file:///home/andre/output-ensemble";
     String numFeatures = Long.toString(RCV1DatasetInfo.get().getNumFeatures());
     String runValidation = "1";
+    boolean runLocal = false;
     
     // numSubTasks dataInput output
     String[] args = {numberPartitions, inputFileTrain, inputFileTest, outputFile, numFeatures, runValidation};
-    Plan wordcount = (new EnsembleJob()).getPlan(args);
-    
-    LocalExecutor executor = new LocalExecutor();
-    executor.start();
-    executor.executePlan(wordcount);
-    
-    executor.stop();
+
+    if (runLocal) {
+      
+      Plan wordcount = (new EnsembleJob()).getPlan(args);
+
+      LocalExecutor executor = new LocalExecutor();
+      executor.start();
+      executor.executePlan(wordcount);
+
+      executor.stop();
+      
+    } else {
+      
+      System.out.println("CODE PATH: " + IOUtils.getDirectoryOfJarOrClass(EnsembleJob.class));
+      String jarPath = IOUtils.getDirectoryOfJarOrClass(EnsembleJob.class)
+          + "/logreg-pact-0.0.1-SNAPSHOT-job.jar";
+      JobRunner.run(jarPath, args, "");
+      System.out.println("Job completed");
+      
+    }
   }
 
 }

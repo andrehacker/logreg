@@ -20,7 +20,8 @@
       -->
       <!-- For documentation see http://maven.apache.org/plugins/maven-assembly-plugin/assembly.html -->
       <includes>
-        <include>com.celebihacker.*</include>
+        <include>de.tuberlin.dima.*</include>
+        <include>de.tuberlin.dima:logreg-common</include>
         <include>org.apache.mahout:mahout-core</include>
         <include>org.apache.mahout:mahout-math</include>
         <include>com.google.guava:guava</include>

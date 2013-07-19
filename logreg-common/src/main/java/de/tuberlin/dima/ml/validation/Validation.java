@@ -9,6 +9,7 @@ import de.tuberlin.dima.ml.RegressionModel;
 
 /**
  * Several Validation methods for Matrix based implementations
+ * Pretty outdated...
  */
 public class Validation {  
   

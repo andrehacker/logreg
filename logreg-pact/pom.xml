@@ -24,27 +24,55 @@
 		<dependency>
 			<groupId>eu.stratosphere</groupId>
 			<artifactId>pact-common</artifactId>
-			<version>0.2</version>
+			<version>0.2-ozone</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>eu.stratosphere</groupId>
 			<artifactId>pact-clients</artifactId>
-			<version>0.2</version>
+			<version>0.2-ozone</version>
 			<scope>compile</scope>
 		</dependency>
+		<!-- Won't compile if I remove this -->
+		<!-- 
 		<dependency>
 			<groupId>eu.stratosphere</groupId>
 			<artifactId>pact-compiler</artifactId>
 			<version>0.2</version>
 			<scope>compile</scope>
 		</dependency>
+		 -->
 
 	</dependencies>
 
 	<!-- Required for Stratosphere job -->
+	<!-- We will use the maven-assembly plugin instead, is designed to include dependencies in jar -->
 	<build>
 		<plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>job</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/ensemble-job.xml</descriptor>
+              </descriptors>
+			         <archive>
+			           <manifestEntries>
+			             <Pact-Assembler-Class>de.tuberlin.dima.ml.pact.logreg.ensemble.EnsembleJob</Pact-Assembler-Class>
+			           </manifestEntries>
+			         </archive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -64,14 +92,13 @@
 								</manifestEntries>
 							</archive>
 							<includes>
-								<include>**/logreg/*.class</include>
-								<include>**/types/*.class</include>
-								<include>**/util/*.class</include>
+                <include>**/*.class</include>
 							</includes>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			 -->
 		</plugins>
 	</build>
 
