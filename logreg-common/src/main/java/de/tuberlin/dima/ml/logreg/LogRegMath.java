@@ -38,18 +38,32 @@ public class LogRegMath {
   
   /**
    * Computes the prediction, using our current hypothesis (logistic function)
-   * Detects overflow
+   * 
+   * Handles numerical issues
+   * 
+   * - Underflows: The real result is something very close to zero, but due to
+   * the lack of precision we get 0.0. In the logistic function this does not
+   * cause any problems so we just ignore it
+   * 
+   * - Overflows: We should get a very big number, but due to the lack of
+   * precision we get Double.POSITIVE_INFINITY instead. In the logistic function
+   * this does not cause any problems, because java will actually calculate with
+   * INFINITY as we would expect it.
+   * 
+   * - NaN: This occurs only when dividing by zero, which is not the case here
    */
   public static double logisticFunction(double exp) {
     double negativeExpResult = Math.exp(-exp);
     // Overflow detection
     if (Double.isInfinite(negativeExpResult) || Double.isNaN(negativeExpResult)) {
-      System.out.println("OVERFLOW detected: exp=" + exp + " e^(-exp)=" + negativeExpResult);
+      System.out.println("OVERFLOW (ignored): exp=" + exp + " e^(-exp)=" + negativeExpResult);
+      // System.out.println(" result: " + 1d / (1d + negativeExpResult));
     }
-    // Underflow detection (no problem in most cases, because just a lack of precision)
+    // Underflow detection (no problem in most cases, because just a lack of
+    // precision)
     if (exp != 0 && negativeExpResult == 0) {
       System.out.println("UNDERFLOW (ignored): exp=" + exp + " e^(-exp)=" + negativeExpResult);
-      System.out.println(" result: " + 1d / (1d + negativeExpResult));
+      // System.out.println(" result: " + 1d / (1d + negativeExpResult));
     }
     return 1d / (1d + negativeExpResult);
   }
@@ -57,6 +71,8 @@ public class LogRegMath {
   /**
    * Computes the log-likelihood for a single data point
    * Uses the natural logarithm
+   * 
+   * TODO Handle special numerical cases: 0.0, INFINITY, NaN
    * 
    * See Hastie p.120 (equation 4.20) for explanation
    */

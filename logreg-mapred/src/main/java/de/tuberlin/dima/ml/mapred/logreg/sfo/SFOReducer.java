@@ -13,7 +13,6 @@ import com.google.common.collect.Lists;
 import de.tuberlin.dima.ml.logreg.LogRegMath;
 import de.tuberlin.dima.ml.mapred.GlobalSettings;
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
-import de.tuberlin.dima.ml.util.MathUtil;
 
 public class SFOReducer extends
     Reducer<IntWritable, SFOIntermediateWritable, IntWritable, DoubleWritable> {
@@ -26,7 +25,7 @@ public class SFOReducer extends
   private static final double LAMBDA = 0;
   private static final double TOLERANCE = 10E-7;
 
-  private static final int DEBUG_DIMENSION = -1;
+  private static final int DEBUG_DIMENSION = 29573;
 
   /**
    * Notes: To iterate multiple times over data, we cache all data on heap For
@@ -75,24 +74,18 @@ public class SFOReducer extends
         /*
          * Compute the 1st and 2nd derivate
          * 
-         * Handle Underflows: If we receive underflow then we would have been
-         * close to zero anyhow, so nothing to do here
-         * 
-         * Handle Overflows: If we receive overflow, we have a problem, because
-         * we can not calculate with Infinity value. We should avoid this
-         * (regularization?)
+         * See LogRegMath.logisticFunction how we handle Numeric issues
          * 
          * TODO Bug: Why does Singh not use (xDotw + element.getXid() * betad)??
-         * This is the general derivation!
          */
         double exponent = xDotw + (element.getXid() * betad);
         double piNew = LogRegMath.logisticFunction(exponent);
-        if (!MathUtil.checkDouble(piNew, true)) {
-          log.debug("- INVALID RESULT: d=" + dim.get() + " iteration="
-              + iteration + " cacheSize=" + cache.size() + " xDotw=" + xDotw
-              + " x_id=" + element.getXid() + " betad=" + betad
-              + " last-update=" + lastUpdate);
-        }
+//        if (!MathUtil.checkDouble(piNew, true)) {
+//          log.debug("- INVALID RESULT: d=" + dim.get() + " iteration="
+//              + iteration + " cacheSize=" + cache.size() + " xDotw=" + xDotw
+//              + " x_id=" + element.getXid() + " betad=" + betad
+//              + " last-update=" + lastUpdate);
+//        }
         debugSumPi += piNew;
 
         batchGradient += LogRegSFOTraining.derivateL2SFO(element.getXid(),
@@ -102,7 +95,7 @@ public class SFOReducer extends
       }
 
       /*
-       * Newton update
+       * Newton Update
        * 
        * If first and/or second derivate is zero we probably already converged
        * to the optimum and should stop (otherwise we divide by zero)
