@@ -14,7 +14,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import de.tuberlin.dima.ml.logreg.LogRegMath;
-import de.tuberlin.dima.ml.writables.IDAndLabels;
+import de.tuberlin.dima.ml.mapred.writables.IDAndLabels;
 
 public class TrainingErrorMapper extends
     Mapper<IDAndLabels, VectorWritable, NullWritable, DoubleWritable> {

@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.writables;
+package de.tuberlin.dima.ml.mapred.writables;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -9,37 +9,33 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * For transfer of a vector and multiple numeric label.
+ * For transfer of a vector and a numeric label.
  * Usefull for labeled data (supervised learning)
  * where we have to transmit not only the VectorWritable, but also the label 
  * Uses a VectorWritable instance internally
- * 
- * TODO Performance This is not very efficient, since it is wrapping around VectorWritables
- * Better to write a VectorPairWritable
  */
-public class VectorMultiLabeledWritable implements Writable
+public class VectorLabeledWritable implements Writable
 {
   private VectorWritable vector;
-  private VectorWritable labels;
+  private int label;
   
-  public VectorMultiLabeledWritable() {
+  public VectorLabeledWritable() {
     this.vector = new VectorWritable();
-    this.labels = new VectorWritable();
   }
 
-  public VectorMultiLabeledWritable(VectorWritable vector, VectorWritable labels) {
+  public VectorLabeledWritable(VectorWritable vector, int label) {
     this.vector = vector;
-    this.labels = labels;
+    this.label = label;
   }
   
   public void readFields(DataInput in) throws IOException {
     vector.readFields(in);
-    labels.readFields(in);
+    label = in.readInt();
   }
 
   public void write(DataOutput out) throws IOException {
     vector.write(out);
-    labels.write(out);
+    out.writeInt(label);
   }
   
   @Override
@@ -47,16 +43,16 @@ public class VectorMultiLabeledWritable implements Writable
     return vector.hashCode();
   }
   
-  public Vector getLabels() {
-    return labels.get();
+  public int getLabel() {
+    return label;
   }
   
   public Vector getVector() {
     return vector.get();
   }
   
-  public void setLabels(Vector labels) {
-    this.labels.set(labels);
+  public void setLabel(int label) {
+    this.label = label;
   }
   
   public void setVector(Vector vector) {

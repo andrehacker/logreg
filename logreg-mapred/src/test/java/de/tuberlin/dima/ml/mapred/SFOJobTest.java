@@ -1,6 +1,5 @@
 package de.tuberlin.dima.ml.mapred;
 
-
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -15,14 +14,13 @@ import de.tuberlin.dima.ml.mapred.logreg.sfo.SFODriver;
 
 public class SFOJobTest {
   
-  
   private static final String TRAIN_OUTPUT_PATH = "output-sfo-train";
   private static final String TEST_OUTPUT_PATH = "output-sfo-test";
   
   private static final int REDUCERS_TRAIN = 4;
   private static final int REDUCERS_TEST = 4;
   
-  private static final int ITERATIONS = 1;
+  private static final int ITERATIONS = 2;
 
   @Test
   @Ignore
@@ -42,8 +40,7 @@ public class SFOJobTest {
 //  @Ignore
   public void testRCV1() throws Exception {
     
-    String inputFile = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_5000.seq";
-//    String inputFile = "rcv1-v2/lyrl2004_vectors_sfo_train_5000.seq";
+    String inputFile = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_500.seq";
     String predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt";
     
     RCV1DatasetInfo.readPredictorNames(predictorNamePath);
@@ -66,8 +63,7 @@ public class SFOJobTest {
         REDUCERS_TEST,
         (int)datasetInfo.getNumFeatures());
     
-    int iterations = ITERATIONS;
-    for (int i=0; i<iterations; ++i ) {
+    for (int i=0; i<ITERATIONS; ++i ) {
       
       driver.runSFO();
       
@@ -75,8 +71,8 @@ public class SFOJobTest {
       printTopGains(gains, datasetInfo);
       int bestDim = gains.get(0).getDimension();
       System.out.println("Best dimension: " + bestDim + " (" + datasetInfo.getFeatureName(bestDim) + ")");
-      if (i==0)
-        assertTrue(bestDim == actualBestDim);
+//      if (i==0)
+//        assertTrue(bestDim == actualBestDim);
       
       driver.addBestFeature();
       

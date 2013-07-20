@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import org.apache.mahout.math.VectorWritable;
 
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
-import de.tuberlin.dima.ml.writables.IDAndLabels;
-import de.tuberlin.dima.ml.writables.VectorMultiLabeledWritable;
+import de.tuberlin.dima.ml.mapred.writables.IDAndLabels;
+import de.tuberlin.dima.ml.mapred.writables.VectorMultiLabeledWritable;
 
 public class EnsembleMapper extends Mapper<IDAndLabels, VectorWritable, IntWritable, VectorMultiLabeledWritable> {
   

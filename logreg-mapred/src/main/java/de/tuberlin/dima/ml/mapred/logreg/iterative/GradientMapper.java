@@ -18,7 +18,7 @@ import org.apache.mahout.math.function.Functions;
 
 import de.tuberlin.dima.ml.logreg.LogRegModel;
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
-import de.tuberlin.dima.ml.writables.IDAndLabels;
+import de.tuberlin.dima.ml.mapred.writables.IDAndLabels;
 
 public class GradientMapper extends Mapper<IDAndLabels, VectorWritable, NullWritable, VectorWritable> {
   

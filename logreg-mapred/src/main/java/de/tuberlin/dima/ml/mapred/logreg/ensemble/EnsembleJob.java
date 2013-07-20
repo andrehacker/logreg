@@ -7,7 +7,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.math.VectorWritable;
 
 import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
-import de.tuberlin.dima.ml.writables.VectorMultiLabeledWritable;
+import de.tuberlin.dima.ml.mapred.writables.VectorMultiLabeledWritable;
 
 public class EnsembleJob extends AbstractHadoopJob {
 

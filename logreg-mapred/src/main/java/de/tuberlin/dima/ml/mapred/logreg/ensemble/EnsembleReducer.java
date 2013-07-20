@@ -13,8 +13,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
+import de.tuberlin.dima.ml.mapred.writables.VectorMultiLabeledWritable;
 import de.tuberlin.dima.ml.validation.OnlineAccuracy;
-import de.tuberlin.dima.ml.writables.VectorMultiLabeledWritable;
 
 public class EnsembleReducer extends Reducer<IntWritable, VectorMultiLabeledWritable, IntWritable, VectorWritable> {
 

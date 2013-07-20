@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.preprocess;
+package de.tuberlin.dima.ml.mapred.preprocess;
 
 import java.util.List;
 
@@ -12,8 +12,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
-
-import de.tuberlin.dima.ml.preprocess.CSVToSeq;
 
 public class CSVToSequenceFileTest {
   

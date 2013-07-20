@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.preprocess;
+package de.tuberlin.dima.ml.mapred.preprocess;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -8,9 +8,9 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
-import de.tuberlin.dima.ml.writables.IDAndLabels;
+import de.tuberlin.dima.ml.mapred.writables.IDAndLabels;
 
-public class RCV1ToSequenceFileTest {
+public class RCV1ToSeqMultiLabelTest {
 
   @Test
   public void testTransform() throws Exception {

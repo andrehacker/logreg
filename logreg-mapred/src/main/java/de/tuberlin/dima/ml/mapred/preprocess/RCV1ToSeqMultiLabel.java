@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.preprocess;
+package de.tuberlin.dima.ml.mapred.preprocess;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,8 +7,8 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -18,9 +18,10 @@ import com.google.common.io.Closeables;
 
 import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.inputreader.RCV1VectorReader;
+import de.tuberlin.dima.ml.mapred.writables.IDAndLabels;
 import de.tuberlin.dima.ml.util.MLUtils;
 
-public class RCV1ToSeq {
+public class RCV1ToSeqMultiLabel {
   
   /**
    * Transforms predefined vector files into sequence files
@@ -40,7 +41,7 @@ public class RCV1ToSeq {
    * - MCAT (Markets)
    * 
    */
-  public static void transform (String folderPath, String positiveClassName, String trainingOutputPath, String testOutputPath, int limit) throws Exception {
+  public static void transform (String folderPath, String trainingOutputPath, String testOutputPath, int limit) throws Exception {
     
     if ((new File(trainingOutputPath)).exists() || (new File(testOutputPath)).exists()) {
       throw new Exception("Output file(s) already exists, stop");
@@ -57,35 +58,33 @@ public class RCV1ToSeq {
     int maxFeatureId = (int)RCV1DatasetInfo.get().getNumFeatures();
     int labelRows = (int)RCV1DatasetInfo.get().getTotal();
 
-    RCV1ToSeq.transform(
-        trainingFile, 
+    RCV1ToSeqMultiLabel.transform(trainingFile, 
         labelPath,
-        positiveClassName,
         trainingOutputPath,
         maxFeatureId,
         labelRows,
         limit);
     
-    RCV1ToSeq.transform(
-        testFiles, 
+    RCV1ToSeqMultiLabel.transform(testFiles, 
         labelPath,
-        positiveClassName,
         testOutputPath,
         maxFeatureId,
         labelRows,
         limit);
   }
   
-  private static void transform (
-      List<String> sourcePaths,
+  private static void transform (List<String> sourcePaths,
       String labelPath,
-      String positiveClassName,
       String targetPath,
       int maxFeatureId,
       int labelRows,
       int limit) throws Exception {
 
-    Vector y = RCV1VectorReader.readTarget(labelRows+1, labelPath, positiveClassName);
+    DenseVector yC = new DenseVector(labelRows+1);
+    DenseVector yE = new DenseVector(labelRows+1);
+    DenseVector yG = new DenseVector(labelRows+1);
+    DenseVector yM = new DenseVector(labelRows+1);
+    RCV1VectorReader.readLabels(labelPath, yC, yE, yG, yM);
     
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.getLocal(conf);
@@ -95,9 +94,9 @@ public class RCV1ToSeq {
     int count=0;
     try {
       writer = SequenceFile.createWriter(fs, conf, new Path(targetPath),
-          IntWritable.class, VectorWritable.class);
+          IDAndLabels.class, VectorWritable.class);
       
-      IntWritable label = new IntWritable();
+      IDAndLabels idAndLabels = new IDAndLabels();
       VectorWritable vector = new VectorWritable();
       
       boolean stop=false;
@@ -109,9 +108,15 @@ public class RCV1ToSeq {
           int docId = RCV1VectorReader.readVector(v, line);
 
           vector.set(v);
-          label.set((int)y.get(docId));
+          idAndLabels.set(docId,
+              new DenseVector(
+                  new double[] {
+                      (int)yC.get(docId),
+                      (int)yE.get(docId),
+                      (int)yG.get(docId),
+                      (int)yM.get(docId)}));
           
-          writer.append(label, vector);
+          writer.append(idAndLabels, vector);
           
           ++count;
           if ((limit != -1) && (count >= limit)) {
@@ -129,3 +134,4 @@ public class RCV1ToSeq {
   }
 
 }
+

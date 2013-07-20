@@ -49,11 +49,11 @@ public class JobRunner {
       // - Reads all files in specified directory
       // - results in warning, because nephele-plugins.xml does not start with
       // configuration
-      if (configPath != "") {
+      if (configPath.equals("")) {
         GlobalConfiguration.loadConfiguration(configPath);
       }
       Configuration config = GlobalConfiguration.getConfiguration();
-      if (configPath == "") {
+      if (configPath.equals("")) {
         // Apply defaults (is there another way to get a default configuration?)
         config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, "127.0.0.1");
         config.setInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT);

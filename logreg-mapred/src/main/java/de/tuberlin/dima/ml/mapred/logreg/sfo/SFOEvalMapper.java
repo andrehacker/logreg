@@ -10,7 +10,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import de.tuberlin.dima.ml.logreg.LogRegMath;
 import de.tuberlin.dima.ml.mapred.GlobalSettings;
-import de.tuberlin.dima.ml.writables.DoublePairWritable;
+import de.tuberlin.dima.ml.mapred.writables.DoublePairWritable;
 
 public class SFOEvalMapper extends Mapper<IntWritable, VectorWritable, IntWritable, DoublePairWritable> {
   

@@ -26,8 +26,8 @@ import de.tuberlin.dima.ml.RegressionModel;
 import de.tuberlin.dima.ml.logreg.LogRegEnsembleModel;
 import de.tuberlin.dima.ml.logreg.LogRegEnsembleModel.VotingSchema;
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
+import de.tuberlin.dima.ml.mapred.writables.IDAndLabels;
 import de.tuberlin.dima.ml.validation.OnlineAccuracy;
-import de.tuberlin.dima.ml.writables.IDAndLabels;
 
 public class EvalMapper extends Mapper<IDAndLabels, VectorWritable, Text, IntPairWritable> {
   

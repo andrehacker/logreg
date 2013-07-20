@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 import de.tuberlin.dima.ml.mapred.GlobalSettings;
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
-import de.tuberlin.dima.ml.writables.DoublePairWritable;
+import de.tuberlin.dima.ml.mapred.writables.DoublePairWritable;
 
 public class SFOEvalReducer extends Reducer<IntWritable, DoublePairWritable, IntWritable, DoubleWritable> {
   
@@ -19,7 +19,7 @@ public class SFOEvalReducer extends Reducer<IntWritable, DoublePairWritable, Int
   @Override
   public void reduce(IntWritable dim, Iterable<DoublePairWritable> values, Context context) throws IOException, InterruptedException {
     
-    log.debug("Eval Reducer for d=" + dim.get());
+//    log.debug("Eval Reducer for d=" + dim.get());
     
     int count=0;
     double sumLlBase=0;
@@ -32,7 +32,7 @@ public class SFOEvalReducer extends Reducer<IntWritable, DoublePairWritable, Int
     double gain = sumLlNew - sumLlBase;
     context.write(dim, new DoubleWritable(gain));
 
-    log.debug("- ll_base: " + sumLlBase + " ll_new: " + sumLlNew + " GAIN: " + gain);
-    log.debug("- Processed " + count + " records");
+//    log.debug("- ll_base: " + sumLlBase + " ll_new: " + sumLlNew + " GAIN: " + gain);
+//    log.debug("- Processed " + count + " records");
   }
 }

@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.preprocess;
+package de.tuberlin.dima.ml.mapred.preprocess;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,8 +7,8 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -19,9 +19,8 @@ import com.google.common.io.Closeables;
 import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.inputreader.RCV1VectorReader;
 import de.tuberlin.dima.ml.util.MLUtils;
-import de.tuberlin.dima.ml.writables.IDAndLabels;
 
-public class RCV1ToSeqMultiLabel {
+public class RCV1ToSeq {
   
   /**
    * Transforms predefined vector files into sequence files
@@ -41,7 +40,7 @@ public class RCV1ToSeqMultiLabel {
    * - MCAT (Markets)
    * 
    */
-  public static void transform (String folderPath, String trainingOutputPath, String testOutputPath, int limit) throws Exception {
+  public static void transform (String folderPath, String positiveClassName, String trainingOutputPath, String testOutputPath, int limit) throws Exception {
     
     if ((new File(trainingOutputPath)).exists() || (new File(testOutputPath)).exists()) {
       throw new Exception("Output file(s) already exists, stop");
@@ -58,33 +57,35 @@ public class RCV1ToSeqMultiLabel {
     int maxFeatureId = (int)RCV1DatasetInfo.get().getNumFeatures();
     int labelRows = (int)RCV1DatasetInfo.get().getTotal();
 
-    RCV1ToSeqMultiLabel.transform(trainingFile, 
+    RCV1ToSeq.transform(
+        trainingFile, 
         labelPath,
+        positiveClassName,
         trainingOutputPath,
         maxFeatureId,
         labelRows,
         limit);
     
-    RCV1ToSeqMultiLabel.transform(testFiles, 
+    RCV1ToSeq.transform(
+        testFiles, 
         labelPath,
+        positiveClassName,
         testOutputPath,
         maxFeatureId,
         labelRows,
         limit);
   }
   
-  private static void transform (List<String> sourcePaths,
+  private static void transform (
+      List<String> sourcePaths,
       String labelPath,
+      String positiveClassName,
       String targetPath,
       int maxFeatureId,
       int labelRows,
       int limit) throws Exception {
 
-    DenseVector yC = new DenseVector(labelRows+1);
-    DenseVector yE = new DenseVector(labelRows+1);
-    DenseVector yG = new DenseVector(labelRows+1);
-    DenseVector yM = new DenseVector(labelRows+1);
-    RCV1VectorReader.readLabels(labelPath, yC, yE, yG, yM);
+    Vector y = RCV1VectorReader.readTarget(labelRows+1, labelPath, positiveClassName);
     
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.getLocal(conf);
@@ -94,9 +95,9 @@ public class RCV1ToSeqMultiLabel {
     int count=0;
     try {
       writer = SequenceFile.createWriter(fs, conf, new Path(targetPath),
-          IDAndLabels.class, VectorWritable.class);
+          IntWritable.class, VectorWritable.class);
       
-      IDAndLabels idAndLabels = new IDAndLabels();
+      IntWritable label = new IntWritable();
       VectorWritable vector = new VectorWritable();
       
       boolean stop=false;
@@ -108,15 +109,9 @@ public class RCV1ToSeqMultiLabel {
           int docId = RCV1VectorReader.readVector(v, line);
 
           vector.set(v);
-          idAndLabels.set(docId,
-              new DenseVector(
-                  new double[] {
-                      (int)yC.get(docId),
-                      (int)yE.get(docId),
-                      (int)yG.get(docId),
-                      (int)yM.get(docId)}));
+          label.set((int)y.get(docId));
           
-          writer.append(idAndLabels, vector);
+          writer.append(label, vector);
           
           ++count;
           if ((limit != -1) && (count >= limit)) {
@@ -134,4 +129,3 @@ public class RCV1ToSeqMultiLabel {
   }
 
 }
-

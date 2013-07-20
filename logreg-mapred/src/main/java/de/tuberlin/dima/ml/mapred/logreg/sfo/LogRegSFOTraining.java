@@ -29,8 +29,8 @@ public class LogRegSFOTraining {
         //batchGradient += computePartialGradientSFO(xn, w, y.get(n));
         pi = LogRegMath.predict(xi, w);
         debugSumPi += pi;
-        batchGradient += computePartialGradientSFO(xi.getQuick(xi.size()-1), pi, y.get(i));
-        batchGradientSecond += computeSecondPartialGradientSFO(xi.getQuick(xi.size()-1), pi);
+        batchGradient += derivateSFO(xi.getQuick(xi.size()-1), pi, y.get(i));
+        batchGradientSecond += derivateSecondSFO(xi.getQuick(xi.size()-1), pi);
       }
       
       // Apply Regularization to 1st derivation
@@ -55,23 +55,60 @@ public class LogRegSFOTraining {
   }
 
   /**
-   * Convention: The new feature to be optimized is in last column
+   * Computes the gradient for the negative log-likelihood function regarding a
+   * single data point x and keeping all dimensions except a single dimension
+   * (d) constant<br>
+   * 
+   * Does not use Regularization<br>
+   * 
+   * This is the negative of the 2.8 in the paper (because we minimize
+   * negative-ll here)<br>
+   * 
+   * = ( h_d(x_i) - y) * x_id
    */
-  public static double computePartialGradientSFO(double xid, double pi, double y) {
-    // Compute the partial gradient of negative log-likelihood function
-    // regarding a single data point x and a single feature/dimension d
-    // = ( h(x) - y) * x_d
+  public static double derivateSFO(double xid, double pi, double y) {
     return (pi - y) * xid;
   }
   
   /**
-   * Convention: The new feature to be optimized is in last column
+   * Computes the second gradient for the negative log-likelihood function regarding a
+   * single data point x and keeping all dimensions except a single dimension
+   * (d) constant<br>
+   * 
+   * Does not use Regularization<br>
+   * 
+   * This is the negative of the 2.9 in the paper (because we minimize
+   * negative-ll here)<br>
+   * 
+   * = (x_id)^2 * h_d(x_i) * (1 - h_d(x_i))
    */
-  public static double computeSecondPartialGradientSFO(double xid, double pi) {
-    //Returns: (x_d)^2 h(x) (1-h(x))
+  public static double derivateSecondSFO(double xid, double pi) {
     double xidSquared = Math.pow(xid, 2);
-    
     return xidSquared * pi * (1 - pi);
+  }
+
+  /**
+   * Similar to
+   * {@link LogRegSFOTraining#derivateSFO(double, double, double)}
+   * but uses L2 regularization<br>
+   * 
+   * = 2 * lambda * beta_d - derivate
+   * See 2.11 in the paper.
+   */
+  public static double derivateL2SFO(double xid, double pi, double y, double lambda, double betad) {
+    return 2 * lambda * betad - derivateSFO(xid, pi, y);
+  }
+
+  /**
+   * Similar to
+   * {@link LogRegSFOTraining#computeSecondPartialGradientSFO(double, double, double)}
+   * but uses L2 regularization<br>
+   * 
+   * = 2 * lambda - secondDerivate
+   * See 2.12 in the paper.
+   */
+  public static double derivateSecondL2SFO(double xid, double pi, double lambda) {
+    return 2 * lambda - derivateSecondSFO(xid, pi);
   }
 
 }

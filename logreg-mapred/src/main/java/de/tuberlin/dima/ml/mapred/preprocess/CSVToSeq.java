@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.preprocess;
+package de.tuberlin.dima.ml.mapred.preprocess;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;

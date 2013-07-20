@@ -19,6 +19,10 @@ public class SFOJob extends AbstractHadoopJob {
   
   private static final String JOB_NAME = "sfo-train";
   
+  public static enum SFO_COUNTER { 
+    TRAIN_OVERFLOWS
+  }
+  
   private String inputFile;
   private String outputPath;
   

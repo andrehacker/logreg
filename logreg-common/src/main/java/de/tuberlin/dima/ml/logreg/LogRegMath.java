@@ -42,8 +42,14 @@ public class LogRegMath {
    */
   public static double logisticFunction(double exp) {
     double negativeExpResult = Math.exp(-exp);
-    if (exp != 0 && (negativeExpResult == 0 || Double.isInfinite(negativeExpResult))) {
-      System.out.println(" - OVERFLOW? " + exp + "\t" + negativeExpResult);
+    // Overflow detection
+    if (Double.isInfinite(negativeExpResult) || Double.isNaN(negativeExpResult)) {
+      System.out.println("OVERFLOW detected: exp=" + exp + " e^(-exp)=" + negativeExpResult);
+    }
+    // Underflow detection (no problem in most cases, because just a lack of precision)
+    if (exp != 0 && negativeExpResult == 0) {
+      System.out.println("UNDERFLOW (ignored): exp=" + exp + " e^(-exp)=" + negativeExpResult);
+      System.out.println(" result: " + 1d / (1d + negativeExpResult));
     }
     return 1d / (1d + negativeExpResult);
   }

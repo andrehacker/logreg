@@ -7,7 +7,7 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
-import de.tuberlin.dima.ml.writables.DoublePairWritable;
+import de.tuberlin.dima.ml.mapred.writables.DoublePairWritable;
 
 /**
  * Validates the previously built models

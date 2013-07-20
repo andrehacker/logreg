@@ -218,7 +218,7 @@ public class PactVector implements Value {
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof VectorWritable && vector.equals(((VectorWritable) o).get());
+    return o instanceof PactVector && vector.equals(((PactVector) o).getValue());
   }
 
   @Override

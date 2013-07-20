@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.preprocess;
+package de.tuberlin.dima.ml.mapred.preprocess;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -8,8 +8,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
-
-import de.tuberlin.dima.ml.preprocess.RCV1ToSeq;
 
 public class RCV1ToSeqTest {
   
@@ -21,9 +19,10 @@ public class RCV1ToSeqTest {
   @Test
   public void testTransform() throws Exception {
     
-    boolean createBig = true;
-    boolean createSmall = false;
-    int[] smallSizes = new int[] {5000, 10000, 20000};
+    boolean createBig = false;
+    boolean createSmall = true;
+//    int[] smallSizes = new int[] {5000, 10000, 20000};
+    int[] smallSizes = new int[] {100, 500, 1000, 2000};
     
     // ---- Create sequence files with single label ----
     if (createBig) {

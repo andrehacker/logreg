@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.writables;
+package de.tuberlin.dima.ml.mapred.writables;
 
 import java.io.DataInput;
 import java.io.DataOutput;
