@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.celebihacker.ml.preprocess.rcv1.indexing.Indexer;
 import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer;
+import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.NumberFilterMethod;
 import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.SplitType;
 import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.Weighting;
 
@@ -47,6 +48,11 @@ public class CliFrontend {
       "Split type to use\n" +
           "* date (default): split chronologically\n" +
           "* random: split randomly");
+  
+  private static final Option VEC_NUMBER_FILTER_OPT = new Option("nf", "numberfilter", true,
+     "Number filter to use\n" +
+         "* remove (default)\n" +
+         "* keep\n");
 
   private CommandLineParser parser;
   private Map<String, Options> options;
@@ -83,11 +89,13 @@ public class CliFrontend {
     VEC_WEIGHTING_OPT.setRequired(false);
     VEC_SPLIT_RATIO_OPT.setRequired(false);
     VEC_SPLIT_TYPE_OPT.setRequired(false);
+    VEC_NUMBER_FILTER_OPT.setRequired(false);
 
     opts.addOption(VEC_MIN_DF_OPT);
     opts.addOption(VEC_WEIGHTING_OPT);
     opts.addOption(VEC_SPLIT_RATIO_OPT);
     opts.addOption(VEC_SPLIT_TYPE_OPT);
+    opts.addOption(VEC_NUMBER_FILTER_OPT);
 
     return opts;
   }
@@ -113,6 +121,7 @@ public class CliFrontend {
     Weighting weighting = Weighting.AIC;
     double trainingRatio = 0.8;
     SplitType splitBy = SplitType.DATE;
+    NumberFilterMethod numberFilterMethod = NumberFilterMethod.REMOVE;
 
     // Parse command line options
     CommandLine line = null;
@@ -164,16 +173,27 @@ public class CliFrontend {
         // keep default
       }
     }
+    
+    if (line.hasOption(VEC_NUMBER_FILTER_OPT.getOpt())) {
+        String val = line.getOptionValue(VEC_NUMBER_FILTER_OPT.getOpt()).toUpperCase();
+
+        try {
+          numberFilterMethod = NumberFilterMethod.valueOf(val);
+        } catch (Exception e) {
+          // keep default
+        }
+      }
 
     // vectorize
     System.out.println("Running vectorize with options: \n" +
         "* minDf: " + minDf + "\n" +
         "* weighting: " + weighting + "\n" +
         "* trainingRatio: " + trainingRatio + "\n" +
-        "* splitBy: " + splitBy);
+        "* splitBy: " + splitBy + "\n" +
+        "* numberFilterMethod: " + numberFilterMethod);
 
     try {
-      Vectorizer vectorizer = new Vectorizer(this.inputPath, minDf, weighting);
+      Vectorizer vectorizer = new Vectorizer(this.inputPath, minDf, weighting, numberFilterMethod);
       vectorizer.vectorize(this.outputPath, splitBy, trainingRatio);
     } catch (IOException e) {
       e.printStackTrace();

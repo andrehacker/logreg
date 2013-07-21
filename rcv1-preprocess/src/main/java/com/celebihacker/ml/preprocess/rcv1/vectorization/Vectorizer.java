@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -43,27 +45,34 @@ public class Vectorizer {
     private static final double DEFAULT_TRAINING_RATIO = 0.8;
     private static final SplitType DEFAULT_SPLIT_TYPE = SplitType.DATE;
     private static final Weighting DEFAULT_WEIGHTING = Weighting.AIC;
+    private static final NumberFilterMethod DEFAULT_NUMBER_FILTER_METHOD = NumberFilterMethod.REMOVE;
 
     private final DirectoryReader reader;
     private final int minDf;
     private final Weighting weighting;
     private TermDict termDict;
+    private NumberFilterMethod numberFilterMethod;
 
     /**************************************************************************
      * CONSTRUCTORS
      **************************************************************************/
     public Vectorizer(String pathToIndex) throws IOException {
-        this(pathToIndex, DEFAULT_MIN_DF, DEFAULT_WEIGHTING);
+        this(pathToIndex, DEFAULT_MIN_DF, DEFAULT_WEIGHTING, DEFAULT_NUMBER_FILTER_METHOD);
     }
     
     public Vectorizer(String pathToIndex, int minDf) throws IOException {
-        this(pathToIndex, minDf, DEFAULT_WEIGHTING);
+        this(pathToIndex, minDf, DEFAULT_WEIGHTING, DEFAULT_NUMBER_FILTER_METHOD);
+    }
+    
+    public Vectorizer(String pathToIndex, int minDf, Weighting weighting) throws IOException {
+        this(pathToIndex, minDf, weighting, DEFAULT_NUMBER_FILTER_METHOD);
     }
 
-    public Vectorizer(String pathToIndex, int minDf, Weighting weighting) throws IOException {
+    public Vectorizer(String pathToIndex, int minDf, Weighting weighting, NumberFilterMethod numberFilterMethod) throws IOException {
         this.reader = DirectoryReader.open(new SimpleFSDirectory(new File(pathToIndex)));
         this.minDf = minDf;
         this.weighting = weighting;
+        this.numberFilterMethod = numberFilterMethod;
     }
 
     /**************************************************************************
@@ -104,6 +113,7 @@ public class Vectorizer {
         // Write term dictionary to file
         File termFile = new File(outputPath,
         	String.format("terms-%d.txt", this.termDict.numTerms()));
+
         this.termDict.writeToFile(termFile);
         LOGGER.info("Wrote term dictionary to {}", termFile);
 
@@ -219,7 +229,7 @@ public class Vectorizer {
             int termId = this.termDict.id(termStr);
 
             int tf = (int) termIterator.totalTermFreq();
-            int df = split == Split.TRAINING ? this.termDict.dfTraining(termStr) : this.termDict.dfTest(termStr);
+            int df = (split == Split.TRAINING) ? this.termDict.dfTraining(termStr) : this.termDict.dfTest(termStr);
             double weight = weight(tf, df, maxTf, numDocs);
 
             docVector.setQuick(termId, weight);
@@ -318,10 +328,12 @@ public class Vectorizer {
     		BytesRef termBytes;
     		while((termBytes = termIterator.next()) != null) {
     			
-    			String termStr = termBytes.utf8ToString();
+    			String termStr = this.numberFilterMethod.filter(termBytes.utf8ToString());
     			
-    			if (!dict.contains(termStr)) {
-    					
+    			if (termStr == null)
+    				continue;
+    			
+    			if (!dict.contains(termStr)) {    				
     					// add new term to dict
 	    				Term t = new Term(NewsItemFeatureExtraction.TEXT, termBytes);
 	    				int df = this.reader.docFreq(t);
@@ -340,8 +352,7 @@ public class Vectorizer {
 		    			}
 
     			} else {
-    				
-    				// term already in dict, just increment count
+    				// term already in dict, just increment count    				
 	    			if (docId < splitDocId) {
 	    				dict.incDfTraining(termStr);
 	    			} else {
@@ -349,7 +360,7 @@ public class Vectorizer {
 	    			}
 	    			
     			}
-    		}	
+    		}
     	}
     	
     	return dict;
@@ -404,6 +415,36 @@ public class Vectorizer {
                 for (Element e : vector.nonZeroes()) {                	
                     e.set(e.get() * norm);
                 }
+        }
+    }
+    
+    public enum NumberFilterMethod {
+        KEEP(null), // Keep numbers
+        REMOVE(Pattern.compile("^([0-9]+)([,.0-9a-z]*)$")), // Remove numbers
+        
+        // TODO modifying terms is tricky when counting doc frequency etc. - disabled for now
+        ROUND(Pattern.compile("^([0-9]+)([,.0-9a-z]*)$")); // Remove part after ',' or '.'
+
+        public final Pattern filterPattern;
+
+        NumberFilterMethod(Pattern pattern) {
+            this.filterPattern = pattern;
+        }
+        
+        public String filter(String term) {
+        	
+        	if (this == KEEP)
+                return term;
+
+            Matcher filterMatcher = this.filterPattern.matcher(term);
+
+            if (this == REMOVE)
+            	return !filterMatcher.matches() ? term : null;
+
+            if ((this == ROUND) && filterMatcher.matches())
+            	return term.substring(0, filterMatcher.end(1));
+
+            return term;
         }
     }
 

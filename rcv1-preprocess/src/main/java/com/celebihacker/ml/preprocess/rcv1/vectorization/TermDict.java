@@ -178,7 +178,7 @@ public class TermDict {
     private class TermInfo {
         public final int id;
         public final int df;
-        
+
 		public int dfTraining;
 		public int dfTest;
 

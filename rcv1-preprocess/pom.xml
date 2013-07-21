@@ -19,12 +19,6 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>de.tuberlin.dima</groupId>
-			<artifactId>logreg-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<version>1.1.2</version>
