@@ -16,13 +16,13 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package com.celebihacker.ml.preprocess.rcv1.indexing.types;
+package de.tuberlin.dima.ml.preprocess.rcv1.indexing.types;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.index.FieldInfo;
 
-public class TextFieldWithTermVectors extends Field {
+public class StringFieldWithTermVectors extends Field {
 
     public static final FieldType TYPE = new FieldType();
 
@@ -35,7 +35,7 @@ public class TextFieldWithTermVectors extends Field {
         TYPE.freeze();
     }
 
-    public TextFieldWithTermVectors(String name, String value) {
+    public StringFieldWithTermVectors(String name, String value) {
         super(name, value, TYPE);
     }
 }

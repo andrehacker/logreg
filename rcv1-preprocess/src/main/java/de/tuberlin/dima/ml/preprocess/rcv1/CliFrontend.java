@@ -13,11 +13,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.Indexer;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.NumberFilterMethod;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.SplitType;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.Weighting;
+
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.Indexer;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer.NumberFilterMethod;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer.SplitType;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer.Weighting;
 
 public class CliFrontend {
 

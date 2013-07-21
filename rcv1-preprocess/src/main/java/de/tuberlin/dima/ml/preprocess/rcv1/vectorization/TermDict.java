@@ -1,4 +1,4 @@
-package com.celebihacker.ml.preprocess.rcv1.vectorization;
+package de.tuberlin.dima.ml.preprocess.rcv1.vectorization;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;

@@ -1,4 +1,4 @@
-package com.celebihacker.ml.preprocess.rcv1.vectorization;
+package de.tuberlin.dima.ml.preprocess.rcv1.vectorization;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,10 +30,11 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.NewsItemFeatureExtraction;
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.RCV1;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.types.IdAndLabels;
 import com.google.common.io.Closeables;
+
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.featureextraction.NewsItemFeatureExtraction;
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.RCV1;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.types.IdAndLabels;
 
 // TODO could use some refactoring
 public class Vectorizer {

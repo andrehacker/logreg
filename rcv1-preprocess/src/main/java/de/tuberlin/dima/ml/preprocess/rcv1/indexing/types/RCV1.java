@@ -1,4 +1,4 @@
-package com.celebihacker.ml.preprocess.rcv1.indexing.types;
+package de.tuberlin.dima.ml.preprocess.rcv1.indexing.types;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.celebihacker.ml.preprocess.rcv1.indexing;
+package de.tuberlin.dima.ml.preprocess.rcv1.indexing;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -18,11 +18,12 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.NewsItemFeatureExtraction;
-import com.celebihacker.ml.preprocess.rcv1.indexing.parsing.XmlToNewsItemParser;
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.NewsItem;
 import com.google.common.base.Optional;
 import com.google.common.io.Closeables;
+
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.featureextraction.NewsItemFeatureExtraction;
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.parsing.XmlToNewsItemParser;
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.NewsItem;
 
 public class Indexer {
 
