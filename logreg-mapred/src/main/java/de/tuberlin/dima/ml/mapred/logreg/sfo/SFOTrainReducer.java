@@ -14,18 +14,18 @@ import de.tuberlin.dima.ml.logreg.LogRegMath;
 import de.tuberlin.dima.ml.mapred.GlobalSettings;
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
 
-public class SFOReducer extends
+public class SFOTrainReducer extends
     Reducer<IntWritable, SFOIntermediateWritable, IntWritable, DoubleWritable> {
 
   private static final AdaptiveLogger log = new AdaptiveLogger(
-      Logger.getLogger(SFOReducer.class.getName()), GlobalSettings.LOG_LEVEL);
+      Logger.getLogger(SFOTrainReducer.class.getName()), GlobalSettings.LOG_LEVEL);
 
   private static final int MAX_ITERATIONS = 5;
 
   private static final double LAMBDA = 0;
-  private static final double TOLERANCE = 10E-7;
+  private static final double TOLERANCE = 10E-6;
 
-  private static final int DEBUG_DIMENSION = 29573;
+  private static final int DEBUG_DIMENSION = -1;
 
   /**
    * Notes: To iterate multiple times over data, we cache all data on heap For
@@ -118,9 +118,10 @@ public class SFOReducer extends
       }
 
       if (dim.get() == DEBUG_DIMENSION)
-        log.debug("- it " + iteration + ": grad: " + batchGradient
-            + " gradSecond: " + batchGradientSecond + " new beta_d: " + betad
-            + " sumPi: " + debugSumPi);
+        log.debug("- DEBUG: d=" + dim.get() + " iteration=" + iteration
+            + " cacheSize=" + cache.size() + " grad=" + batchGradient
+            + " gradSecond=" + batchGradientSecond + " new beta_d=" + betad
+            + " sumPi=" + debugSumPi);
     }
 
     // Write trained coefficient

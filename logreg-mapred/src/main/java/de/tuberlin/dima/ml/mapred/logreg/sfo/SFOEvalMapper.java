@@ -53,7 +53,11 @@ public class SFOEvalMapper extends Mapper<IntWritable, VectorWritable, IntWritab
         double piNew = LogRegMath.logisticFunction(xi.get().dot(baseModel.getW()) + GlobalSettings.INTERCEPT);
         baseModel.getW().set(dim, 0d);    // reset to base model
 
+        // logLikelihood will handle the case where piNew is zero
         double llNew = LogRegMath.logLikelihood(y.get(), piNew);
+//        System.out.println("SFO Eval Map: Numeric issue. d=" + dim + " y="
+//            + y.get() + " w_d=" + coefficients.get(dim) + " piBase=" + piBase
+//            + " piNew=" + piNew + " llNew=" + llNew);
         
         outputKey.set(feature.index());
 //        outputValue.setFirst(piBase);

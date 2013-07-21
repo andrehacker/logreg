@@ -20,7 +20,7 @@ public class SFOJobTest {
   private static final int REDUCERS_TRAIN = 4;
   private static final int REDUCERS_TEST = 4;
   
-  private static final int ITERATIONS = 2;
+  private static final int ITERATIONS = 20;
 
   @Test
   @Ignore
@@ -40,7 +40,7 @@ public class SFOJobTest {
 //  @Ignore
   public void testRCV1() throws Exception {
     
-    String inputFile = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_500.seq";
+    String inputFile = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_1000.seq";
     String predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt";
     
     RCV1DatasetInfo.readPredictorNames(predictorNamePath);

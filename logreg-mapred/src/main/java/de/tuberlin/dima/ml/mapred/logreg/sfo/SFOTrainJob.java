@@ -15,7 +15,7 @@ import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
  * 
  * Assumption: Requires total number of features
  */
-public class SFOJob extends AbstractHadoopJob {
+public class SFOTrainJob extends AbstractHadoopJob {
   
   private static final String JOB_NAME = "sfo-train";
   
@@ -28,7 +28,7 @@ public class SFOJob extends AbstractHadoopJob {
   
   private int reducers;
   
-  public SFOJob(String inputFile,
+  public SFOTrainJob(String inputFile,
       String outputPath,
       int reducers) {
     this.inputFile = inputFile;
@@ -42,8 +42,8 @@ public class SFOJob extends AbstractHadoopJob {
     Job job = prepareJob(
         JOB_NAME, 
         reducers, 
-        SFOMapper.class, 
-        SFOReducer.class, 
+        SFOTrainMapper.class, 
+        SFOTrainReducer.class, 
         IntWritable.class,
         SFOIntermediateWritable.class,
         IntWritable.class,

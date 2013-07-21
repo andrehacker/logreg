@@ -39,7 +39,8 @@ public class LogRegMath {
   /**
    * Computes the prediction, using our current hypothesis (logistic function)
    * 
-   * Handles numerical issues
+   * Handles numerical issues (actually we ignore them because they don't
+   * disturb here)
    * 
    * - Underflows: The real result is something very close to zero, but due to
    * the lack of precision we get 0.0. In the logistic function this does not
@@ -53,18 +54,19 @@ public class LogRegMath {
    * - NaN: This occurs only when dividing by zero, which is not the case here
    */
   public static double logisticFunction(double exp) {
+    
     double negativeExpResult = Math.exp(-exp);
+    
     // Overflow detection
-    if (Double.isInfinite(negativeExpResult) || Double.isNaN(negativeExpResult)) {
-      System.out.println("OVERFLOW (ignored): exp=" + exp + " e^(-exp)=" + negativeExpResult);
-      // System.out.println(" result: " + 1d / (1d + negativeExpResult));
-    }
-    // Underflow detection (no problem in most cases, because just a lack of
-    // precision)
-    if (exp != 0 && negativeExpResult == 0) {
-      System.out.println("UNDERFLOW (ignored): exp=" + exp + " e^(-exp)=" + negativeExpResult);
-      // System.out.println(" result: " + 1d / (1d + negativeExpResult));
-    }
+//    if (Double.isInfinite(negativeExpResult) || Double.isNaN(negativeExpResult)) {
+//      System.out.println("OVERFLOW (ignored): exp=" + exp + " e^(-exp)=" + negativeExpResult);
+//    }
+    
+    // Underflow detection (no problem, just a lack of precision)
+//    if (exp != 0 && negativeExpResult == 0) {
+//      System.out.println("UNDERFLOW (ignored): exp=" + exp + " e^(-exp)=" + negativeExpResult);
+//    }
+    
     return 1d / (1d + negativeExpResult);
   }
 
@@ -77,6 +79,10 @@ public class LogRegMath {
    * See Hastie p.120 (equation 4.20) for explanation
    */
   public static double logLikelihood(double actual, double prediction) {
+    if (prediction == 0) {
+      System.out.println("logLikelihood: log(0) detected and solved. prediction=" + prediction + " actual=" + actual);
+      prediction = Double.MIN_VALUE;
+    }
     return (actual * Math.log(prediction)) + ((1 - actual) * (1 - Math.log(prediction)));
   }
 

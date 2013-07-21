@@ -84,7 +84,6 @@ public class SFOSequential {
       System.out.println(" - Trained beta_d:  " + extendedW.get(extendedW.size()-1));
 
       // Measure performance when adding dimension d to base model
-      // TODO: Real SFO would probably evaluate the model here on training data (to avoid separate mapred iteration?)
       extendedModel.setW(extendedW);
       val.computeAccuracy(XTest, csvTest.getY(), extendedModel);
       val.computeMeanDeviation(XTest, csvTest.getY(), extendedModel);

@@ -10,7 +10,7 @@ import org.apache.mahout.math.VectorWritable;
 import de.tuberlin.dima.ml.logreg.LogRegMath;
 import de.tuberlin.dima.ml.mapred.GlobalSettings;
 
-public class SFOMapper extends Mapper<IntWritable, VectorWritable, IntWritable, SFOIntermediateWritable> {
+public class SFOTrainMapper extends Mapper<IntWritable, VectorWritable, IntWritable, SFOIntermediateWritable> {
   
   private static IntWritable outputKey = new IntWritable();
   private static SFOIntermediateWritable outputValue = new SFOIntermediateWritable();
