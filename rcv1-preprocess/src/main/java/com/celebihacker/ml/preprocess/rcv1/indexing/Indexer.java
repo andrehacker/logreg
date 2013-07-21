@@ -9,6 +9,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -17,9 +18,7 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.EnglishWithNumberFilterAnalyzer;
 import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.NewsItemFeatureExtraction;
-import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.EnglishWithNumberFilterAnalyzer.NumberFilterMethod;
 import com.celebihacker.ml.preprocess.rcv1.indexing.parsing.XmlToNewsItemParser;
 import com.celebihacker.ml.preprocess.rcv1.indexing.types.NewsItem;
 import com.google.common.base.Optional;
@@ -29,8 +28,6 @@ public class Indexer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Indexer.class);
 
-    private static final NumberFilterMethod DEFAULT_NUMBER_FILTER_METHOD = NumberFilterMethod.KEEP;
-
     private static final FilenameFilter ZIP_FILES = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
@@ -38,18 +35,14 @@ public class Indexer {
         }
     };
 
-    public static void index(String inputPath, String outputPath) throws IOException {
-        index(inputPath, outputPath, DEFAULT_NUMBER_FILTER_METHOD);
-    }
-
-    public static void index(String pathToInput, String pathToOutput, NumberFilterMethod numberFilterMethod)
+    public static void index(String pathToInput, String pathToOutput)
             throws IOException {
         // Input/output
         File[] zipFiles = new File(pathToInput).listFiles(ZIP_FILES);
         File indexDir = new File(pathToOutput);
 
         // Config
-        Analyzer analyzer = new EnglishWithNumberFilterAnalyzer(numberFilterMethod);
+        Analyzer analyzer = new EnglishAnalyzer(Version.LUCENE_43);
         IndexWriterConfig conf = new IndexWriterConfig(Version.LUCENE_43, analyzer);
 
         IndexWriter writer = new IndexWriter(new SimpleFSDirectory(indexDir), conf);
