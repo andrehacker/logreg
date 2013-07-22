@@ -31,17 +31,25 @@ public class ReduceTrainPartition extends ReduceStub {
     System.out.println("REDUCER");
     
     // TODO Try AdaptiveLogisticRegression
-    OnlineLogisticRegression learningAlgorithm = new OnlineLogisticRegression(
-        2,
-        numFeatures,
-        new L1());
-    
-    learningAlgorithm
-        .alpha(1)   // 1 (skipping is bad)
-        .stepOffset(1000)   // 1000
-        .decayExponent(0.1) // 0.9
-        .lambda(3.0e-6) // 3.0e-5
-        .learningRate(15);  // 20
+    boolean useAdaptive = true;
+    OnlineLogisticRegression learningAlgorithm = null;
+    if (useAdaptive) {
+      // TODO Use Adaptive Logistic Regression.
+//      learningAlgorithm = new AdaptiveLogisticRegression(
+//          2, 
+//          numFeatures,
+//          new L1());
+    } else {
+      learningAlgorithm = new OnlineLogisticRegression(
+          2, 
+          numFeatures, 
+          new L1());
+      learningAlgorithm.alpha(1) // 1 (skipping is bad)
+          .stepOffset(1000) // 1000
+          .decayExponent(0.1) // 0.9
+          .lambda(3.0e-6) // 3.0e-5
+          .learningRate(15); // 20
+    }
 
     OnlineAccuracy accuracy = new OnlineAccuracy(0.5);
     PactRecord element = null;
@@ -50,8 +58,8 @@ public class ReduceTrainPartition extends ReduceStub {
     while (records.hasNext()) {
 
       element = records.next();
-      vec = element.getField(EnsembleJob.ID_TRAIN_OUT_VECTOR, PactVector.class).getValue();
-      short actualTarget = element.getField(EnsembleJob.ID_TRAIN_OUT_LABEL, PactShort.class).getValue();
+      vec = element.getField(EnsembleJob.ID_TRAIN_IN_VECTOR, PactVector.class).getValue();
+      short actualTarget = element.getField(EnsembleJob.ID_TRAIN_IN_LABEL, PactShort.class).getValue();
       
       // Test prediction
       double prediction = learningAlgorithm.classifyScalar(vec);
@@ -65,7 +73,7 @@ public class ReduceTrainPartition extends ReduceStub {
     
     Vector w = learningAlgorithm.getBeta().viewRow(0);    // Returned vector is dense (which is good so)
     
-    int partition = element.getField(EnsembleJob.ID_KEY, PactInteger.class).getValue();
+    int partition = element.getField(EnsembleJob.ID_TRAIN_IN_PARTITION, PactInteger.class).getValue();
     System.out.println("- partition: " + partition);
     System.out.println("- count: " + count);
     System.out.println("- non zeros: " + w.getNumNonZeroElements());
@@ -73,7 +81,7 @@ public class ReduceTrainPartition extends ReduceStub {
     learningAlgorithm.close();
     
     PactRecord outputRecord = new PactRecord();
-    outputRecord.setField(EnsembleJob.ID_KEY, new PactInteger(1));
+    outputRecord.setField(EnsembleJob.ID_COMBINE_IN_MODEL_ID, new PactInteger(1));
     outputRecord.setField(EnsembleJob.ID_COMBINE_IN_PARTITION, new PactInteger(partition));
     outputRecord.setField(EnsembleJob.ID_COMBINE_IN_MODEL, new PactVector(w));
     out.collect(outputRecord);

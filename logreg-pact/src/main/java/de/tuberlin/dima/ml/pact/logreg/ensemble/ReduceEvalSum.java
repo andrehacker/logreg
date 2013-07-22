@@ -24,6 +24,8 @@ public class ReduceEvalSum extends ReduceStub{
 
     System.out.println("ACCURACY (training-data): " + ((double)correct / (double)total) + " (= " + correct + " / " + total + ")");
     
+    // TODO Collect results (model and evaluation)
+    
   }
 
 }

@@ -27,29 +27,31 @@ import eu.stratosphere.pact.common.type.base.PactString;
  *  -> Reduce-sum -> (model-id, total, correct)
  * 
  * How to run on a cluster:
- * ~/dev/ozone-repo/stratosphere-dist/target/stratosphere-dist-0.2-bin.dir/stratosphere-0.2/bin/pact-client.sh -w -j logreg-ozone-ensemblejob-0.0.1-SNAPSHOT.jar -a 1 /home/andre/dev/datasets/donut/donut.csv /home/andre/output-ozone
+ * .../bin/pact-client.sh -w -j job.jar -a 1 [job args]
  * 
- * @author Andre Hacker
+ * @author André Hacker
  */
 public class EnsembleJob implements PlanAssembler, PlanAssemblerDescription {
   
   static final String CONF_KEY_NUM_PARTITIONS = "parameter.NUM_PARTITIONS";
   static final String CONF_KEY_NUM_FEATURES = "parameter.NUM_FEATURES";
-  static final String CONF_KEY_NUM_TEST_ITEMS = "parameter.NUM_TEST_ITEMS";
   
-  static final int ID_KEY = 0;  // Default for all keys that are emitted
+  static final int ID_TRAIN_IN_PARTITION = 0;
+  static final int ID_TRAIN_IN_VECTOR = 1;
+  static final int ID_TRAIN_IN_LABEL = 2;
   
-  static final int ID_TRAIN_OUT_VECTOR = 1;
-  static final int ID_TRAIN_OUT_LABEL = 2;
-  static final int ID_COMBINE_IN_MODEL_ID = 1;
+  static final int ID_COMBINE_IN_MODEL_ID = 0;
   static final int ID_COMBINE_IN_PARTITION = 1;
   static final int ID_COMBINE_IN_MODEL = 2;
+  
   static final int ID_EVAL_IN_MODEL_ID = 0;
   static final int ID_EVAL_IN_NUM_MODELS = 1;
   static final int ID_EVAL_IN_FIRST_MODEL = 2;
+  
   static final int ID_EVAL_OUT_MODEL_ID = 0;
   static final int ID_EVAL_OUT_TOTAL = 1;
   static final int ID_EVAL_OUT_CORRECT = 2;
+
   static final int ID_OUT_MODEL_ID = 0;
   static final int ID_OUT_TOTAL = 1;
   static final int ID_OUT_CORRECT = 2;
@@ -97,7 +99,6 @@ public class EnsembleJob implements PlanAssembler, PlanAssemblerDescription {
     if (runValidation) {
 
       FileDataSource sourceTest = new FileDataSource(TextInputFormat.class, inputPathTest, "Test Input");
-      // TODO Stratosphere: The reader should be able to read ascii without this configuration (utf-8 is backwards compatible). Throws strange error.
       sourceTest.setParameter(TextInputFormat.CHARSET_NAME, "ASCII");
 
       CrossContract crossEval = CrossContract.builder(CrossEval.class)

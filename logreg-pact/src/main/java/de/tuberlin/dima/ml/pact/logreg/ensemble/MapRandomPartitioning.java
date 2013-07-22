@@ -47,13 +47,14 @@ public class MapRandomPartitioning extends MapStub {
     short label = LibSvmVectorReader.readVector(v, line.getValue());
     
 //    System.out.println(v.getNumNonZeroElements());
-    
+//    for (int i=1; i<=3; ++i) {
     outputPartition.setValue(random.nextInt(numPartitions));
     outputVector.setValue(v);
     outputLabel.setValue(label);
-    outputRecord.setField(EnsembleJob.ID_KEY, outputPartition);
-    outputRecord.setField(EnsembleJob.ID_TRAIN_OUT_VECTOR, outputVector);
-    outputRecord.setField(EnsembleJob.ID_TRAIN_OUT_LABEL, outputLabel);
+    outputRecord.setField(EnsembleJob.ID_TRAIN_IN_PARTITION, outputPartition);
+    outputRecord.setField(EnsembleJob.ID_TRAIN_IN_VECTOR, outputVector);
+    outputRecord.setField(EnsembleJob.ID_TRAIN_IN_LABEL, outputLabel);
     out.collect(outputRecord);
+//    }
   }
 }

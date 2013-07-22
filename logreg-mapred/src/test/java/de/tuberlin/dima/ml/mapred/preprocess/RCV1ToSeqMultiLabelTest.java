@@ -16,15 +16,15 @@ public class RCV1ToSeqMultiLabelTest {
   public void testTransform() throws Exception {
     
     String folderPath = "/home/andre/dev/datasets/RCV1-v2/";
-    String trainingOutputPath = folderPath + "vectors/lyrl2004_vectors_train.seq";
-    String testOutputPath = folderPath + "vectors/lyrl2004_vectors_test.seq";
+    String trainingOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_train.seq";
+    String testOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_test.seq";
     
-    RCV1ToSeqMultiLabel.transform(folderPath, trainingOutputPath, testOutputPath, -1);
+//    RCV1ToSeqMultiLabel.transform(folderPath, trainingOutputPath, testOutputPath, -1);
 
     // Produce a smaller version
-    int limit = 5000;
-    String smallTrainingOutputPath = folderPath + "vectors/lyrl2004_vectors_train_" + limit + ".seq";
-    String smallTestOutputPath = folderPath + "vectors/lyrl2004_vectors_test_" + limit + ".seq";
+    int limit = 10000;
+    String smallTrainingOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_train_" + limit + ".seq";
+    String smallTestOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_test_" + limit + ".seq";
     RCV1ToSeqMultiLabel.transform(folderPath, smallTrainingOutputPath, smallTestOutputPath, limit);
     
     Configuration conf = new Configuration();

@@ -15,8 +15,8 @@ import eu.stratosphere.pact.client.nephele.api.ProgramInvocationException;
 
 /**
  * Runs a Stratosphere job (jar) using the pact.client api.
- * Allows the job to be
- * executed on a cluster without using the cli
+ * 
+ * Allows the job to be executed on a cluster without using the cli
  */
 public class JobRunner {
 
@@ -87,6 +87,10 @@ public class JobRunner {
 
   }
 
+  /**
+   * Starts a Ozone job with the parameters defined in an java property file
+   * Currently not used
+   */
   public static void runFromPropertyFile(String propertyFile) {
 
     Properties prop = new Properties();
