@@ -13,11 +13,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.Indexer;
-import com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction.EnglishWithNumberFilterAnalyzer.NumberFilterMethod;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.SplitType;
-import com.celebihacker.ml.preprocess.rcv1.vectorization.Vectorizer.Weighting;
+
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.Indexer;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer.NumberFilterMethod;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer.SplitType;
+import de.tuberlin.dima.ml.preprocess.rcv1.vectorization.Vectorizer.Weighting;
 
 public class CliFrontend {
 
@@ -29,13 +30,6 @@ public class CliFrontend {
   // general options
   private static final Option INPUT_PATH_OPT = new Option("i", "input", true, "Path to input");
   private static final Option OUTPUT_PATH_OPT = new Option("o", "output", true, "Path to output");
-
-  // index options
-  private static final Option INDEX_NUMBER_FILTER_OPT = new Option("nf", "numberfilter", true,
-      "Number filter to use\n" +
-          "* remove (default)\n" +
-          "* keep\n" +
-          "* round");
 
   // vectorize options
   private static final Option VEC_MIN_DF_OPT = new Option("m", "mindf", true,
@@ -55,6 +49,11 @@ public class CliFrontend {
       "Split type to use\n" +
           "* date (default): split chronologically\n" +
           "* random: split randomly");
+  
+  private static final Option VEC_NUMBER_FILTER_OPT = new Option("nf", "numberfilter", true,
+     "Number filter to use\n" +
+         "* remove (default)\n" +
+         "* keep\n");
 
   private CommandLineParser parser;
   private Map<String, Options> options;
@@ -68,7 +67,6 @@ public class CliFrontend {
 
     this.options = new HashMap<String, Options>();
     this.options.put(GENERAL_OPTS, getGeneralOptions());
-    this.options.put(ACTION_INDEX, getIndexOptions());
     this.options.put(ACTION_VECTORIZE, getVectorizeOptions());
 
   }
@@ -85,16 +83,6 @@ public class CliFrontend {
     return opts;
   }
 
-  private Options getIndexOptions() {
-    Options opts = new Options();
-
-    INDEX_NUMBER_FILTER_OPT.setRequired(false);
-
-    opts.addOption(INDEX_NUMBER_FILTER_OPT);
-
-    return opts;
-  }
-
   private Options getVectorizeOptions() {
     Options opts = new Options();
 
@@ -102,49 +90,30 @@ public class CliFrontend {
     VEC_WEIGHTING_OPT.setRequired(false);
     VEC_SPLIT_RATIO_OPT.setRequired(false);
     VEC_SPLIT_TYPE_OPT.setRequired(false);
+    VEC_NUMBER_FILTER_OPT.setRequired(false);
 
     opts.addOption(VEC_MIN_DF_OPT);
     opts.addOption(VEC_WEIGHTING_OPT);
     opts.addOption(VEC_SPLIT_RATIO_OPT);
     opts.addOption(VEC_SPLIT_TYPE_OPT);
+    opts.addOption(VEC_NUMBER_FILTER_OPT);
 
     return opts;
   }
 
-  private void index(String[] args) {
-    // defaults
-    NumberFilterMethod numberFilterMethod = NumberFilterMethod.REMOVE;
+  private void index() {
 
-    // Parse command line options
-    CommandLine line = null;
+    System.out.println("Running index\n");
+    
     try {
-      line = this.parser.parse(this.options.get(ACTION_INDEX), args, false);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    if (line == null)
-      return;
-
-    if (line.hasOption(INDEX_NUMBER_FILTER_OPT.getOpt())) {
-      String val = line.getOptionValue(INDEX_NUMBER_FILTER_OPT.getOpt()).toUpperCase();
-
-      try {
-        numberFilterMethod = NumberFilterMethod.valueOf(val);
-      } catch (Exception e) {
-        // keep default
-      }
-    }
-
-    System.out.println("Running index with options:\n" +
-        "* numberFilterMethod: " + numberFilterMethod);
-    try {
-      Indexer.index(this.inputPath, this.outputPath, numberFilterMethod);
+      Indexer.index(this.inputPath, this.outputPath);
     } catch (IOException e) {
       e.printStackTrace();
     }
+    
     System.out.println("Finished.");
     System.out.println("Output in " + this.outputPath);
+    
   }
 
   private void vectorize(String[] args) {
@@ -153,6 +122,7 @@ public class CliFrontend {
     Weighting weighting = Weighting.AIC;
     double trainingRatio = 0.8;
     SplitType splitBy = SplitType.DATE;
+    NumberFilterMethod numberFilterMethod = NumberFilterMethod.REMOVE;
 
     // Parse command line options
     CommandLine line = null;
@@ -204,16 +174,27 @@ public class CliFrontend {
         // keep default
       }
     }
+    
+    if (line.hasOption(VEC_NUMBER_FILTER_OPT.getOpt())) {
+        String val = line.getOptionValue(VEC_NUMBER_FILTER_OPT.getOpt()).toUpperCase();
+
+        try {
+          numberFilterMethod = NumberFilterMethod.valueOf(val);
+        } catch (Exception e) {
+          // keep default
+        }
+      }
 
     // vectorize
     System.out.println("Running vectorize with options: \n" +
         "* minDf: " + minDf + "\n" +
         "* weighting: " + weighting + "\n" +
         "* trainingRatio: " + trainingRatio + "\n" +
-        "* splitBy: " + splitBy);
+        "* splitBy: " + splitBy + "\n" +
+        "* numberFilterMethod: " + numberFilterMethod);
 
     try {
-      Vectorizer vectorizer = new Vectorizer(this.inputPath, minDf, weighting);
+      Vectorizer vectorizer = new Vectorizer(this.inputPath, minDf, weighting, numberFilterMethod);
       vectorizer.vectorize(this.outputPath, splitBy, trainingRatio);
     } catch (IOException e) {
       e.printStackTrace();
@@ -230,9 +211,6 @@ public class CliFrontend {
 
     formatter.setSyntaxPrefix("  general options:");
     formatter.printHelp(" ", this.options.get(GENERAL_OPTS));
-
-    formatter.setSyntaxPrefix("  index options:");
-    formatter.printHelp(" ", this.options.get(ACTION_INDEX));
 
     formatter.setSyntaxPrefix("  vectorize options:");
     formatter.printHelp(" ", this.options.get(ACTION_VECTORIZE));
@@ -283,7 +261,7 @@ public class CliFrontend {
     params = parseGeneralOptions(params);
 
     if (action.equals(ACTION_INDEX)) {
-      index(params);
+      index();
     } else if (action.equals(ACTION_VECTORIZE)) {
       vectorize(params);
     } else {

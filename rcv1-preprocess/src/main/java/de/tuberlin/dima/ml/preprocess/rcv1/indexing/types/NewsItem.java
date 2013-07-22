@@ -16,7 +16,7 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package com.celebihacker.ml.preprocess.rcv1.indexing.types;
+package de.tuberlin.dima.ml.preprocess.rcv1.indexing.types;
 
 import com.google.common.collect.Multimap;
 

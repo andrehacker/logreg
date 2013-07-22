@@ -1,12 +1,13 @@
-package com.celebihacker.ml.preprocess.rcv1.indexing.parsing;
+package de.tuberlin.dima.ml.preprocess.rcv1.indexing.parsing;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.NewsItem;
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.RCV1;
 import com.google.common.collect.Multimap;
+
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.NewsItem;
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.RCV1;
 
 /**
  * Patch RCV1-v1 articles to RCV1-v2.

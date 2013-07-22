@@ -12,12 +12,14 @@
  * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package com.celebihacker.ml.preprocess.rcv1.indexing.parsing;
+package de.tuberlin.dima.ml.preprocess.rcv1.indexing.parsing;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.NewsItem;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.NewsItem;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

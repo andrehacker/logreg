@@ -1,4 +1,4 @@
-package com.celebihacker.ml.preprocess.rcv1.vectorization.types;
+package de.tuberlin.dima.ml.preprocess.rcv1.vectorization.types;
 
 import java.io.DataInput;
 import java.io.DataOutput;

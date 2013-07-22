@@ -1,4 +1,4 @@
-package com.celebihacker.ml.preprocess.rcv1.indexing.featureextraction;
+package de.tuberlin.dima.ml.preprocess.rcv1.indexing.featureextraction;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -8,9 +8,9 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.StringField;
 
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.NewsItem;
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.RCV1;
-import com.celebihacker.ml.preprocess.rcv1.indexing.types.TextFieldWithTermVectors;
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.NewsItem;
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.RCV1;
+import de.tuberlin.dima.ml.preprocess.rcv1.indexing.types.TextFieldWithTermVectors;
 
 /**
  * Extract features as Lucene Document objects from parsed NewsItem objects.

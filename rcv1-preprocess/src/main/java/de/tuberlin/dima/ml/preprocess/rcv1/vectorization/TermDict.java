@@ -1,4 +1,4 @@
-package com.celebihacker.ml.preprocess.rcv1.vectorization;
+package de.tuberlin.dima.ml.preprocess.rcv1.vectorization;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
@@ -26,7 +26,7 @@ public class TermDict {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TermDict.class);
 
-    private final Map<String, TermInfo> terms;
+    public final Map<String, TermInfo> terms;
 
     private int nextTermId;
 
@@ -35,6 +35,10 @@ public class TermDict {
         this.nextTermId = 0;
     }
 
+    public void add(String term) {
+    	add(term, -1);
+    }
+    
     public void add(String term, int df) {
         if (this.terms.containsKey(term))
             return;
@@ -66,6 +70,40 @@ public class TermDict {
             return this.terms.get(term).df;
 
         throw new IllegalArgumentException("Unknown term " + term);
+    }
+    
+    public int dfTraining(String term) {
+        if (this.terms.containsKey(term))
+            return this.terms.get(term).dfTraining;
+
+        throw new IllegalArgumentException("Unknown term " + term);
+    }
+    
+    public int dfTest(String term) {
+        if (this.terms.containsKey(term))
+            return this.terms.get(term).dfTest;
+
+        throw new IllegalArgumentException("Unknown term " + term);
+    }    
+    
+    public void incDfTraining(String term) {
+    	this.terms.get(term).dfTraining++;
+    }
+    
+    public void incDfTest(String term) {
+    	this.terms.get(term).dfTest++;
+    }
+    
+    public boolean verify () {
+    	for (String key : this.terms.keySet()) {
+    		TermInfo ti = this.terms.get(key);
+    		
+    		if (ti.df != (ti.dfTraining + ti.dfTest))
+    			return false;
+    		
+    	}
+    	
+    	return true;
     }
 
     public void writeToFile(File file) throws IOException {
@@ -140,6 +178,9 @@ public class TermDict {
     private class TermInfo {
         public final int id;
         public final int df;
+
+		public int dfTraining;
+		public int dfTest;
 
         public TermInfo(int termId, int df) {
             this.id = termId;
