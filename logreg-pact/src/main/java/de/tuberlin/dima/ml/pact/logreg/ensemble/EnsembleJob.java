@@ -71,7 +71,7 @@ public class EnsembleJob implements PlanAssembler, PlanAssemblerDescription {
     String inputPathTest = args[2];
     String outputPath = args[3];
     int numFeatures =  Integer.parseInt(args[4]);
-    boolean runValidation = (args[5] == "1") ? true : false;
+    boolean runValidation = (args[5].equals("1")) ? true : false;
 
     FileDataSource source = new FileDataSource(TextInputFormat.class, inputPathTrain, "Train Input");
     source.setParameter(TextInputFormat.CHARSET_NAME, "ASCII");     // comment out this line for UTF-8 inputs
