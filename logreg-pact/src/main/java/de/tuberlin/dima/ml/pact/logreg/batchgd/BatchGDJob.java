@@ -144,7 +144,7 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
     // "file:///Users/uce/Desktop/rcv1libsvm/rcv1_topics_train.svm",
     // "file:///Users/uce/Desktop/rcv1libsvm/output/", "1", "0" };
     
-    boolean runLocal = false;
+    boolean runLocal = true;
     JobRunner runner = new JobRunner();
     if (runLocal) {
       

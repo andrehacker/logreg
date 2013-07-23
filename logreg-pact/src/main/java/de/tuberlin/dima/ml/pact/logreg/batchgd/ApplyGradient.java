@@ -35,6 +35,8 @@ public class ApplyGradient extends CrossStub {
     w.assign(gradient, Functions.MINUS);
     
     System.out.println("- New model: D=" + w.size() + " non-zeros=" + w.getNumNonZeroElements());
+    
+    out.collect(new PactRecord(new PactVector(w)));
   }
 
 }
