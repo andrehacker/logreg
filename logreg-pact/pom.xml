@@ -33,6 +33,12 @@
 			<version>0.2-ozone</version>
 			<scope>compile</scope>
 		</dependency>
+    <dependency>
+      <groupId>eu.stratosphere</groupId>
+      <artifactId>pact-examples</artifactId>
+      <version>0.2-ozone</version>
+      <scope>compile</scope>
+    </dependency>
 		<!-- Won't compile if I remove this -->
 		<!-- 
 		<dependency>

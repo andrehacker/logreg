@@ -17,12 +17,18 @@ import eu.stratosphere.pact.common.type.base.PactShort;
 
 public class ReduceTrainPartition extends ReduceStub {
   
+  public static final int IDX_PARTITION = 0;
+  public static final int IDX_VECTOR = 1;
+  public static final int IDX_LABEL = 2;
+  
+  static final String CONF_KEY_NUM_FEATURES = "parameter.NUM_FEATURES";
+  
   private int numFeatures;
   
   @Override
   public void open(Configuration parameters) throws Exception {
     super.open(parameters);
-    numFeatures = parameters.getInteger(EnsembleJob.CONF_KEY_NUM_FEATURES, 0);
+    numFeatures = parameters.getInteger(CONF_KEY_NUM_FEATURES, 0);
   }
 
   @Override
@@ -31,7 +37,7 @@ public class ReduceTrainPartition extends ReduceStub {
     System.out.println("REDUCER");
     
     // TODO Try AdaptiveLogisticRegression
-    boolean useAdaptive = true;
+    boolean useAdaptive = false;
     OnlineLogisticRegression learningAlgorithm = null;
     if (useAdaptive) {
       // TODO Use Adaptive Logistic Regression.
@@ -58,8 +64,8 @@ public class ReduceTrainPartition extends ReduceStub {
     while (records.hasNext()) {
 
       element = records.next();
-      vec = element.getField(EnsembleJob.ID_TRAIN_IN_VECTOR, PactVector.class).getValue();
-      short actualTarget = element.getField(EnsembleJob.ID_TRAIN_IN_LABEL, PactShort.class).getValue();
+      vec = element.getField(IDX_VECTOR, PactVector.class).getValue();
+      short actualTarget = element.getField(IDX_LABEL, PactShort.class).getValue();
       
       // Test prediction
       double prediction = learningAlgorithm.classifyScalar(vec);
@@ -73,7 +79,7 @@ public class ReduceTrainPartition extends ReduceStub {
     
     Vector w = learningAlgorithm.getBeta().viewRow(0);    // Returned vector is dense (which is good so)
     
-    int partition = element.getField(EnsembleJob.ID_TRAIN_IN_PARTITION, PactInteger.class).getValue();
+    int partition = element.getField(IDX_PARTITION, PactInteger.class).getValue();
     System.out.println("- partition: " + partition);
     System.out.println("- count: " + count);
     System.out.println("- non zeros: " + w.getNumNonZeroElements());
@@ -81,9 +87,9 @@ public class ReduceTrainPartition extends ReduceStub {
     learningAlgorithm.close();
     
     PactRecord outputRecord = new PactRecord();
-    outputRecord.setField(EnsembleJob.ID_COMBINE_IN_MODEL_ID, new PactInteger(1));
-    outputRecord.setField(EnsembleJob.ID_COMBINE_IN_PARTITION, new PactInteger(partition));
-    outputRecord.setField(EnsembleJob.ID_COMBINE_IN_MODEL, new PactVector(w));
+    outputRecord.setField(ReduceCombineModel.IDX_MODEL_ID, new PactInteger(1));
+    outputRecord.setField(ReduceCombineModel.IDX_PARTITION, new PactInteger(partition));
+    outputRecord.setField(ReduceCombineModel.IDX_MODEL, new PactVector(w));
     out.collect(outputRecord);
   }
 }

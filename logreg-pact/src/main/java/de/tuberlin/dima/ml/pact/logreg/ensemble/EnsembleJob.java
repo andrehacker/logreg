@@ -1,5 +1,7 @@
 package de.tuberlin.dima.ml.pact.logreg.ensemble;
 
+import de.tuberlin.dima.ml.pact.logreg.eval.CrossEval;
+import de.tuberlin.dima.ml.pact.logreg.eval.ReduceEvalSum;
 import de.tuberlin.dima.ml.pact.types.PactVector;
 import eu.stratosphere.pact.common.contract.CrossContract;
 import eu.stratosphere.pact.common.contract.FileDataSink;
@@ -33,29 +35,6 @@ import eu.stratosphere.pact.common.type.base.PactString;
  */
 public class EnsembleJob implements PlanAssembler, PlanAssemblerDescription {
   
-  static final String CONF_KEY_NUM_PARTITIONS = "parameter.NUM_PARTITIONS";
-  static final String CONF_KEY_NUM_FEATURES = "parameter.NUM_FEATURES";
-  
-  static final int ID_TRAIN_IN_PARTITION = 0;
-  static final int ID_TRAIN_IN_VECTOR = 1;
-  static final int ID_TRAIN_IN_LABEL = 2;
-  
-  static final int ID_COMBINE_IN_MODEL_ID = 0;
-  static final int ID_COMBINE_IN_PARTITION = 1;
-  static final int ID_COMBINE_IN_MODEL = 2;
-  
-  static final int ID_EVAL_IN_MODEL_ID = 0;
-  static final int ID_EVAL_IN_NUM_MODELS = 1;
-  static final int ID_EVAL_IN_FIRST_MODEL = 2;
-  
-  static final int ID_EVAL_OUT_MODEL_ID = 0;
-  static final int ID_EVAL_OUT_TOTAL = 1;
-  static final int ID_EVAL_OUT_CORRECT = 2;
-
-  static final int ID_OUT_MODEL_ID = 0;
-  static final int ID_OUT_TOTAL = 1;
-  static final int ID_OUT_CORRECT = 2;
-
   @Override
   public String getDescription() {
     return "Parameters: [numPartitions] [inputPathTrain] [inputPathTest] [outputPath] [numFeatures] [runValidation (0 or 1)]";
@@ -80,14 +59,14 @@ public class EnsembleJob implements PlanAssembler, PlanAssemblerDescription {
         .input(source)
         .name("Map: Random Partitioning")
         .build();
-    mapRandomPartitioning.getParameters().setInteger(CONF_KEY_NUM_PARTITIONS, numPartitions);
-    mapRandomPartitioning.getParameters().setInteger(CONF_KEY_NUM_FEATURES, numFeatures);
+    mapRandomPartitioning.getParameters().setInteger(MapRandomPartitioning.CONF_KEY_NUM_PARTITIONS, numPartitions);
+    mapRandomPartitioning.getParameters().setInteger(MapRandomPartitioning.CONF_KEY_NUM_FEATURES, numFeatures);
     
     ReduceContract reduceTrain = new ReduceContract.Builder(ReduceTrainPartition.class, PactInteger.class, 0)
         .input(mapRandomPartitioning)
         .name("Reduce: Train Partitions")
         .build();
-    reduceTrain.getParameters().setInteger(CONF_KEY_NUM_FEATURES, numFeatures);
+    reduceTrain.getParameters().setInteger(ReduceTrainPartition.CONF_KEY_NUM_FEATURES, numFeatures);
     
     ReduceContract reduceCombineModel = new ReduceContract.Builder(ReduceCombineModel.class, PactInteger.class, 0)
         .input(reduceTrain)
@@ -106,9 +85,9 @@ public class EnsembleJob implements PlanAssembler, PlanAssemblerDescription {
           .input2(sourceTest)
           .name("Cross: Evaluation")
           .build();
-      crossEval.getParameters().setInteger(CONF_KEY_NUM_FEATURES, numFeatures);
+      crossEval.getParameters().setInteger(CrossEval.CONF_KEY_NUM_FEATURES, numFeatures);
       
-      ReduceContract reduceEvalSum = new ReduceContract.Builder(ReduceEvalSum.class, PactString.class, ID_EVAL_OUT_MODEL_ID)
+      ReduceContract reduceEvalSum = new ReduceContract.Builder(ReduceEvalSum.class, PactString.class, ReduceEvalSum.IDX_MODEL_ID)
       .input(crossEval)
       .name("Reduce: Eval Sum Up")
       .build();

@@ -17,6 +17,11 @@ import eu.stratosphere.pact.common.type.base.PactString;
 
 public class MapRandomPartitioning extends MapStub {
   
+  public static final int IDX_INPUT_LINE = 0;
+  
+  static final String CONF_KEY_NUM_FEATURES = "parameter.NUM_FEATURES";
+  static final String CONF_KEY_NUM_PARTITIONS = "parameter.NUM_PARTITIONS";
+  
   Random random = new Random();
 
   private int numPartitions;
@@ -30,8 +35,8 @@ public class MapRandomPartitioning extends MapStub {
   @Override
   public void open(Configuration parameters) throws Exception {
     super.open(parameters);
-    numPartitions = parameters.getInteger(EnsembleJob.CONF_KEY_NUM_PARTITIONS, 0);
-    numFeatures = parameters.getInteger(EnsembleJob.CONF_KEY_NUM_FEATURES, 0);
+    numPartitions = parameters.getInteger(CONF_KEY_NUM_PARTITIONS, 0);
+    numFeatures = parameters.getInteger(CONF_KEY_NUM_FEATURES, 0);
     System.out.println("Prepare Map");
     System.out.println("- num partitions: " + numPartitions);
     System.out.println("- num features: " + numFeatures);
@@ -41,7 +46,7 @@ public class MapRandomPartitioning extends MapStub {
   public void map(PactRecord record, Collector<PactRecord> out)
       throws Exception {
     // TextInputFormat puts line into first field (as type PactString)
-    PactString line = record.getField(0, PactString.class);
+    PactString line = record.getField(IDX_INPUT_LINE, PactString.class);
     
     Vector v = new RandomAccessSparseVector(numFeatures);
     short label = LibSvmVectorReader.readVector(v, line.getValue());
@@ -51,9 +56,9 @@ public class MapRandomPartitioning extends MapStub {
     outputPartition.setValue(random.nextInt(numPartitions));
     outputVector.setValue(v);
     outputLabel.setValue(label);
-    outputRecord.setField(EnsembleJob.ID_TRAIN_IN_PARTITION, outputPartition);
-    outputRecord.setField(EnsembleJob.ID_TRAIN_IN_VECTOR, outputVector);
-    outputRecord.setField(EnsembleJob.ID_TRAIN_IN_LABEL, outputLabel);
+    outputRecord.setField(ReduceTrainPartition.IDX_PARTITION, outputPartition);
+    outputRecord.setField(ReduceTrainPartition.IDX_VECTOR, outputVector);
+    outputRecord.setField(ReduceTrainPartition.IDX_LABEL, outputLabel);
     out.collect(outputRecord);
 //    }
   }

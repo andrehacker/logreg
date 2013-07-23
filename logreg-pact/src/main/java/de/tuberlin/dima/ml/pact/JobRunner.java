@@ -4,34 +4,82 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.Stopwatch;
 
 import eu.stratosphere.nephele.configuration.ConfigConstants;
 import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.nephele.configuration.GlobalConfiguration;
+import eu.stratosphere.pact.client.LocalExecutor;
 import eu.stratosphere.pact.client.nephele.api.Client;
 import eu.stratosphere.pact.client.nephele.api.ErrorInPlanAssemblerException;
 import eu.stratosphere.pact.client.nephele.api.PactProgram;
 import eu.stratosphere.pact.client.nephele.api.ProgramInvocationException;
+import eu.stratosphere.pact.common.plan.Plan;
 
 /**
- * Runs a Stratosphere job (jar) using the pact.client api.
+ * Runs a Stratosphere job (jar), either locally (using LocalExecutor) or using
+ * the PACT/Nephele client api. Measures the runtime.
  * 
- * Allows the job to be executed on a cluster without using the cli
+ * Allows the job to be executed on a cluster without using the shell/cli.
  */
 public class JobRunner {
-
+  
+  private long lastRuntime = 0;    // runtime as seen from the client
+  private long lastNetRuntime = 0;  // net runtime of the JobEvent
+  
   /**
-   * Runs a Stratosphere job from a jar file using the pact client api
+   * Run a Stratosphere job on a local instance of Nephele (a bit like Hadoop
+   * local mode)
+   * 
+   * Note that only the local filesystem is supported, so data sources and sinks
+   * must use the "file://" schema.
+   * 
+   * @return the total runtime in milliseconds 
+   * 
+   * @throws Exception
+   */
+  public void runLocal(Plan plan) throws Exception {
+    LocalExecutor executor = new LocalExecutor();
+    executor.start();
+
+    final Stopwatch stop = new Stopwatch();
+    long netRuntime = 0;
+    try {
+      stop.start();
+      netRuntime = executor.executePlan(plan);
+      stop.stop();
+    } catch (Exception e) {
+      executor.stop();
+      throw e;
+    }
+    
+    executor.stop();
+    
+    lastRuntime = stop.elapsed(TimeUnit.MILLISECONDS);
+    lastNetRuntime = netRuntime; 
+  }
+
+   /**
+   * Runs a Stratosphere job from a jar file using the pact client api.
+   * Measures the total runtime.
    * 
    * @param jarPath
    *          Path to the jar to execute
    * @param jobArgs
    *          Arguments for the job
+   * @param assemblerClassName
+   *          Optional: Name of the Assembler class (e.g. de.tu-berlin.dima.MyJob)
+   *          If empty, it will execute the default job (as defined in jar manifest)
    * @param configPath
    *          Optional: The path (or file) containing the cluster-configuration
    *          (e.g. jobmanager). If empty, defaults will be applied (localhost)
+   * @param waitForCompletion
+   *          If true, the function will return when the job finished, otherwise
+   *          immediately
    */
-  public static void run(String jarPath, String[] jobArgs, String configPath) {
+  public void run(String jarPath, String assemblerClassName, String[] jobArgs, String configPath, boolean waitForCompletion) {
 
     File jar = new File(jarPath);
 
@@ -41,7 +89,12 @@ public class JobRunner {
       // Pass (classname and) arguments here
       // PactProgram(File jarFile, String... args)
       // PactProgram(File jarFile, String className, String... args)
-      PactProgram prog = new PactProgram(jar, jobArgs);
+      PactProgram prog = null;
+      if (assemblerClassName.equals("")) {
+        prog = new PactProgram(jar, jobArgs);
+      } else {
+        prog = new PactProgram(jar, assemblerClassName, jobArgs);
+      }
 
       // Client compiles and submits pact programs to nephele cluster
       // Configuration is the nephele configuration
@@ -69,15 +122,20 @@ public class JobRunner {
       //    to submit Job to nephele
       // unfortunately jobDuration returned from submitJobAndWait() is not
       // returned
-      // probably because it is only returned if we wait for completion
+      // probably because it is only returned if we wait for completion?!
       
       // Here we get: cannot access OptimizedPlan class file for OptimizedPlan not found
       // PROBLEM: Looks for short name, not for full qualified name!
       // This cannot be compiled from maven / javac. Works only if Eclipse built the class file for this class before
       //  http://stackoverflow.com/questions/9693889/maven-class-file-for-not-found-compilation-error
       //  http://maven.40175.n5.nabble.com/Maven-project-can-t-access-class-file-td4599976.html
-      client.run(prog, true);
-      System.out.println("Job submitted succesfully");
+      final Stopwatch stop = new Stopwatch();
+      stop.start();
+      client.run(prog, waitForCompletion);
+      stop.stop();
+
+      lastNetRuntime = 0;   // not available
+      lastRuntime = stop.elapsed(TimeUnit.MILLISECONDS);
 
     } catch (ProgramInvocationException e) {
       System.out.println(e.toString());
@@ -91,7 +149,7 @@ public class JobRunner {
    * Starts a Ozone job with the parameters defined in an java property file
    * Currently not used
    */
-  public static void runFromPropertyFile(String propertyFile) {
+  public void runFromPropertyFile(String propertyFile, boolean waitForCompletion) {
 
     Properties prop = new Properties();
     try {
@@ -112,7 +170,23 @@ public class JobRunner {
 
     String configPath = prop.getProperty("system.configpath", "");
 
-    run(jobJar, params, configPath);
+    run(jobJar, "", params, configPath, waitForCompletion);
+  }
+  
+  /**
+   * @return The runtime for the last job as seen from the client
+   */
+  public long getLastRuntime() {
+    return lastRuntime;
+  }
+  
+  /**
+   * Attention: Not supported if we run on a cluster.
+   * 
+   * @return The runtime for the internal JobEvent of the last job.
+   */
+  public long getLastNetRuntime() {
+    return lastNetRuntime;
   }
 
 }

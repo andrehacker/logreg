@@ -39,11 +39,5 @@ public class GradientReducer extends Reducer<NullWritable, VectorWritable, NullW
     log.debug("Gradient result: Dimensions: " + batchGradientSum.size() + " Non Zero: " + batchGradientSum.getNumNonZeroElements());
     context.write(NullWritable.get(), new VectorWritable(batchGradientSum));
   }
-
   
-  @Override
-  protected void cleanup(Context context)
-      throws IOException, InterruptedException {
-    super.cleanup(context);
-  }
 }

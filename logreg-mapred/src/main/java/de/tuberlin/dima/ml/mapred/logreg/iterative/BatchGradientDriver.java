@@ -27,7 +27,8 @@ import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
 import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
 
 /**
- * Batch gradient for logistic regression
+ * NOT-FINISHED Batch gradient for logistic regression
+ * TODO Apply gradient to current model instead of overwriting it
  */
 public class BatchGradientDriver {
 
