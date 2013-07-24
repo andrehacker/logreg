@@ -73,6 +73,7 @@ public class CrossEval extends CrossStub {
       modelCached = true;
     }
     
+    // TODO Change to ClassificationModel and classify. For EnsembleModel I cannot really predict the probability
     double prediction = model.predict(x);
     recordOut.setField(ReduceEvalSum.IDX_MODEL_ID, one);
     recordOut.setField(ReduceEvalSum.IDX_TOTAL, one);

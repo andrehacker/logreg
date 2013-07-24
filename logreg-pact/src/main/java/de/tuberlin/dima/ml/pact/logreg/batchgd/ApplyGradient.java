@@ -15,6 +15,7 @@ public class ApplyGradient extends CrossStub {
   public static final String CONF_KEY_LEARNING_RATE = "parameter.LEARNING_RATE";
 
   public static final int IDX_INPUT1_OLD_MODEL= 0;
+  
   public static final int IDX_INPUT2_MODEL_KEY = 0;
   public static final int IDX_INPUT2_GRADIENT = 1;
   
@@ -33,6 +34,7 @@ public class ApplyGradient extends CrossStub {
     
     Vector w = modelRecord.getField(IDX_INPUT1_OLD_MODEL, PactVector.class).getValue();
     Vector gradient = gradientRecord.getField(IDX_INPUT2_GRADIENT, PactVector.class).getValue();
+    
     System.out.println("- Old model: D=" + w.size() + " non-zeros=" + w.getNumNonZeroElements());
     System.out.println("- Gradient: D=" + gradient.size() + " non-zeros=" + gradient.getNumNonZeroElements());
 
@@ -45,9 +47,12 @@ public class ApplyGradient extends CrossStub {
       w = new DenseVector(w);
     }
     
-    System.out.println("- New model: D=" + w.size() + " non-zeros=" + w.getNumNonZeroElements() + " is-dense:" + w.isDense());
+    System.out.println("- New model: D=" + w.size() + " non-zeros=" + w.getNumNonZeroElements() + " is-dense=" + w.isDense() + " learningRate=" + learningRate);
+    System.out.println("--------");
 
-    out.collect(new PactRecord(new PactVector(w)));
+    PactRecord recordOut = new PactRecord(1);
+    recordOut.setField(ComputeGradientParts.IDX_INPUT2_MODEL, new PactVector(w));
+    out.collect(recordOut);
   }
 
 }

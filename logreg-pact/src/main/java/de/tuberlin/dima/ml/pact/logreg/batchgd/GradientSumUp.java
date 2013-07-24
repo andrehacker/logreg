@@ -20,7 +20,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 
 import de.tuberlin.dima.ml.pact.types.PactVector;
-import eu.stratosphere.pact.common.contract.ReduceContract.Combinable;
 import eu.stratosphere.pact.common.stubs.Collector;
 import eu.stratosphere.pact.common.stubs.ReduceStub;
 import eu.stratosphere.pact.common.type.PactRecord;
@@ -29,36 +28,46 @@ import eu.stratosphere.pact.common.type.base.PactInteger;
 /**
  * Sums up the gradients from subsets of the data to a global gradient. This is
  * possible because the gradient is in our case the sum of the gradients of the
- * individual data points.
- * 
- * The reduce method is combinable. However we don't implement combine because
- * the default behaviour is to use the reduce method as combine, which is fine
- * here.
  */
-@Combinable
 public class GradientSumUp extends ReduceStub {
   
   // Has to be similar because we want to use the reduce method as combiner 
-  public static final int IDX_MODEL_KEY = ApplyGradient.IDX_INPUT2_MODEL_KEY;
-  public static final int IDX_GRADIENT_PART = ApplyGradient.IDX_INPUT2_GRADIENT;
+  public static final int IDX_MODEL_KEY = 0;
+  public static final int IDX_GRADIENT_PART = 1;
+  public static final int IDX_TOTAL = 2;
+  public static final int IDX_CORRECT = 3;
 
   @Override
   public void reduce(Iterator<PactRecord> gradientParts,
       Collector<PactRecord> out) throws Exception {
+
+    // Start with values from first record
     PactRecord first = gradientParts.next();
     PactInteger modelKey = first.getField(IDX_MODEL_KEY, PactInteger.class);
     Vector gradient = first.getField(IDX_GRADIENT_PART, PactVector.class).getValue();
-
+    int total = first.getField(IDX_TOTAL, PactInteger.class).getValue();
+    int correct = first.getField(IDX_CORRECT, PactInteger.class).getValue();
+    PactRecord record = null;
     while (gradientParts.hasNext()) {
-      Vector gradientPart = gradientParts.next()
-          .getField(IDX_GRADIENT_PART, PactVector.class).getValue();
+      // Gradient sum up
+      record = gradientParts.next();
+      Vector gradientPart = record.getField(IDX_GRADIENT_PART, PactVector.class).getValue();
       gradient.assign(gradientPart, Functions.PLUS);
+
+      // In sample validation
+      total += record.getField(IDX_TOTAL, PactInteger.class).getValue();
+      correct += record.getField(IDX_CORRECT, PactInteger.class).getValue();
     }
     
     PactRecord recordOut = new PactRecord();
     recordOut.setField(ApplyGradient.IDX_INPUT2_MODEL_KEY, modelKey);
     recordOut.setField(ApplyGradient.IDX_INPUT2_GRADIENT, new PactVector(gradient));
     out.collect(recordOut);
+    
+    // TODO Forward Validation results
+    System.out.println("--------\nIN-SAMPLE-VALIDATION\n--------");
+    System.out.println("ACCURACY (training-data, last model): " + ((double)correct / (double)total) + " (= " + correct + " / " + total + ")");
+    System.out.println("--------");
   }
 
 }

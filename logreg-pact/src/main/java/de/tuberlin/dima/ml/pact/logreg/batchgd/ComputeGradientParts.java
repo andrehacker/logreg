@@ -29,26 +29,40 @@ import eu.stratosphere.pact.common.type.base.PactInteger;
  */
 public class ComputeGradientParts extends CrossStub {
   
+  public static final int IDX_INPUT1_INPUT_RECORD = 0;
+  public static final int IDX_INPUT1_LABEL = 1;
+  
+  public static final int IDX_INPUT2_MODEL = 0;
+  
   private final PactRecord recordOut = new PactRecord();
   private final PactVector vectorOut = new PactVector();
-  private static final PactInteger staticModelkey = new PactInteger(1);
+  private static final PactInteger zero = new PactInteger(0);
+  private static final PactInteger one = new PactInteger(1);
   
   private static int totalProcessed = 0;
 
+  /**
+   * TODO Feature: Produce multiple models, e.g. with different regularization
+   */
 	@Override
 	public void cross(PactRecord trainingVector, PactRecord model, Collector<PactRecord> out) throws Exception {
 
-        int y = trainingVector.getField(0, PactInteger.class).getValue();
-		Vector xTrain = trainingVector.getField(1, PactVector.class).getValue();
-		Vector w = model.getField(0, PactVector.class).getValue();
+        int y = trainingVector.getField(IDX_INPUT1_INPUT_RECORD, PactInteger.class).getValue();
+		Vector x = trainingVector.getField(IDX_INPUT1_LABEL, PactVector.class).getValue();
+		Vector w = model.getField(IDX_INPUT2_MODEL, PactVector.class).getValue();
 		
 //		System.out.println("Training vector: size=" + xTrain.size() + " non-zeros=" + xTrain.getNumNonZeroElements());
 
-        Vector gradient = LogRegMath.computePartialGradient(xTrain, w, y);
+        Vector gradient = LogRegMath.computePartialGradient(x, w, y);
+
+        // In sample validation
+        double prediction = LogRegMath.classify(x, w);
+        
         vectorOut.setValue(gradient);
-        // TODO Feature: Produce multiple models, e.g. with different regularization
-        recordOut.setField(GradientSumUp.IDX_MODEL_KEY, staticModelkey);
+        recordOut.setField(GradientSumUp.IDX_MODEL_KEY, one);
         recordOut.setField(GradientSumUp.IDX_GRADIENT_PART, vectorOut);
+        recordOut.setField(GradientSumUp.IDX_TOTAL, one);
+        recordOut.setField(GradientSumUp.IDX_CORRECT, (prediction == y)?one:zero);
         out.collect(recordOut);
         
         totalProcessed++;

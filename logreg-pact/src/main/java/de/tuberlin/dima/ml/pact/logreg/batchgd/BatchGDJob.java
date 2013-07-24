@@ -121,8 +121,8 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
 
     String numSubTasks = "1";
     String inputPathWeights = "file:///home/andre/dev/logreg-repo/logreg-pact/bgd-initial-weights";
-    String inputFileTrain = "file:///home/andre/dev/datasets/libsvm-rcv1/rcv1_train_20000.binary";
-    String inputFileTest = "file:///home/andre/dev/datasets/libsvm-rcv1/rcv1_test_10000.binary";
+    String inputFileTrain = "file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_5000.svm";
+    String inputFileTest = "file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_test_1000.svm";
     String outputFile = "file:///home/andre/output-bgd";
     String numIterations = "3";
     String runValidation = "0";
@@ -141,7 +141,7 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
     // "file:///Users/uce/Desktop/rcv1libsvm/rcv1_topics_train.svm",
     // "file:///Users/uce/Desktop/rcv1libsvm/output/", "1", "0" };
     
-    boolean runLocal = false;
+    boolean runLocal = true;
     JobRunner runner = new JobRunner();
     if (runLocal) {
       
