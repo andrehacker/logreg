@@ -29,16 +29,16 @@ public class CrossEval extends CrossStub {
   
   public static final String CONF_KEY_NUM_FEATURES = "parameter.NUM_FEATURES";
   
-  public static final int IDX_MODEL_ID = 0;
-  public static final int IDX_NUM_MODELS = 1;
-  public static final int IDX_FIRST_MODEL = 2;
+  public static final int IDX_INPUT1_MODEL_ID = 0;
+  public static final int IDX_INPUT1_NUM_MODELS = 1;
+  public static final int IDX_INPUT1_FIRST_MODEL = 2;
+  
+  public static final int IDX_INPUT2_INPUT_RECORD = 0;
   
   private int numFeatures;
   
   private boolean modelCached = false;
   private RegressionModel model = null; // this will be cached in first local run by the udf
-  
-//  private OnlineAccuracy onlineAccuracy = new OnlineAccuracy(0.5);
   
   private final PactRecord recordOut = new PactRecord();
   
@@ -56,18 +56,18 @@ public class CrossEval extends CrossStub {
       Collector<PactRecord> out) throws Exception {
     
     // Read test item
-    PactString line = dataRecord.getField(0, PactString.class);
+    PactString line = dataRecord.getField(IDX_INPUT2_INPUT_RECORD, PactString.class);
     Vector x = new RandomAccessSparseVector(numFeatures);
     short label = LibSvmVectorReader.readVector(x, line.getValue());
 
     if (! modelCached) {
       // Read ensemble model
       // TODO Major: Bad that we build the model for every call - should always stay the same!
-      int numModels = modelRecord.getField(IDX_NUM_MODELS, PactInteger.class).getValue();
+      int numModels = modelRecord.getField(IDX_INPUT1_NUM_MODELS, PactInteger.class).getValue();
       System.out.println("Num Models: " + numModels);
       ArrayList<Vector> ensembleModels = Lists.newArrayList();
       for (int i=0; i<numModels; ++i) {
-        ensembleModels.add(modelRecord.getField(IDX_FIRST_MODEL + i, PactVector.class).getValue());
+        ensembleModels.add(modelRecord.getField(IDX_INPUT1_FIRST_MODEL + i, PactVector.class).getValue());
       }
       model = new LogRegEnsembleModel(ensembleModels, 0.5d, VotingSchema.MAJORITY_VOTE);
       modelCached = true;

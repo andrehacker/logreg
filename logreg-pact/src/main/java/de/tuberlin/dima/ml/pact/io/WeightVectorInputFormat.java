@@ -13,46 +13,49 @@ import eu.stratosphere.pact.common.type.base.parser.DecimalTextIntParser;
 
 public class WeightVectorInputFormat extends DelimitedInputFormat {
 
-	// --------------------------------------- Config ---------------------------------------------
+  // --------------------------------------- Config  ---------------------------------------------
 
-	public static final String NUM_FEATURES = "libsvm.num_features";
+  public static final String NUM_FEATURES = "libsvm.num_features";
 
-	private static final int NUM_FEATURES_UNDEFINED = -1;
+  private static final int NUM_FEATURES_UNDEFINED = -1;
 
-	private int numFeatures;
+  private int numFeatures;
 
-	// --------------------------------------- Output ---------------------------------------------
+  // --------------------------------------- Output ---------------------------------------------
 
-	private final PactVector weights = new PactVector();
+  private final PactVector weights = new PactVector();
 
-	@Override
-	public void configure(Configuration parameters) {
-		super.configure(parameters);
+  @Override
+  public void configure(Configuration parameters) {
+    super.configure(parameters);
 
-		// num features
-		this.numFeatures = parameters.getInteger(NUM_FEATURES, NUM_FEATURES_UNDEFINED);
-		if (this.numFeatures == NUM_FEATURES_UNDEFINED) {
-			throw new IllegalArgumentException("Please specify the number of features for the vector");
-		}
-	}
+    // num features
+    this.numFeatures = parameters.getInteger(NUM_FEATURES, NUM_FEATURES_UNDEFINED);
+    if (this.numFeatures == NUM_FEATURES_UNDEFINED) {
+      throw new IllegalArgumentException("Please specify the number of features for the vector");
+    }
+  }
 
-	@Override
-	public boolean readRecord(PactRecord target, byte[] bytes, int offset, int numBytes) {
+  @Override
+  public boolean readRecord(PactRecord target, byte[] bytes, int offset,
+      int numBytes) {
 
-		final int limit = offset + numBytes;
+    final int limit = offset + numBytes;
 
-		DecimalTextIntParser intParser = new DecimalTextIntParser();
-		PactInteger initial = new PactInteger();
+    DecimalTextIntParser intParser = new DecimalTextIntParser();
+    PactInteger initial = new PactInteger();
 
-		intParser.parseField(bytes, offset, limit, ' ', initial);
+    intParser.parseField(bytes, offset, limit, ' ', initial);
 
-		System.out.println("WeightVectorInputFormat: numFeatures=" + this.numFeatures + " initialValue=" + initial.getValue());
-		Vector vector = initial.getValue() == 0 ? new RandomAccessSparseVector(this.numFeatures) : new DenseVector(
-			this.numFeatures).assign(initial.getValue());
+    System.out.println("WeightVectorInputFormat: numFeatures="
+        + this.numFeatures + " initialValue=" + initial.getValue());
 
-		this.weights.setValue(vector);
-		target.setField(0, this.weights);
+    Vector vector = initial.getValue() == 0 ? new RandomAccessSparseVector(this.numFeatures)
+        : new DenseVector(this.numFeatures).assign(initial.getValue());
 
-		return true;
-	}
+    this.weights.setValue(vector);
+    target.setField(0, this.weights);
+
+    return true;
+  }
 }

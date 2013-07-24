@@ -33,13 +33,10 @@ import eu.stratosphere.pact.generic.contract.BulkIteration;
 
 public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
 
-  static final int ID_SUM_IN_KEY = 0;
-  static final int ID_SUM_IN_GRADIENT_PART = 1;
-
   private static final int CCAT = 33;
-  private static final int ECAT = 59;
-  private static final int GCAT = 70;
-  private static final int MCAT = 102;
+//  private static final int ECAT = 59;
+//  private static final int GCAT = 70;
+//  private static final int MCAT = 102;
 
   private static final int NUM_FEATURES = 47237;
 
@@ -75,7 +72,7 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
     iteration.setMaximumNumberOfIterations(numIterations);
     System.out.println("NUM ITERATIONS: " + numIterations);
 
-    CrossContract computeGradientParts = CrossContract.builder(ComputeGradientPart.class)
+    CrossContract computeGradientParts = CrossContract.builder(ComputeGradientParts.class)
         .input1(trainingVectors)
         .input2(iteration.getPartialSolution())
         .name("Compute Gradient Parts (Cross)")
@@ -87,7 +84,7 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
     // eu.stratosphere.pact.compiler.CompilerException: Unknown local strategy:
     // ALL_GROUP at
     // eu.stratosphere.pact.compiler.costs.CostEstimator.costOperator(CostEstimator.java:185)
-    ReduceContract computeGradient = ReduceContract.builder(GradientSum.class, PactInteger.class, 0)
+    ReduceContract computeGradient = ReduceContract.builder(GradientSumUp.class, PactInteger.class, 0)
         .input(computeGradientParts)
         .name("Sum up Gradient (Reduce)")
         .build();
@@ -124,8 +121,8 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
 
     String numSubTasks = "1";
     String inputPathWeights = "file:///home/andre/dev/logreg-repo/logreg-pact/bgd-initial-weights";
-    String inputFileTrain = "file:///home/andre/dev/datasets/libsvm-rcv1/rcv1_train.binary";
-    String inputFileTest = "file:///home/andre/dev/datasets/libsvm-rcv1/rcv1_test_20000.binary";
+    String inputFileTrain = "file:///home/andre/dev/datasets/libsvm-rcv1/rcv1_train_20000.binary";
+    String inputFileTest = "file:///home/andre/dev/datasets/libsvm-rcv1/rcv1_test_10000.binary";
     String outputFile = "file:///home/andre/output-bgd";
     String numIterations = "3";
     String runValidation = "0";
@@ -144,7 +141,7 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
     // "file:///Users/uce/Desktop/rcv1libsvm/rcv1_topics_train.svm",
     // "file:///Users/uce/Desktop/rcv1libsvm/output/", "1", "0" };
     
-    boolean runLocal = true;
+    boolean runLocal = false;
     JobRunner runner = new JobRunner();
     if (runLocal) {
       

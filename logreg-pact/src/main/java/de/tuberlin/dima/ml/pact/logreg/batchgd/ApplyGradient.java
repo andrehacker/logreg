@@ -1,5 +1,6 @@
 package de.tuberlin.dima.ml.pact.logreg.batchgd;
 
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 
@@ -12,6 +13,10 @@ import eu.stratosphere.pact.common.type.PactRecord;
 public class ApplyGradient extends CrossStub {
   
   public static final String CONF_KEY_LEARNING_RATE = "parameter.LEARNING_RATE";
+
+  public static final int IDX_INPUT1_OLD_MODEL= 0;
+  public static final int IDX_INPUT2_MODEL_KEY = 0;
+  public static final int IDX_INPUT2_GRADIENT = 1;
   
   private double learningRate = 0;
   
@@ -26,16 +31,22 @@ public class ApplyGradient extends CrossStub {
       Collector<PactRecord> out) throws Exception {
     System.out.println("--------\nAPPLY GRADIENT\n--------");
     
-    Vector w = modelRecord.getField(0, PactVector.class).getValue();
-    Vector gradient = gradientRecord.getField(0, PactVector.class).getValue();
+    Vector w = modelRecord.getField(IDX_INPUT1_OLD_MODEL, PactVector.class).getValue();
+    Vector gradient = gradientRecord.getField(IDX_INPUT2_GRADIENT, PactVector.class).getValue();
     System.out.println("- Old model: D=" + w.size() + " non-zeros=" + w.getNumNonZeroElements());
     System.out.println("- Gradient: D=" + gradient.size() + " non-zeros=" + gradient.getNumNonZeroElements());
 
+    // TODO Apply different learning rates, and find out which performs best
     gradient.assign(Functions.MULT, learningRate);
     w.assign(gradient, Functions.MINUS);
     
-    System.out.println("- New model: D=" + w.size() + " non-zeros=" + w.getNumNonZeroElements());
+    if (!w.isDense()) {
+      System.out.println("- Converting model to dense vector");
+      w = new DenseVector(w);
+    }
     
+    System.out.println("- New model: D=" + w.size() + " non-zeros=" + w.getNumNonZeroElements() + " is-dense:" + w.isDense());
+
     out.collect(new PactRecord(new PactVector(w)));
   }
 

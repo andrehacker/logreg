@@ -25,14 +25,14 @@ public class ReduceCombineModel extends ReduceStub {
     while (records.hasNext()) {
       record = records.next();
       recordOut.setField(
-          CrossEval.IDX_FIRST_MODEL + numModels,
+          CrossEval.IDX_INPUT1_FIRST_MODEL + numModels,
           record.getField(IDX_MODEL, PactVector.class));
       
       ++numModels;
     }
-    recordOut.setField(CrossEval.IDX_NUM_MODELS, new PactInteger(numModels));
+    recordOut.setField(CrossEval.IDX_INPUT1_NUM_MODELS, new PactInteger(numModels));
     
-    recordOut.setField(CrossEval.IDX_MODEL_ID, 
+    recordOut.setField(CrossEval.IDX_INPUT1_MODEL_ID, 
         record.getField(IDX_MODEL_ID, PactInteger.class));
     
     out.collect(recordOut);

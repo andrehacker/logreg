@@ -24,14 +24,16 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 
 /**
- * Computes the gradient for the logistic regression function for a given model
- * (weight vector) and a partition of the data.
+ * Computes the gradient for the logistic regression function for a single data
+ * point and a given model (weight vector).
  */
-public class ComputeGradientPart extends CrossStub {
+public class ComputeGradientParts extends CrossStub {
   
   private final PactRecord recordOut = new PactRecord();
   private final PactVector vectorOut = new PactVector();
-  private static final PactInteger one = new PactInteger(1);
+  private static final PactInteger staticModelkey = new PactInteger(1);
+  
+  private static int totalProcessed = 0;
 
 	@Override
 	public void cross(PactRecord trainingVector, PactRecord model, Collector<PactRecord> out) throws Exception {
@@ -41,13 +43,17 @@ public class ComputeGradientPart extends CrossStub {
 		Vector w = model.getField(0, PactVector.class).getValue();
 		
 //		System.out.println("Training vector: size=" + xTrain.size() + " non-zeros=" + xTrain.getNumNonZeroElements());
-//        System.out.println("Model: size=" + w.size() + " non-zeros=" + w.getNumNonZeroElements());
 
         Vector gradient = LogRegMath.computePartialGradient(xTrain, w, y);
         vectorOut.setValue(gradient);
-        recordOut.setField(BatchGDJob.ID_SUM_IN_KEY, one);
-        recordOut.setField(BatchGDJob.ID_SUM_IN_GRADIENT_PART, vectorOut);
+        // TODO Feature: Produce multiple models, e.g. with different regularization
+        recordOut.setField(GradientSumUp.IDX_MODEL_KEY, staticModelkey);
+        recordOut.setField(GradientSumUp.IDX_GRADIENT_PART, vectorOut);
         out.collect(recordOut);
+        
+        totalProcessed++;
+        if (totalProcessed%1000 == 0)
+          System.out.println("totalProcessed=" + totalProcessed);
 	}
 
 }
