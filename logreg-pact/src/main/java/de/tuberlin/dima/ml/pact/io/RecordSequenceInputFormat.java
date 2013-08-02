@@ -10,10 +10,10 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.generic.io.InputFormat;
 
 /**
- * Base class for Input Formats that have only a single split and usually don't
- * read from files, but instead emit a predefined set of records. The process of
- * creating the records can be made dynamic to a certain extend by overriding
- * configure (and so sending primitive parameters to the InputFormat).<br/>
+ * Base class for Input Formats that have only a single split and but instead
+ * emit a sequence of records. The process of creating the records can be
+ * made dynamic to a certain extend by overriding configure (i.e. by sending
+ * simple parameters to the InputFormat).<br/>
  * 
  * Use {@link GenericDataSource} to get a Contract that can be used as an job
  * input. <br/>
@@ -25,14 +25,19 @@ import eu.stratosphere.pact.generic.io.InputFormat;
  * file and use this as input.
  * 
  */
-public abstract class SingletonInputFormat implements InputFormat<PactRecord, GenericInputSplit> {
+public abstract class RecordSequenceInputFormat implements InputFormat<PactRecord, GenericInputSplit> {
+  
+  int recordsProcessed = 0;
   
   /**
-   * This must be overridden and return the number of records for statistics
+   * The implementation must return the number of records.
+   * This class will call getNextRecord() this many times.
    * 
    * @return The number of records this InputFormat will produce
    */
-  abstract long getStatisticsNumberRecords();
+  abstract long getNumberRecords();
+  
+  abstract boolean fillNextRecord(PactRecord record);
   
   /**
    * Default implementation for configure where we don't get any parameters.
@@ -41,9 +46,9 @@ public abstract class SingletonInputFormat implements InputFormat<PactRecord, Ge
   public void configure(Configuration parameters) { }
 
   @Override
-  public BaseStatistics getStatistics(BaseStatistics cachedStatistics)
+  public final BaseStatistics getStatistics(BaseStatistics cachedStatistics)
       throws IOException {
-    // When this method is called, configured was called before
+    // When this method is called, configure was called before
     // I guess this is called once only when the job gets compiled
     
     return new BaseStatistics() {
@@ -53,7 +58,7 @@ public abstract class SingletonInputFormat implements InputFormat<PactRecord, Ge
       }
       @Override
       public long getNumberOfRecords() {
-        return getStatisticsNumberRecords();
+        return getNumberRecords();
       }
       @Override
       public float getAverageRecordWidth() {
@@ -63,7 +68,7 @@ public abstract class SingletonInputFormat implements InputFormat<PactRecord, Ge
   }
 
   @Override
-  public GenericInputSplit[] createInputSplits(int minNumSplits)
+  public final GenericInputSplit[] createInputSplits(int minNumSplits)
       throws IOException {
     // return a single split
     GenericInputSplit[] splits = new GenericInputSplit[] {new GenericInputSplit(0)};
@@ -71,17 +76,28 @@ public abstract class SingletonInputFormat implements InputFormat<PactRecord, Ge
   }
 
   @Override
-  public Class<? extends GenericInputSplit> getInputSplitType() {
+  public final Class<? extends GenericInputSplit> getInputSplitType() {
     return GenericInputSplit.class;
   }
 
   @Override
-  public void open(GenericInputSplit split) throws IOException {
+  public final void open(GenericInputSplit split) throws IOException {
     // Nothing to do here
+  }
+  
+  @Override
+  public final boolean nextRecord(PactRecord record) throws IOException {
+    ++ recordsProcessed;
+    return fillNextRecord(record);
+  }
+  
+  @Override
+  public final boolean reachedEnd() throws IOException {
+    return (recordsProcessed >= getNumberRecords());
   }
 
   @Override
-  public void close() throws IOException {
+  public final void close() throws IOException {
     // Nothing to do here
   }
 

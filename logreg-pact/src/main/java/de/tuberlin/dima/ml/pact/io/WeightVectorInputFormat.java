@@ -1,7 +1,5 @@
 package de.tuberlin.dima.ml.pact.io;
 
-import java.io.IOException;
-
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
@@ -9,21 +7,13 @@ import de.tuberlin.dima.ml.pact.types.PactVector;
 import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.pact.common.type.PactRecord;
 
-public class WeightVectorInputFormat extends SingletonInputFormat {
-
-  // ------------------------------------- Configuration ------------------------------------------
+public class WeightVectorInputFormat extends RecordSequenceInputFormat {
 
   public static final String CONF_KEY_NUM_FEATURES = "weight_vector_input.num_features";
-  public static final String CONF_KEY_INITIAL_VALUE = "weight_vector_input.initial_value";
-  
   private int numFeatures = 0;
+  
+  public static final String CONF_KEY_INITIAL_VALUE = "weight_vector_input.initial_value";
   private int initialValue = 0;
-
-  // ------------------------------------- Private Settings ------------------------------------------
-  
-  private static final int NUMBER_OF_RECORDS = 1;
-  
-  private boolean reachedEnd = false;
   
   @Override
   public void configure(Configuration parameters) {
@@ -38,22 +28,12 @@ public class WeightVectorInputFormat extends SingletonInputFormat {
   }
 
   @Override
-  long getStatisticsNumberRecords() {
-    return NUMBER_OF_RECORDS;
-  }
+  long getNumberRecords() { return 1; }
 
   @Override
-  public boolean reachedEnd() throws IOException {
-    return reachedEnd;
-  }
-
-  @Override
-  public boolean nextRecord(PactRecord record) throws IOException {
-    reachedEnd = true;
-    
+  boolean fillNextRecord(PactRecord record) {
     Vector vector = new RandomAccessSparseVector(numFeatures);
     if (this.initialValue != 0) vector.assign(initialValue);
-    
     record.setField(0, new PactVector(vector));
     return true;
   }
