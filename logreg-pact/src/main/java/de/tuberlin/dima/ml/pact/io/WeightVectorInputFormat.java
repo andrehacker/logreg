@@ -1,61 +1,61 @@
 package de.tuberlin.dima.ml.pact.io;
 
-import org.apache.mahout.math.DenseVector;
+import java.io.IOException;
+
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 import de.tuberlin.dima.ml.pact.types.PactVector;
 import eu.stratosphere.nephele.configuration.Configuration;
-import eu.stratosphere.pact.common.io.DelimitedInputFormat;
 import eu.stratosphere.pact.common.type.PactRecord;
-import eu.stratosphere.pact.common.type.base.PactInteger;
-import eu.stratosphere.pact.common.type.base.parser.DecimalTextIntParser;
 
-public class WeightVectorInputFormat extends DelimitedInputFormat {
+public class WeightVectorInputFormat extends SingletonInputFormat {
 
-  // --------------------------------------- Config  ---------------------------------------------
+  // ------------------------------------- Configuration ------------------------------------------
 
-  public static final String NUM_FEATURES = "libsvm.num_features";
+  public static final String CONF_KEY_NUM_FEATURES = "weight_vector_input.num_features";
+  public static final String CONF_KEY_INITIAL_VALUE = "weight_vector_input.initial_value";
+  
+  private int numFeatures = 0;
+  private int initialValue = 0;
 
-  private static final int NUM_FEATURES_UNDEFINED = -1;
-
-  private int numFeatures;
-
-  // --------------------------------------- Output ---------------------------------------------
-
-  private final PactVector weights = new PactVector();
-
+  // ------------------------------------- Private Settings ------------------------------------------
+  
+  private static final int NUMBER_OF_RECORDS = 1;
+  
+  private boolean reachedEnd = false;
+  
   @Override
   public void configure(Configuration parameters) {
-    super.configure(parameters);
-
-    // num features
-    this.numFeatures = parameters.getInteger(NUM_FEATURES, NUM_FEATURES_UNDEFINED);
-    if (this.numFeatures == NUM_FEATURES_UNDEFINED) {
-      throw new IllegalArgumentException("Please specify the number of features for the vector");
+    this.numFeatures = parameters.getInteger(CONF_KEY_NUM_FEATURES, -1);
+    if (this.numFeatures == -1) {
+      throw new IllegalArgumentException("Please specify the value for CONF_KEY_NUM_FEATURES");
+    }
+    this.initialValue = parameters.getInteger(CONF_KEY_INITIAL_VALUE, Integer.MIN_VALUE);
+    if (this.initialValue == Integer.MIN_VALUE) {
+      throw new IllegalArgumentException("Please specify the value for CONF_KEY_INITIAL_VALUE");
     }
   }
 
   @Override
-  public boolean readRecord(PactRecord target, byte[] bytes, int offset,
-      int numBytes) {
+  long getStatisticsNumberRecords() {
+    return NUMBER_OF_RECORDS;
+  }
 
-    final int limit = offset + numBytes;
+  @Override
+  public boolean reachedEnd() throws IOException {
+    return reachedEnd;
+  }
 
-    DecimalTextIntParser intParser = new DecimalTextIntParser();
-    PactInteger initial = new PactInteger();
-
-    intParser.parseField(bytes, offset, limit, ' ', initial);
-
-    System.out.println("WeightVectorInputFormat: numFeatures="
-        + this.numFeatures + " initialValue=" + initial.getValue());
-
-    Vector vector = initial.getValue() == 0 ? new RandomAccessSparseVector(this.numFeatures)
-        : new DenseVector(this.numFeatures).assign(initial.getValue());
-
-    this.weights.setValue(vector);
-    target.setField(0, this.weights);
-
+  @Override
+  public boolean nextRecord(PactRecord record) throws IOException {
+    reachedEnd = true;
+    
+    Vector vector = new RandomAccessSparseVector(numFeatures);
+    if (this.initialValue != 0) vector.assign(initialValue);
+    
+    record.setField(0, new PactVector(vector));
     return true;
   }
+
 }

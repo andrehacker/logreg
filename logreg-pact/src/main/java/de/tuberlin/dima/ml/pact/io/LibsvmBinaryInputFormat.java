@@ -16,15 +16,15 @@ import eu.stratosphere.pact.common.type.base.parser.DecimalTextIntParser;
  * Read file in libsvm format.
  * The first numbers are a comma-separated list of the labels. After two spaces follows a sparse encoding of the feature
  * vector, e.g. '9,33,62,60,70  268:0.059 440:0.031 577:0.064'
- * If the labels contain the target label, the label will be set to 1, otherwise it will be 0.
+ * If the labels is equal to the positive class label, the label will be set to 1, otherwise it will be 0.
  */
 public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 
 	// ------------------------------------- Config Keys ------------------------------------------
 
-	public static final String TARGET = "libsvm.target";
+	public static final String CONF_KEY_POSITIVE_CLASS = "libsvm.positive_class";
 
-	public static final String NUM_FEATURES = "libsvm.num_features";
+	public static final String CONF_KEY_NUM_FEATURES = "libsvm.num_features";
 
 	// --------------------------------------- Config ---------------------------------------------
 
@@ -34,7 +34,7 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 
 	private static final char DELIMITER_FEATURE = ':';
 
-	private static final int TARGET_UNDEFINED = -1;
+	private static final int POSITIVE_CLASS_UNDEFINED = -1;
 
 	private static final int NUM_FEATURES_UNDEFINED = -1;
 
@@ -54,7 +54,7 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 
 	private DecimalTextDoubleParser doubleParser = new DecimalTextDoubleParser();
 
-	private int target;
+	private int positiveClass;
 	
 	private int numFeatures;
 
@@ -65,13 +65,13 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 		super.configure(parameters);
 
 		// target class
-		this.target = parameters.getInteger(TARGET, TARGET_UNDEFINED);
-		if (this.target == TARGET_UNDEFINED) {
-			throw new IllegalArgumentException("Please specify the target class id");
+		this.positiveClass = parameters.getInteger(CONF_KEY_POSITIVE_CLASS, POSITIVE_CLASS_UNDEFINED);
+		if (this.positiveClass == POSITIVE_CLASS_UNDEFINED) {
+			throw new IllegalArgumentException("Please specify the positive class id");
 		}
 
 		// num features
-		this.numFeatures = parameters.getInteger(NUM_FEATURES, NUM_FEATURES_UNDEFINED);
+		this.numFeatures = parameters.getInteger(CONF_KEY_NUM_FEATURES, NUM_FEATURES_UNDEFINED);
 		if (this.numFeatures == NUM_FEATURES_UNDEFINED) {
 			throw new IllegalArgumentException("Please specify the number of features for the vector");
 		}
@@ -91,20 +91,20 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 		while (bytes[readPos++] != DELIMITER) {
 		}
 
-		boolean isTarget = false;
+		boolean isPositive = false;
 
 		int currentOffset = offset;
 		while (currentOffset < readPos - 1) {
 			currentOffset = this.intParser.parseField(bytes, currentOffset, readPos - 1, DELIMITER_LABEL, this.label);
 
-			if (this.label.getValue() == this.target) {
-				isTarget = true;
+			if (this.label.getValue() == this.positiveClass) {
+				isPositive = true;
 
 				break;
 			}
 		}
 
-		this.label.setValue(isTarget ? 1 : 0);
+		this.label.setValue(isPositive ? 1 : 0);
 		target.setField(0, this.label);
 
 		// ------------------------------------

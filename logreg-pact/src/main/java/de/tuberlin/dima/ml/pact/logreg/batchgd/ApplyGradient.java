@@ -14,7 +14,7 @@ public class ApplyGradient extends CrossStub {
   
   public static final String CONF_KEY_LEARNING_RATE = "parameter.LEARNING_RATE";
 
-  public static final int IDX_INPUT1_OLD_MODEL= 0;
+  public static final int IDX_INPUT1_OLD_MODEL = 0;
   
   public static final int IDX_INPUT2_MODEL_KEY = 0;
   public static final int IDX_INPUT2_GRADIENT = 1;

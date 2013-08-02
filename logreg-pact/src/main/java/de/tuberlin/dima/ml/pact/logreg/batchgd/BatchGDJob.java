@@ -23,6 +23,7 @@ import de.tuberlin.dima.ml.util.IOUtils;
 import eu.stratosphere.pact.common.contract.CrossContract;
 import eu.stratosphere.pact.common.contract.FileDataSink;
 import eu.stratosphere.pact.common.contract.FileDataSource;
+import eu.stratosphere.pact.common.contract.GenericDataSource;
 import eu.stratosphere.pact.common.contract.ReduceContract;
 import eu.stratosphere.pact.common.io.RecordOutputFormat;
 import eu.stratosphere.pact.common.plan.Plan;
@@ -39,33 +40,32 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
 //  private static final int MCAT = 102;
 
   private static final int NUM_FEATURES = 47237;
+  private static final int INITIAL_VALUE = 0;
 
   @Override
   public Plan getPlan(String... args) {
     // parse job parameters
     final int numSubTasks = (args.length > 0) ? Integer.parseInt(args[0]) : 1;
-    final String inputPathWeights = (args.length > 1) ? args[1] : "";
-    final String inputPathTrain = (args.length > 2) ? args[2] : "";
-    final String inputPathTest = (args.length > 3) ? args[3] : "";
-    final String outputPath = (args.length > 4) ? args[4] : "";
-    final int numIterations = (args.length > 5) ? Integer.parseInt(args[5]) : 1;
-    final boolean runValidation = (args.length > 6) ? ((args[6].equals("1")) ? true
+    final String inputPathTrain = (args.length > 1) ? args[1] : "";
+    final String inputPathTest = (args.length > 2) ? args[2] : "";
+    final String outputPath = (args.length > 3) ? args[3] : "";
+    final int numIterations = (args.length > 4) ? Integer.parseInt(args[4]) : 1;
+    final boolean runValidation = (args.length > 5) ? ((args[5].equals("1")) ? true
         : false)
         : false;
-    final String learningRate = (args.length > 7) ? args[7] : "1";
+    final String learningRate = (args.length > 6) ? args[6] : "1";
 
     // input vectors (constant path)
     FileDataSource trainingVectors = new FileDataSource(
         LibsvmBinaryInputFormat.class, inputPathTrain, "Input Vectors");
-    trainingVectors.setParameter(LibsvmBinaryInputFormat.TARGET, CCAT);
-    trainingVectors.setParameter(LibsvmBinaryInputFormat.NUM_FEATURES,
+    trainingVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_POSITIVE_CLASS, CCAT);
+    trainingVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_NUM_FEATURES,
         NUM_FEATURES);
 
     // initial weight
-    FileDataSource initialWeights = new FileDataSource(
-        WeightVectorInputFormat.class, inputPathWeights, "Weights");
-    initialWeights.setParameter(LibsvmBinaryInputFormat.NUM_FEATURES,
-        NUM_FEATURES);
+    GenericDataSource<WeightVectorInputFormat> initialWeights = new GenericDataSource<WeightVectorInputFormat>(WeightVectorInputFormat.class);
+    initialWeights.setParameter(WeightVectorInputFormat.CONF_KEY_NUM_FEATURES, NUM_FEATURES);
+    initialWeights.setParameter(WeightVectorInputFormat.CONF_KEY_INITIAL_VALUE, INITIAL_VALUE);
 
     BulkIteration iteration = new BulkIteration("Batch GD");
     iteration.setInput(initialWeights);
@@ -120,16 +120,14 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
     BatchGDJob bgd = new BatchGDJob();
 
     String numSubTasks = "1";
-    String inputPathWeights = "file:///home/andre/dev/logreg-repo/logreg-pact/bgd-initial-weights";
     String inputFileTrain = "file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_5000.svm";
     String inputFileTest = "file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_test_1000.svm";
     String outputFile = "file:///home/andre/output-bgd";
-    String numIterations = "3";
+    String numIterations = "1";
     String runValidation = "0";
-    String learningRate = "0.1";
+    String learningRate = "0.05";
     String[] jobArgs = { 
         numSubTasks, 
-        inputPathWeights, 
         inputFileTrain, 
         inputFileTest,
         outputFile,
