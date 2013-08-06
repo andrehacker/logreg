@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.mapred;
+package de.tuberlin.dima.ml.logreg;
 
 
 import java.io.IOException;
@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import de.tuberlin.dima.ml.mapred.logreg.sfo.SFOSequential;
+import de.tuberlin.dima.ml.logreg.sfo.SFOSequential;
 
 public class SFOSequentialTest {
   public static List<String> predictorNames;

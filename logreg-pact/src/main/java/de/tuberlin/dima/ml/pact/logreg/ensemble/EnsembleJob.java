@@ -68,7 +68,7 @@ public class EnsembleJob implements PlanAssembler, PlanAssemblerDescription {
         .build();
     reduceTrain.getParameters().setInteger(ReduceTrainPartition.CONF_KEY_NUM_FEATURES, numFeatures);
     
-    ReduceContract reduceCombineModel = new ReduceContract.Builder(ReduceCombineModel.class, PactInteger.class, 0)
+    ReduceContract reduceCombineModel = new ReduceContract.Builder(ReduceFlattenModel.class, PactInteger.class, 0)
         .input(reduceTrain)
         .name("Reduce: Combine models to a single model")
         .build();

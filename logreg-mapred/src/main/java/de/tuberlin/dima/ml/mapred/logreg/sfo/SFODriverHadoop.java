@@ -5,21 +5,19 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.google.common.collect.Lists;
-import com.google.common.primitives.Doubles;
 
+import de.tuberlin.dima.ml.logreg.sfo.FeatureGain;
+import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
+import de.tuberlin.dima.ml.logreg.sfo.SFODriver;
 import de.tuberlin.dima.ml.mapred.GlobalSettings;
 
 /**
  * Implements the Single Feature Optimization Algorithm as proposed by Singh et
- * al. [1]
- * 
- * Uses Hadoop Jobs internally
+ * al. [1] using Hadoop.
  * 
  * REFERENCES [1] Singh, S., Kubica, J., Larsen, S., & Sorokina, D. (2009).
  * Parallel Large Scale Feature Selection for Logistic Regression. Optimization,
@@ -27,7 +25,7 @@ import de.tuberlin.dima.ml.mapred.GlobalSettings;
  * 
  * @author André Hacker
  */
-public class SFODriver extends Configured implements Tool {
+public class SFODriverHadoop implements SFODriver {
 
   private String inputFile;
 
@@ -46,7 +44,7 @@ public class SFODriver extends Configured implements Tool {
   /**
    * Initializes a new empty base model
    */
-  public SFODriver(String inputFile, String outputPathTrain,
+  public SFODriverHadoop(String inputFile, String outputPathTrain,
       String outputPathTest, int reducersTrain, int reducersTest,
       int numFeatures) {
     this.inputFile = inputFile;
@@ -61,22 +59,6 @@ public class SFODriver extends Configured implements Tool {
   }
 
   /**
-   * Whenever we are started through
-   */
-  @Override
-  public int run(String[] args) throws Exception {
-    if (args.length != 5) {
-      System.err
-          .printf(
-              "Usage: %s [generic options] <input> <outputTrain> <outputTest> <reducersTrain> <reducersTest>",
-              getClass().getSimpleName());
-      ToolRunner.printGenericCommandUsage(System.err);
-      return -1;
-    }
-    return 0;
-  }
-
-  /**
    * Runs a single SFO-Iteration. Computes the gain in metric (e.g.
    * log-likelihood) for all possible models with one more feature added to the
    * current base model
@@ -84,10 +66,11 @@ public class SFODriver extends Configured implements Tool {
    * Does not add the best feature to the base model, allows the client to
    * decide whether to add it or not.
    */
+  @Override
   public void runSFO() throws Exception {
 
     // Make base model available for train/test mappers
-    SFOTools.writeBaseModel(baseModel);
+    SFOToolsHadoop.writeBaseModel(baseModel);
 
     // ----- TRAIN -----
     ToolRunner.run(new SFOTrainJob(inputFile, trainOutputPath, reducersTrain),
@@ -104,13 +87,14 @@ public class SFODriver extends Configured implements Tool {
     readGains();
   }
 
+  @Override
   public void addBestFeature() throws IOException {
     // Read coefficients
     // TODO Minor Optimization: Don't read all into memory, just search the single
     // coefficient
     Configuration conf = new Configuration();
     conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
-    List<Double> coefficients = SFOTools.readTrainedCoefficients(conf,
+    List<Double> coefficients = SFOToolsHadoop.readTrainedCoefficients(conf,
         numFeatures, trainOutputPath);
 
     // Add best to base model
@@ -119,7 +103,7 @@ public class SFODriver extends Configured implements Tool {
         coefficients.get(bestDimension));
 
     // Write updated model to hdfs
-    SFOTools.writeBaseModel(baseModel);
+    SFOToolsHadoop.writeBaseModel(baseModel);
 
     System.out
         .println("Added dimension " + bestDimension
@@ -132,8 +116,10 @@ public class SFODriver extends Configured implements Tool {
    * In Forward feature selection we can add multiple features in each
    * iteration.
    */
+  @Override
   public void addNBestFeatures(int n) {
     // TODO Implement add n best features!
+    throw new UnsupportedOperationException("Not yet implemented");
   }
 
   /**
@@ -146,44 +132,23 @@ public class SFODriver extends Configured implements Tool {
    * next iteration of features selection, so the approximation error does not
    * add up."
    */
+  @Override
   public void retrainBaseModel() {
     // TODO Major: Retrain Base Model!
     System.out.println("Retraining base model not yet implemented");
   }
 
-  private void readGains() throws IOException {
-    // Read results from hdfs into memory
-    gains = SFOTools.readEvalResult(testOutputPath);
-
-    // Sort by gain
-    Collections.sort(gains, Collections.reverseOrder());
-  }
-
+  @Override
   public List<FeatureGain> getGains() {
     return gains;
   }
 
-  public static class FeatureGain implements Comparable<FeatureGain> {
-    private int dimension;
-    private double gain; // currently log-likelihood gain
+  private void readGains() throws IOException {
+    // Read results from hdfs into memory
+    gains = SFOToolsHadoop.readEvalResult(testOutputPath);
 
-    public FeatureGain(int dimension, double gain) {
-      this.dimension = dimension;
-      this.gain = gain;
-    }
-
-    @Override
-    public int compareTo(FeatureGain other) {
-      return Doubles.compare(this.gain, other.gain);
-    }
-
-    public int getDimension() {
-      return dimension;
-    }
-
-    public double getGain() {
-      return gain;
-    }
+    // Sort by gain
+    Collections.sort(gains, Collections.reverseOrder());
   }
 
 }

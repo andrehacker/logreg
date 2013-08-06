@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.mapred.logreg.sfo;
+package de.tuberlin.dima.ml.logreg.sfo;
 
 import java.util.List;
 
@@ -6,8 +6,9 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
-
 import de.tuberlin.dima.ml.logreg.LogRegModel;
+import de.tuberlin.dima.ml.logreg.sfo.IncrementalModelOld;
+import de.tuberlin.dima.ml.logreg.sfo.LogRegSFOTraining;
 import de.tuberlin.dima.ml.util.CsvReader;
 import de.tuberlin.dima.ml.util.MLUtils;
 import de.tuberlin.dima.ml.validation.Validation;

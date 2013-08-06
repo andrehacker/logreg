@@ -22,7 +22,6 @@ public class ReduceTrainPartition extends ReduceStub {
   public static final int IDX_LABEL = 2;
   
   static final String CONF_KEY_NUM_FEATURES = "parameter.NUM_FEATURES";
-  
   private int numFeatures;
   
   @Override
@@ -87,9 +86,9 @@ public class ReduceTrainPartition extends ReduceStub {
     learningAlgorithm.close();
     
     PactRecord outputRecord = new PactRecord();
-    outputRecord.setField(ReduceCombineModel.IDX_MODEL_ID, new PactInteger(1));
-    outputRecord.setField(ReduceCombineModel.IDX_PARTITION, new PactInteger(partition));
-    outputRecord.setField(ReduceCombineModel.IDX_MODEL, new PactVector(w));
+    outputRecord.setField(ReduceFlattenModel.IDX_MODEL_ID, new PactInteger(1));
+    outputRecord.setField(ReduceFlattenModel.IDX_PARTITION, new PactInteger(partition));
+    outputRecord.setField(ReduceFlattenModel.IDX_MODEL, new PactVector(w));
     out.collect(outputRecord);
   }
 }

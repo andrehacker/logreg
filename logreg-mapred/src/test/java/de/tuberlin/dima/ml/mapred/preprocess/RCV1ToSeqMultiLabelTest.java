@@ -19,7 +19,7 @@ public class RCV1ToSeqMultiLabelTest {
     String trainingOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_train.seq";
     String testOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_test.seq";
     
-//    RCV1ToSeqMultiLabel.transform(folderPath, trainingOutputPath, testOutputPath, -1);
+    RCV1ToSeqMultiLabel.transform(folderPath, trainingOutputPath, testOutputPath, -1);
 
     // Produce a smaller version
     int limit = 10000;

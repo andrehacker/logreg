@@ -1,8 +1,9 @@
-package de.tuberlin.dima.ml.pact.io;
+package de.tuberlin.dima.ml.pact.logreg.batchgd;
 
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
+import de.tuberlin.dima.ml.pact.io.RecordSequenceInputFormat;
 import de.tuberlin.dima.ml.pact.types.PactVector;
 import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.pact.common.type.PactRecord;
@@ -28,10 +29,10 @@ public class WeightVectorInputFormat extends RecordSequenceInputFormat {
   }
 
   @Override
-  long getNumberRecords() { return 1; }
+  public long getNumberRecords() { return 1; }
 
   @Override
-  boolean fillNextRecord(PactRecord record) {
+  public boolean fillNextRecord(PactRecord record) {
     Vector vector = new RandomAccessSparseVector(numFeatures);
     if (this.initialValue != 0) vector.assign(initialValue);
     record.setField(0, new PactVector(vector));

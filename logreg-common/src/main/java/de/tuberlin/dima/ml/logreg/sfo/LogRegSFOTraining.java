@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.mapred.logreg.sfo;
+package de.tuberlin.dima.ml.logreg.sfo;
 
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;

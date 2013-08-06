@@ -14,9 +14,6 @@ public class GlobalSettings {
 
   public static final Level LOG_LEVEL = Level.DEBUG;
   
-  //TODO What to set this to? Why does Singh not train it?
-  public static final double INTERCEPT = 1;
-  
   // --------- Settings for execution in a cluster ------------
   public static final String JAR_PATH = "target/logreg-0.0.1-SNAPSHOT-job.jar";
   

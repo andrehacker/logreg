@@ -39,16 +39,13 @@
       <version>0.2-ozone</version>
       <scope>compile</scope>
     </dependency>
-		<!-- Won't compile if I remove this -->
-		<!-- 
-		<dependency>
-			<groupId>eu.stratosphere</groupId>
-			<artifactId>pact-compiler</artifactId>
-			<version>0.2</version>
-			<scope>compile</scope>
-		</dependency>
-		 -->
 
+    <dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+    </dependency>
 	</dependencies>
 
 	<!-- Required for Stratosphere job -->

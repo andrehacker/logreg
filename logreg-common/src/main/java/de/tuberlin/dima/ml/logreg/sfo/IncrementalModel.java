@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.mapred.logreg.sfo;
+package de.tuberlin.dima.ml.logreg.sfo;
 
 import java.util.List;
 
@@ -22,9 +22,9 @@ import de.tuberlin.dima.ml.logreg.LogRegMath;
  * TODO Maybe I don't need unusedDimensions at all, because they are just the rest?!
  * TODO Tradeoff: Either let w also include unused features, or extract only the used
  * V1 (big w): No costs for extraction of used features in w. Requires knowledge of total features. Might take longer to multiply (depends on implementation of sparse vector)
- * V2 (small w): Use DenseVector. Fast to multiply (if basemodel is small). If basemodel is big
+ * V2 (small w): Use DenseVector. Fast to multiply (if basemodel is small).
  */
-class IncrementalModel implements RegressionModel, ClassificationModel {
+public class IncrementalModel implements RegressionModel, ClassificationModel {
   
   private Vector w;
   private List<Integer> usedDimensions;

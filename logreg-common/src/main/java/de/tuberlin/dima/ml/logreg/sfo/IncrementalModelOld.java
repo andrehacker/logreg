@@ -1,4 +1,4 @@
-package de.tuberlin.dima.ml.mapred.logreg.sfo;
+package de.tuberlin.dima.ml.logreg.sfo;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
  * V1 (big w): No costs for extraction of used features in w. Requires knowledge of total features. Might take longer to multiply (depends on implementation of sparse vector)
  * V2 (small w): Use DenseVector. Fast to multiply (if basemodel is small). If basemodel is big, 
  */
-class IncrementalModelOld {
+public class IncrementalModelOld {
   
   private Vector w;
   private List<Integer> usedDimensions;

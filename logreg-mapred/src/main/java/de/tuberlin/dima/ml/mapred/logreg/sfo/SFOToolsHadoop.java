@@ -17,10 +17,11 @@ import org.apache.hadoop.io.SequenceFile;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
+import de.tuberlin.dima.ml.logreg.sfo.FeatureGain;
+import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.mapred.GlobalSettings;
-import de.tuberlin.dima.ml.mapred.logreg.sfo.SFODriver.FeatureGain;
 
-public class SFOTools {
+public class SFOToolsHadoop {
   
   private static final String BASE_MODEL_PATH = "sfo-base-model.seq";
   

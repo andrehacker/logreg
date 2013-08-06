@@ -8,7 +8,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import de.tuberlin.dima.ml.logreg.LogRegMath;
-import de.tuberlin.dima.ml.mapred.GlobalSettings;
+import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
+import de.tuberlin.dima.ml.logreg.sfo.SFOGlobalSettings;
 
 public class SFOTrainMapper extends Mapper<IntWritable, VectorWritable, IntWritable, SFOIntermediateWritable> {
   
@@ -21,7 +22,7 @@ public class SFOTrainMapper extends Mapper<IntWritable, VectorWritable, IntWrita
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     
-    baseModel = SFOTools.readBaseModel(context.getConfiguration());
+    baseModel = SFOToolsHadoop.readBaseModel(context.getConfiguration());
   }
   
   
@@ -30,7 +31,7 @@ public class SFOTrainMapper extends Mapper<IntWritable, VectorWritable, IntWrita
 
     // Compute prediction for current x_i using the base model
     // TODO Improvement: Why not just compute and transmit beta * x_i ??
-    double pi = LogRegMath.predict(xi.get(), baseModel.getW(), GlobalSettings.INTERCEPT);
+    double pi = LogRegMath.predict(xi.get(), baseModel.getW(), SFOGlobalSettings.INTERCEPT);
 //    double xDotW = xi.get().dot(model.getW()) + SFOJob.INTERCEPT;
     
     // Go through all features in x, emit value.

@@ -1,25 +1,29 @@
-package de.tuberlin.dima.ml.mapred.logreg.sfo;
+package de.tuberlin.dima.ml.pact.logreg.sfo;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import com.google.common.collect.Lists;
 
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
+import eu.stratosphere.pact.common.type.Value;
 
-public class IncrementalModelWritable implements Writable {
+/**
+ * TODO Refactoring: Avoid redundant code, implement for Writable and Value and
+ * move to common instead
+ */
+public class PactIncrementalModel implements Value {
   
   IncrementalModel model;
   
-  public IncrementalModelWritable() { }
+  public PactIncrementalModel() { }
   
-  public IncrementalModelWritable(IncrementalModel model) {
+  public PactIncrementalModel(IncrementalModel model) {
     this.model = model;
   }
 
@@ -36,7 +40,7 @@ public class IncrementalModelWritable implements Writable {
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
+  public void read(DataInput in) throws IOException {
     int numberUsed = in.readInt();
     List<Integer> used = Lists.newArrayListWithCapacity(numberUsed);
     for (int i=0; i<numberUsed; ++i) {
@@ -48,7 +52,7 @@ public class IncrementalModelWritable implements Writable {
     model = new IncrementalModel(used, w);
   }
   
-  public IncrementalModel getModel() {
+  public IncrementalModel getValue() {
     return model;
   }
 

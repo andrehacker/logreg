@@ -16,7 +16,6 @@ package de.tuberlin.dima.ml.pact.logreg.batchgd;
 
 import de.tuberlin.dima.ml.pact.JobRunner;
 import de.tuberlin.dima.ml.pact.io.LibsvmBinaryInputFormat;
-import de.tuberlin.dima.ml.pact.io.WeightVectorInputFormat;
 import de.tuberlin.dima.ml.pact.logreg.ensemble.EnsembleJob;
 import de.tuberlin.dima.ml.pact.types.PactVector;
 import de.tuberlin.dima.ml.util.IOUtils;
@@ -27,12 +26,11 @@ import eu.stratosphere.pact.common.contract.GenericDataSource;
 import eu.stratosphere.pact.common.contract.ReduceContract;
 import eu.stratosphere.pact.common.io.RecordOutputFormat;
 import eu.stratosphere.pact.common.plan.Plan;
-import eu.stratosphere.pact.common.plan.PlanAssembler;
 import eu.stratosphere.pact.common.plan.PlanAssemblerDescription;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 import eu.stratosphere.pact.generic.contract.BulkIteration;
 
-public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
+public class BatchGDPlanAssembler implements PlanAssemblerDescription {
 
   private static final int CCAT = 33;
 //  private static final int ECAT = 59;
@@ -117,7 +115,7 @@ public class BatchGDJob implements PlanAssembler, PlanAssemblerDescription {
   }
 
   public static void main(String[] args) throws Exception {
-    BatchGDJob bgd = new BatchGDJob();
+    BatchGDPlanAssembler bgd = new BatchGDPlanAssembler();
 
     String numSubTasks = "1";
     String inputFileTrain = "file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_5000.svm";

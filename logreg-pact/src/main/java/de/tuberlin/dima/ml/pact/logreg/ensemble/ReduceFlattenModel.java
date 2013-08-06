@@ -9,7 +9,7 @@ import eu.stratosphere.pact.common.stubs.ReduceStub;
 import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 
-public class ReduceCombineModel extends ReduceStub {
+public class ReduceFlattenModel extends ReduceStub {
   
   public static final int IDX_MODEL_ID = 0;
   public static final int IDX_PARTITION = 1;

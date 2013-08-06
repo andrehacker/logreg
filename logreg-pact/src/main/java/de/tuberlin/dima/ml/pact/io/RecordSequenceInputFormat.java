@@ -10,10 +10,10 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.generic.io.InputFormat;
 
 /**
- * Base class for Input Formats that have only a single split and but instead
- * emit a sequence of records. The process of creating the records can be
- * made dynamic to a certain extend by overriding configure (i.e. by sending
- * simple parameters to the InputFormat).<br/>
+ * Base class for Input Formats that have only a single split and emit a
+ * sequence of records. The process of creating the records can be made dynamic
+ * to a certain extend by overriding configure (i.e. by sending simple
+ * parameters to the InputFormat).<br/>
  * 
  * Use {@link GenericDataSource} to get a Contract that can be used as an job
  * input. <br/>
@@ -23,7 +23,6 @@ import eu.stratosphere.pact.generic.io.InputFormat;
  * because sometimes we have the objects to use as input available at runtime
  * during job construction and we don't want to use the workaround to write to a
  * file and use this as input.
- * 
  */
 public abstract class RecordSequenceInputFormat implements InputFormat<PactRecord, GenericInputSplit> {
   
@@ -35,9 +34,9 @@ public abstract class RecordSequenceInputFormat implements InputFormat<PactRecor
    * 
    * @return The number of records this InputFormat will produce
    */
-  abstract long getNumberRecords();
+  public abstract long getNumberRecords();
   
-  abstract boolean fillNextRecord(PactRecord record);
+  public abstract boolean fillNextRecord(PactRecord record);
   
   /**
    * Default implementation for configure where we don't get any parameters.
