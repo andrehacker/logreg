@@ -11,9 +11,10 @@ import eu.stratosphere.pact.generic.io.InputFormat;
 
 /**
  * Base class for Input Formats that have only a single split and emit a
- * sequence of records. The process of creating the records can be made dynamic
- * to a certain extend by overriding configure (i.e. by sending simple
- * parameters to the InputFormat).<br/>
+ * sequence of records. This is designed as a non-file input format where the
+ * records to emit are predefined at compile-time. The process of creating the
+ * records can be made dynamic to a certain extend by overriding configure (i.e.
+ * by sending parameters to the InputFormat).<br/>
  * 
  * Use {@link GenericDataSource} to get a Contract that can be used as an job
  * input. <br/>
@@ -29,14 +30,21 @@ public abstract class RecordSequenceInputFormat implements InputFormat<PactRecor
   int recordsProcessed = 0;
   
   /**
-   * The implementation must return the number of records.
-   * This class will call getNextRecord() this many times.
+   * The implementation must return the number of records it wants to emit.
+   * fillNextRecord() will be called this many times.
    * 
    * @return The number of records this InputFormat will produce
    */
-  public abstract long getNumberRecords();
+  public abstract long getNumRecords();
   
-  public abstract boolean fillNextRecord(PactRecord record);
+  /**
+   * This method will be called as often as specified in getNumRecords(). This
+   * is the place where the implementation can actually create the records.
+   * 
+   * @param record  The record that has to be filled
+   * @param recordNumber  1 if this is the first record, 2 for second, ...
+   */
+  public abstract void fillNextRecord(PactRecord record, int recordNumber);
   
   /**
    * Default implementation for configure where we don't get any parameters.
@@ -57,7 +65,7 @@ public abstract class RecordSequenceInputFormat implements InputFormat<PactRecor
       }
       @Override
       public long getNumberOfRecords() {
-        return getNumberRecords();
+        return getNumRecords();
       }
       @Override
       public float getAverageRecordWidth() {
@@ -87,12 +95,13 @@ public abstract class RecordSequenceInputFormat implements InputFormat<PactRecor
   @Override
   public final boolean nextRecord(PactRecord record) throws IOException {
     ++ recordsProcessed;
-    return fillNextRecord(record);
+    fillNextRecord(record, recordsProcessed);
+    return true;
   }
   
   @Override
   public final boolean reachedEnd() throws IOException {
-    return (recordsProcessed >= getNumberRecords());
+    return (recordsProcessed >= getNumRecords());
   }
 
   @Override

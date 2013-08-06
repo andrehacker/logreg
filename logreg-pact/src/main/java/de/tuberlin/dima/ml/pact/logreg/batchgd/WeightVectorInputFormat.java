@@ -29,14 +29,13 @@ public class WeightVectorInputFormat extends RecordSequenceInputFormat {
   }
 
   @Override
-  public long getNumberRecords() { return 1; }
+  public long getNumRecords() { return 1; }
 
   @Override
-  public boolean fillNextRecord(PactRecord record) {
+  public void fillNextRecord(PactRecord record, int recordNumber) {
     Vector vector = new RandomAccessSparseVector(numFeatures);
     if (this.initialValue != 0) vector.assign(initialValue);
     record.setField(0, new PactVector(vector));
-    return true;
   }
 
 }

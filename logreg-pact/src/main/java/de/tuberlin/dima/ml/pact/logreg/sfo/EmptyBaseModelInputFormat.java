@@ -23,14 +23,13 @@ public class EmptyBaseModelInputFormat extends RecordSequenceInputFormat {
   }
 
   @Override
-  public long getNumberRecords() { return 1; }
+  public long getNumRecords() { return 1; }
 
   @Override
-  public boolean fillNextRecord(PactRecord record) {
+  public void fillNextRecord(PactRecord record, int recordNumber) {
     IncrementalModel baseModel = new IncrementalModel(numFeatures);
     record.setField(IDX_OUT_BASEMODEL, new PactIncrementalModel(baseModel));
     record.setField(IDX_OUT_KEY_CONST_ONE, PactUtils.pactOne);
-    return true;
   }
 
 }
