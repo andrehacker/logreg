@@ -8,7 +8,7 @@ import eu.stratosphere.pact.common.type.PactRecord;
 
 /**
  * A fake collector that can be used in unit tests for UDFs. It collects all
- * records in a list.<br/>
+ * emitted records in a list.<br/>
  * 
  * Fake is meant in the sense of Martin fowler: We implement the whole
  * interface, but implementations are very simple and just for purpose of

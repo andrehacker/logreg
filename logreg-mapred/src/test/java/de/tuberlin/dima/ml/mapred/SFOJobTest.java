@@ -20,7 +20,7 @@ public class SFOJobTest {
   private static final int REDUCERS_TRAIN = 4;
   private static final int REDUCERS_TEST = 4;
   
-  private static final int ITERATIONS = 1;
+  private static final int ITERATIONS = 2;
 
   @Test
   @Ignore
@@ -40,10 +40,10 @@ public class SFOJobTest {
 //  @Ignore
   public void testRCV1() throws Exception {
     
-    String inputFile = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_10000.seq";
     String predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt";
-    
     RCV1DatasetInfo.readPredictorNames(predictorNamePath);
+    
+    String inputFile = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_1000.seq";
     
     runSFOTest(
         RCV1DatasetInfo.get(),
@@ -65,7 +65,7 @@ public class SFOJobTest {
     
     for (int i=0; i<ITERATIONS; ++i) {
       
-      driver.runSFO();
+      driver.computeGainsSFO();
       
       List<FeatureGain> gains = driver.getGains();
       printTopGains(gains, datasetInfo);

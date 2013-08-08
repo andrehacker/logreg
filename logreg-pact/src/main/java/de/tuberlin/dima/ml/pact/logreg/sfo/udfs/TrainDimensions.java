@@ -14,7 +14,7 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 
-public class TrainNewFeatures extends ReduceStub {
+public class TrainDimensions extends ReduceStub {
   
   public static final int IDX_DIMENSION = 0;
   public static final int IDX_LABEL = 1;
@@ -23,9 +23,9 @@ public class TrainNewFeatures extends ReduceStub {
 
   // Always chained
   // Key is just a workaround to send to single reducer
-  public static final int IDX_OUT_KEY_CONST_ONE = ReduceFlattenToVector.IDX_KEY_CONST_ONE;
   public static final int IDX_OUT_DIMENSION = ReduceFlattenToVector.IDX_DIMENSION;
   public static final int IDX_OUT_COEFICCIENT = ReduceFlattenToVector.IDX_DOUBLE_VALUE;
+  public static final int IDX_OUT_KEY_CONST_ONE = ReduceFlattenToVector.IDX_KEY_CONST_ONE;
   
   private static final int MAX_ITERATIONS = 5;
   private static final double LAMBDA = 0;

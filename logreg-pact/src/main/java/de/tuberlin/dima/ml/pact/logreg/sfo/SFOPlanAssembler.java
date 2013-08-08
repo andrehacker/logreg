@@ -1,23 +1,29 @@
 package de.tuberlin.dima.ml.pact.logreg.sfo;
 
+import java.io.IOException;
+
+import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.pact.io.LibsvmBinaryInputFormat;
+import de.tuberlin.dima.ml.pact.io.SingleRuntimeValueDataSource;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.ApplyBest;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.EvalComputeLikelihoods;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.EvalSumLikelihoods;
+import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.MatchGainsAndCoefficients;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.TrainComputeProbabilities;
-import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.TrainNewFeatures;
+import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.TrainDimensions;
 import de.tuberlin.dima.ml.pact.udfs.CrossTwoToOne;
 import de.tuberlin.dima.ml.pact.udfs.ReduceFlattenToVector;
 import eu.stratosphere.pact.common.contract.CoGroupContract;
 import eu.stratosphere.pact.common.contract.CrossContract;
 import eu.stratosphere.pact.common.contract.FileDataSink;
 import eu.stratosphere.pact.common.contract.FileDataSource;
-import eu.stratosphere.pact.common.contract.GenericDataSource;
+import eu.stratosphere.pact.common.contract.MatchContract;
 import eu.stratosphere.pact.common.contract.ReduceContract;
 import eu.stratosphere.pact.common.io.RecordOutputFormat;
 import eu.stratosphere.pact.common.plan.Plan;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
+import eu.stratosphere.pact.generic.contract.Contract;
 
 public class SFOPlanAssembler {
   
@@ -28,7 +34,8 @@ public class SFOPlanAssembler {
       String outputPath, 
       int numFeatures, 
       int labelIndex,
-      boolean applyBest) {
+      boolean applyBest,
+      IncrementalModel baseModel) throws IOException {
     
     // ----- Data Sources -----
     
@@ -45,21 +52,28 @@ public class SFOPlanAssembler {
         numFeatures);
 
     // ----- Base Model -----
-    
-    GenericDataSource<EmptyBaseModelInputFormat> initialBaseModel = new GenericDataSource<EmptyBaseModelInputFormat>(EmptyBaseModelInputFormat.class);
-    initialBaseModel.setParameter(EmptyBaseModelInputFormat.CONF_KEY_NUM_FEATURES, numFeatures);
+    String filePath = "file:///tmp/tmp-base-model";
+    Contract baseModelSource = new SingleRuntimeValueDataSource(new PactIncrementalModel(baseModel), filePath);
+
+//    Contract baseModelSource = null;
+//    if (baseModel != null && baseModel.getUsedDimensions().size() > 0) {
+//      baseModelSource = new SingleRuntimeValueDataSource(new PactIncrementalModel(baseModel));
+//    } else {
+//      baseModelSource = new GenericDataSource<EmptyBaseModelInputFormat>(EmptyBaseModelInputFormat.class);
+//      baseModelSource.setParameter(EmptyBaseModelInputFormat.CONF_KEY_NUM_FEATURES, numFeatures);
+//    }
 
     // ----- Cross: Train over x -----
     
     CrossContract trainComputeProbabilities = CrossContract.builder(TrainComputeProbabilities.class)
         .input1(trainingVectors)
-        .input2(initialBaseModel)
+        .input2(baseModelSource)
         .name("Train: Compute probabilities (Cross)")
         .build();
     
     // ----- Reduce: Train over d -----
     
-    ReduceContract trainNewFeatures = ReduceContract.builder(TrainNewFeatures.class, PactInteger.class, TrainNewFeatures.IDX_DIMENSION)
+    ReduceContract trainDimensions = ReduceContract.builder(TrainDimensions.class, PactInteger.class, TrainDimensions.IDX_DIMENSION)
         .input(trainComputeProbabilities)
         .name("Train: Train new Features (Reduce)")
         .build();
@@ -67,7 +81,7 @@ public class SFOPlanAssembler {
     // ----- Workaround 1: Flatten Coefficients -----
     
     ReduceContract flattenCoefficients = ReduceContract.builder(ReduceFlattenToVector.class, PactInteger.class, ReduceFlattenToVector.IDX_KEY_CONST_ONE)
-        .input(trainNewFeatures)
+        .input(trainDimensions)
         .name("Flatten trained coefficients (Reduce)")
         .build();
     flattenCoefficients.setParameter(ReduceFlattenToVector.CONF_KEY_NUM_FEATURES, numFeatures);
@@ -75,7 +89,7 @@ public class SFOPlanAssembler {
     // ----- Workaround 2: Make 1 out of 2 records -----
 
     CrossContract basemodelAndCoefficients = CrossContract.builder(CrossTwoToOne.class)
-        .input1(initialBaseModel)
+        .input1(baseModelSource)
         .input2(flattenCoefficients)
         .name("Flatten two to one (Cross)")
         .build();
@@ -108,10 +122,10 @@ public class SFOPlanAssembler {
               EvalSumLikelihoods.IDX_OUT_KEY_CONST_ONE,
               EmptyBaseModelInputFormat.IDX_OUT_KEY_CONST_ONE)
           .input1(evalSumUpLikelihoods)
-          .input2(initialBaseModel)
+          .input2(baseModelSource)
           .name("ApplyBest")
           .build();
-      // TODO: This does not work!
+      // TODO _SFO: Sorting does not work!
   //    sortAndApplyBest.setGroupOrderForInputOne(new Ordering(EvalSumLikelihoods.IDX_OUT_GAIN,
   //                PactDouble.class, Order.ASCENDING));
       
@@ -127,15 +141,27 @@ public class SFOPlanAssembler {
 
     } else {
       
+      // ----- Match Gains & Coefficients -----
+
+      MatchContract matchGainsCoefficients = MatchContract
+          .builder(MatchGainsAndCoefficients.class, PactInteger.class,
+              EvalSumLikelihoods.IDX_OUT_DIMENSION,
+              TrainDimensions.IDX_OUT_DIMENSION)
+              .input1(evalSumUpLikelihoods)
+              .input2(trainDimensions)
+              .name("Match Gains and Coefficients")
+              .build();
+      
       // ----- Data Sink & Output Format -----
       
       dataSink = new FileDataSink(RecordOutputFormat.class,
-          outputPath, evalSumUpLikelihoods, "Output");
+          outputPath, matchGainsCoefficients, "Output");
 
       RecordOutputFormat.configureRecordFormat(dataSink).recordDelimiter('\n')
           .fieldDelimiter(' ')
-          .field(PactInteger.class, EvalSumLikelihoods.IDX_OUT_DIMENSION)
-          .field(PactDouble.class, EvalSumLikelihoods.IDX_OUT_GAIN);
+          .field(PactInteger.class, MatchGainsAndCoefficients.IDX_OUT_DIMENSION)
+          .field(PactDouble.class, MatchGainsAndCoefficients.IDX_OUT_GAIN)
+          .field(PactDouble.class, MatchGainsAndCoefficients.IDX_OUT_COEFFICIENT);
     }
 
     // ----- Plan -----

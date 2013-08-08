@@ -21,10 +21,10 @@ public class TrainComputeProbabilities extends CrossStub {
   public static final int IDX_INPUT2_BASEMODEL = 0;
 
   // This contract is chained (hardcoded)
-  public static final int IDX_OUT_DIMENSION = TrainNewFeatures.IDX_DIMENSION;
-  public static final int IDX_OUT_LABEL = TrainNewFeatures.IDX_LABEL;
-  public static final int IDX_OUT_XID = TrainNewFeatures.IDX_XID;
-  public static final int IDX_OUT_PI = TrainNewFeatures.IDX_PI;
+  public static final int IDX_OUT_DIMENSION = TrainDimensions.IDX_DIMENSION;
+  public static final int IDX_OUT_LABEL = TrainDimensions.IDX_LABEL;
+  public static final int IDX_OUT_XID = TrainDimensions.IDX_XID;
+  public static final int IDX_OUT_PI = TrainDimensions.IDX_PI;
   
   private final PactRecord recordOut = new PactRecord();
 

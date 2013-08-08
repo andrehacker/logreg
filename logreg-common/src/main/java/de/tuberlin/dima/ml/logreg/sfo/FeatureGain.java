@@ -5,10 +5,16 @@ import com.google.common.primitives.Doubles;
 public class FeatureGain implements Comparable<FeatureGain> {
   private int dimension;
   private double gain; // currently log-likelihood gain
+  private double coefficient;
 
   public FeatureGain(int dimension, double gain) {
+    this(dimension, gain, 0);
+  }
+
+  public FeatureGain(int dimension, double gain, double coefficient) {
     this.dimension = dimension;
     this.gain = gain;
+    this.coefficient = coefficient;
   }
 
   @Override
@@ -22,5 +28,9 @@ public class FeatureGain implements Comparable<FeatureGain> {
 
   public double getGain() {
     return gain;
+  }
+  
+  public double getCoefficient() {
+    return coefficient;
   }
 }

@@ -5,11 +5,11 @@ import java.util.List;
 
 public interface SFODriver {
 
-  public void runSFO() throws Exception;
+  public List<FeatureGain> computeGainsSFO() throws Exception;
 
   public void addBestFeature() throws IOException;
 
-  public void addNBestFeatures(int n);
+  public void addNBestFeatures(int n) throws IOException;
   
   public void retrainBaseModel();
 

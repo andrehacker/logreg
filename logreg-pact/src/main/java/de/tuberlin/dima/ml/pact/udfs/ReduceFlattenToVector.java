@@ -24,9 +24,9 @@ import eu.stratosphere.pact.common.type.base.PactInteger;
  */
 public class ReduceFlattenToVector extends ReduceStub {
   
-  public static final int IDX_KEY_CONST_ONE = 0;
-  public static final int IDX_DIMENSION = 1;
-  public static final int IDX_DOUBLE_VALUE = 2;
+  public static final int IDX_DIMENSION = 0;
+  public static final int IDX_DOUBLE_VALUE = 1;
+  public static final int IDX_KEY_CONST_ONE = 2;
   
   public static final int IDX_OUT_VECTOR = 0;
   public static final int IDX_OUT_KEY_CONST_ONE = 1;

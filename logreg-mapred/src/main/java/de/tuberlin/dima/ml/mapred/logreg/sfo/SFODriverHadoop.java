@@ -67,59 +67,64 @@ public class SFODriverHadoop implements SFODriver {
    * decide whether to add it or not.
    */
   @Override
-  public void runSFO() throws Exception {
+  public List<FeatureGain> computeGainsSFO() throws Exception {
 
     // Make base model available for train/test mappers
     SFOToolsHadoop.writeBaseModel(baseModel);
 
     // ----- TRAIN -----
+    
     ToolRunner.run(new SFOTrainJob(inputFile, trainOutputPath, reducersTrain),
         null);
-
     System.out.println("Done training");
 
     // ----- TEST -----
+    
     ToolRunner.run(new SFOEvalJob(inputFile, testOutputPath, reducersTest,
         numFeatures, trainOutputPath), null);
     System.out.println("Done validation");
 
-    // ----- Postprocess -----
-    readGains();
+    // ----- READ RESULTS -----
+
+    gains = SFOToolsHadoop.readEvalResult(testOutputPath);
+    Collections.sort(gains, Collections.reverseOrder());
+    
+    return getGains();
   }
 
   @Override
   public void addBestFeature() throws IOException {
+    addNBestFeatures(1);
+  }
+
+  /**
+   * In Forward feature selection we can add multiple features in each
+   * iteration.
+   * @throws IOException 
+   */
+  @Override
+  public void addNBestFeatures(int n) throws IOException {
     // Read coefficients
-    // TODO Minor Optimization: Don't read all into memory, just search the single
-    // coefficient
     Configuration conf = new Configuration();
     conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
     List<Double> coefficients = SFOToolsHadoop.readTrainedCoefficients(conf,
         numFeatures, trainOutputPath);
 
     // Add best to base model
-    int bestDimension = gains.get(0).getDimension();
-    baseModel.addDimensionToModel(bestDimension,
-        coefficients.get(bestDimension));
+    for (int i=0; i<n; ++i) {
+      int bestDimension = gains.get(i).getDimension();
+      baseModel.addDimensionToModel(bestDimension,
+          coefficients.get(bestDimension));
+      System.out
+      .println("Added d=" + bestDimension
+          + " to base model with c="
+          + coefficients.get(bestDimension));
+    }
 
     // Write updated model to hdfs
     SFOToolsHadoop.writeBaseModel(baseModel);
 
-    System.out
-        .println("Added dimension " + bestDimension
-            + " to base model with coefficient: "
-            + coefficients.get(bestDimension));
     System.out.println("- New base model: " + baseModel.getW().toString());
-  }
-
-  /**
-   * In Forward feature selection we can add multiple features in each
-   * iteration.
-   */
-  @Override
-  public void addNBestFeatures(int n) {
-    // TODO Implement add n best features!
-    throw new UnsupportedOperationException("Not yet implemented");
   }
 
   /**
@@ -141,14 +146,6 @@ public class SFODriverHadoop implements SFODriver {
   @Override
   public List<FeatureGain> getGains() {
     return gains;
-  }
-
-  private void readGains() throws IOException {
-    // Read results from hdfs into memory
-    gains = SFOToolsHadoop.readEvalResult(testOutputPath);
-
-    // Sort by gain
-    Collections.sort(gains, Collections.reverseOrder());
   }
 
 }
