@@ -20,9 +20,6 @@ import org.apache.mahout.math.VectorWritable;
 
 import com.google.common.base.Joiner;
 
-import de.tuberlin.dima.ml.datasets.DatasetInfo;
-import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
-import de.tuberlin.dima.ml.mapred.GlobalSettings;
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
 import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
 
@@ -41,10 +38,11 @@ public class BatchGradientDriver {
   private final int maxIterations;
   private int labelDimension;
   private int numFeatures;
+  private String hdfsAddress;
+  private String jobTrackerAddress;
 
   private final VectorWritable weights;
 
-  public static final DatasetInfo rcv1 = RCV1DatasetInfo.get();
   private static final Joiner pathJoiner = Joiner.on("/");
 
   public BatchGradientDriver(
@@ -53,15 +51,19 @@ public class BatchGradientDriver {
       int maxIterations,
       double initial,
       int labelDimension,
-      int numFeatures) {
+      int numFeatures,
+      String hdfsAddress,
+      String jobTrackerAddress) {
     this.inputFile = inputFile;
     this.outputPath = outputPath;
     this.labelDimension = labelDimension;
     this.numFeatures = numFeatures;
+    this.hdfsAddress = hdfsAddress;
+    this.jobTrackerAddress = jobTrackerAddress;
 
     this.maxIterations = maxIterations;
 
-    Vector vec = new SequentialAccessSparseVector((int) rcv1.getNumFeatures());
+    Vector vec = new SequentialAccessSparseVector(numFeatures);
     
     vec.assign(initial);
 
@@ -75,8 +77,7 @@ public class BatchGradientDriver {
     boolean[] hasSucceeded = new boolean[this.maxIterations];
     
     // Configuration object for file system actions
-    Configuration conf = new Configuration();
-    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
+    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress);
     boolean runLocal = HadoopUtils.detectLocalMode(conf);
 
     // iterations
@@ -118,7 +119,7 @@ public class BatchGradientDriver {
       job.setWeightVector(this.weights.get());
       
       // execute job
-      hasSucceeded[i] = (ToolRunner.run(job, null)==0) ? true : false;
+      hasSucceeded[i] = (ToolRunner.run(conf, job, null)==0) ? true : false;
       LOGGER.debug("> completed iteration? " + hasSucceeded[i]);
     }
 

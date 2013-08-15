@@ -9,12 +9,12 @@ import org.apache.log4j.Level;
  */
 public class GlobalSettings {
   
-  public static final String CONFIG_FILE_PATH = "core-site-local.xml";
+//  public static final String CONFIG_FILE_PATH = "core-site-local.xml";
   // static final String CONFIG_FILE_PATH = "core-site-pseudo-distributed.xml";
 
   public static final Level LOG_LEVEL = Level.DEBUG;
   
   // --------- Settings for execution in a cluster ------------
-  public static final String JAR_PATH = "target/logreg-0.0.1-SNAPSHOT-job.jar";
+//  public static final String JAR_PATH = "target/logreg-0.0.1-SNAPSHOT-job.jar";
   
 }

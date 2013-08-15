@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.pact.io.LibsvmBinaryInputFormat;
-import de.tuberlin.dima.ml.pact.io.SingleRuntimeValueDataSource;
+import de.tuberlin.dima.ml.pact.io.SingleValueDataSource;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.ApplyBest;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.EvalComputeLikelihoods;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.EvalSumLikelihoods;
@@ -17,15 +17,68 @@ import eu.stratosphere.pact.common.contract.CoGroupContract;
 import eu.stratosphere.pact.common.contract.CrossContract;
 import eu.stratosphere.pact.common.contract.FileDataSink;
 import eu.stratosphere.pact.common.contract.FileDataSource;
+import eu.stratosphere.pact.common.contract.GenericDataSource;
 import eu.stratosphere.pact.common.contract.MatchContract;
 import eu.stratosphere.pact.common.contract.ReduceContract;
 import eu.stratosphere.pact.common.io.RecordOutputFormat;
 import eu.stratosphere.pact.common.plan.Plan;
+import eu.stratosphere.pact.common.plan.PlanAssembler;
+import eu.stratosphere.pact.common.plan.PlanAssemblerDescription;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 import eu.stratosphere.pact.generic.contract.Contract;
 
-public class SFOPlanAssembler {
+public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription {
+
+  @Override
+  public String getDescription() {
+    return "Parameters: <numSubStasks> <inputPathTrain> <inputPathTest> <outputPath> <numFeatures> <labelIndex> <applyBest>";
+  }
+
+  /**
+   * TODO _SFO Major: This method currently only supports empty base models - no idea how to resolve this!?
+   */
+  @Override
+  public Plan getPlan(String... args) {
+    int numArgs = 7;
+    if (args.length < numArgs) throw new RuntimeException("You didn't pass all required arguments");
+    Plan plan = null;
+    try {
+      plan = createPlan(
+          Integer.parseInt(args[0]),
+          args[1],
+          args[2],
+          args[3],
+          Integer.parseInt(args[4]),
+          Integer.parseInt(args[5]),
+          Boolean.parseBoolean(args[6]),
+          new IncrementalModel(Integer.parseInt(args[4])));
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return plan;
+  }
+  
+  public static String[] buildArgs(
+      int numSubTasks, 
+      String inputPathTrain, 
+      String inputPathTest, 
+      String outputPath, 
+      int numFeatures, 
+      int labelIndex,
+      boolean applyBest) {
+    return new String[] {
+        Integer.toString(numSubTasks),
+        inputPathTrain,
+        inputPathTest,
+        outputPath,
+        Integer.toString(numFeatures),
+        Integer.toString(labelIndex),
+        Boolean.toString(applyBest)
+    };
+  }
   
   public Plan createPlan(
       int numSubTasks, 
@@ -52,16 +105,15 @@ public class SFOPlanAssembler {
         numFeatures);
 
     // ----- Base Model -----
-    String filePath = "file:///tmp/tmp-base-model";
-    Contract baseModelSource = new SingleRuntimeValueDataSource(new PactIncrementalModel(baseModel), filePath);
+    String baseModelTmpPath = "file:///tmp/tmp-base-model";
 
-//    Contract baseModelSource = null;
-//    if (baseModel != null && baseModel.getUsedDimensions().size() > 0) {
-//      baseModelSource = new SingleRuntimeValueDataSource(new PactIncrementalModel(baseModel));
-//    } else {
-//      baseModelSource = new GenericDataSource<EmptyBaseModelInputFormat>(EmptyBaseModelInputFormat.class);
-//      baseModelSource.setParameter(EmptyBaseModelInputFormat.CONF_KEY_NUM_FEATURES, numFeatures);
-//    }
+    Contract baseModelSource = null;
+    if (baseModel != null && baseModel.getUsedDimensions().size() > 0) {
+      baseModelSource = new SingleValueDataSource(new PactIncrementalModel(baseModel), baseModelTmpPath);
+    } else {
+      baseModelSource = new GenericDataSource<EmptyBaseModelInputFormat>(EmptyBaseModelInputFormat.class);
+      baseModelSource.setParameter(EmptyBaseModelInputFormat.CONF_KEY_NUM_FEATURES, numFeatures);
+    }
 
     // ----- Cross: Train over x -----
     

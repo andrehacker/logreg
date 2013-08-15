@@ -56,8 +56,10 @@ public class RCV1DatasetInfo {
       4, "MCAT"
       );
 
-  private static DatasetInfo datasetInfo = new DatasetInfo.Builder(NUM_FEATURES, TOTAL).
-      labelMap(labelMap).build();
+  private static DatasetInfo datasetInfo = new DatasetInfo.Builder()
+    .numFeatures(NUM_FEATURES)
+    .total(TOTAL)
+    .labelMap(labelMap).build();
   
   public static DatasetInfo get() {
     return datasetInfo;

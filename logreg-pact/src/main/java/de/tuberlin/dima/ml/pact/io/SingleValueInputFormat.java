@@ -16,9 +16,9 @@ import eu.stratosphere.pact.common.type.Value;
 import eu.stratosphere.pact.generic.io.InputFormat;
 
 /**
- * See related {@link SingleRuntimeValueDataSource} for explanation.
+ * See related {@link SingleValueDataSource} for explanation.
  */
-public class SingleRuntimeValueInputFormat implements
+public class SingleValueInputFormat implements
     InputFormat<PactRecord, GenericInputSplit> {
 
   // ------------------------------------- Config Keys ------------------------------------------

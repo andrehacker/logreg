@@ -19,6 +19,7 @@ import eu.stratosphere.nephele.fs.Path;
 public final class SFOToolsPact {
 
   /**
+   * TODO _SFO Major We needed to add dependency to nephele-hdfs for this. Could we not simply use the hdfs FileSystem object directly?
    * 
    * @param outputPath Path with 
    * @param gains Empty list
@@ -29,19 +30,23 @@ public final class SFOToolsPact {
     List<FeatureGain> gains = Lists.newArrayList();
     FileSystem fs = FileSystem.get(new URI(outputPath));
     
-    FileStatus[] statusList = fs.listStatus(new Path(outputPath));
-    for (FileStatus status : statusList) {
-      System.out.println("Output: " + status.getPath());
-      FSDataInputStream stream = fs.open(status.getPath());
-      BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-      String line = null;
-      while ((line = reader.readLine()) != null) {
-        String[] tokens = line.split(" ");
-        gains.add(new FeatureGain(
-            Integer.parseInt(tokens[MatchGainsAndCoefficients.IDX_OUT_DIMENSION]),
-            Double.parseDouble(tokens[MatchGainsAndCoefficients.IDX_OUT_GAIN]),
-            Double.parseDouble(tokens[MatchGainsAndCoefficients.IDX_OUT_COEFFICIENT])));
+    if (fs.exists(new Path(outputPath))) {
+      FileStatus[] statusList = fs.listStatus(new Path(outputPath));
+      for (FileStatus status : statusList) {
+        System.out.println("Output: " + status.getPath());
+        FSDataInputStream stream = fs.open(status.getPath());
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+          String[] tokens = line.split(" ");
+          gains.add(new FeatureGain(
+              Integer.parseInt(tokens[MatchGainsAndCoefficients.IDX_OUT_DIMENSION]),
+              Double.parseDouble(tokens[MatchGainsAndCoefficients.IDX_OUT_GAIN]),
+              Double.parseDouble(tokens[MatchGainsAndCoefficients.IDX_OUT_COEFFICIENT])));
+        }
       }
+    } else {
+      System.out.println("ERROR: Output folder does not exist, cannot read the gains and coefficients.");
     }
     
     return gains;

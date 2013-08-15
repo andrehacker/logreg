@@ -6,8 +6,6 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import de.tuberlin.dima.ml.datasets.DatasetInfo;
-import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.logreg.sfo.FeatureGain;
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.pact.logreg.sfo.PactIncrementalModel;
@@ -30,6 +28,7 @@ public class ApplyBest extends CoGroupStub {
       Iterator<PactRecord> modelRecord, Collector<PactRecord> out)
       throws Exception {
 
+    // TODO _SFO: Finish implementation
     IncrementalModel baseModel = modelRecord.next().getField(IDX_INPUT2_BASEMODEL, PactIncrementalModel.class).getValue();
     
     PactRecord gainRecord = null;
@@ -43,16 +42,6 @@ public class ApplyBest extends CoGroupStub {
       gains.add(new FeatureGain(dim, gain));
     }
     Collections.sort(gains, Collections.reverseOrder());
-    
-    printTopGains(gains, RCV1DatasetInfo.get());
-  }
-  
-  private void printTopGains(List<FeatureGain> gains, DatasetInfo datasetInfo) {
-    for (int i=0; i<10 && i<gains.size(); ++i) {
-      System.out.println("d " + gains.get(i).getDimension() + 
-          " (" + datasetInfo.getFeatureName(gains.get(i).getDimension()) 
-          + ") gain: " + gains.get(i).getGain());
-    }
   }
 
 }

@@ -9,7 +9,6 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
 import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
 
@@ -42,7 +41,7 @@ public class GradientJob extends AbstractHadoopJob {
     this.labelDimension = labelDimension;
     this.numFeatures = numFeatures;
 
-    Vector vec = new SequentialAccessSparseVector((int) RCV1DatasetInfo.get().getNumFeatures());
+    Vector vec = new SequentialAccessSparseVector(numFeatures);
     this.weights = new VectorWritable(vec);
   }
 

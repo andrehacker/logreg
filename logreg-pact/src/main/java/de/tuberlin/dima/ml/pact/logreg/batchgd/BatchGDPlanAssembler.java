@@ -45,12 +45,12 @@ public class BatchGDPlanAssembler implements PlanAssemblerDescription {
     // parse job parameters
     final int numSubTasks = (args.length > 0) ? Integer.parseInt(args[0]) : 1;
     final String inputPathTrain = (args.length > 1) ? args[1] : "";
-    final String inputPathTest = (args.length > 2) ? args[2] : "";
+//    final String inputPathTest = (args.length > 2) ? args[2] : "";
     final String outputPath = (args.length > 3) ? args[3] : "";
     final int numIterations = (args.length > 4) ? Integer.parseInt(args[4]) : 1;
-    final boolean runValidation = (args.length > 5) ? ((args[5].equals("1")) ? true
-        : false)
-        : false;
+//    final boolean runValidation = (args.length > 5) ? ((args[5].equals("1")) ? true
+//        : false)
+//        : false;
     final String learningRate = (args.length > 6) ? args[6] : "1";
 
     // input vectors (constant path)
@@ -148,7 +148,7 @@ public class BatchGDPlanAssembler implements PlanAssemblerDescription {
       String jarPath = IOUtils.getDirectoryOfJarOrClass(EnsembleJob.class)
           + "/logreg-pact-0.0.1-SNAPSHOT-job.jar";
       System.out.println("JAR PATH: " + jarPath);
-      runner.run(jarPath, "de.tuberlin.dima.ml.pact.logreg.batchgd.BatchGDJob", jobArgs, "", true);
+      runner.run(jarPath, "de.tuberlin.dima.ml.pact.logreg.batchgd.BatchGDJob", jobArgs, "", "", "", true);
       
     }
     System.out.println("Job completed. Runtime=" + runner.getLastRuntime());

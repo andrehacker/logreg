@@ -62,24 +62,31 @@ public class JobRunner {
   }
 
    /**
-   * Runs a Stratosphere job from a jar file using the pact client api.
-   * Measures the total runtime.
+   * Runs a Stratosphere job from a jar file using the pact client api. Measures
+   * the total runtime.
    * 
    * @param jarPath
    *          Path to the jar to execute
    * @param jobArgs
    *          Arguments for the job
    * @param assemblerClassName
-   *          Optional: Name of the Assembler class (e.g. de.tu-berlin.dima.MyJob)
-   *          If empty, it will execute the default job (as defined in jar manifest)
+   *          Optional: Name of the Assembler class (e.g.
+   *          de.tu-berlin.dima.MyJob) If empty, it will execute the default job
+   *          (as defined in jar manifest)
    * @param configPath
    *          Optional: The path (or file) containing the cluster-configuration
    *          (e.g. jobmanager). If empty, defaults will be applied (localhost)
+   * @param jobManagerAddress
+   *          If not empty, it will overwrite the default values and the values
+   *          that may be read from a conf file
+   * @param jobManagerPort
+   *          If not empty, it will overwrite the default values and the values
+   *          that may be read from a conf file
    * @param waitForCompletion
    *          If true, the function will return when the job finished, otherwise
    *          immediately
    */
-  public void run(String jarPath, String assemblerClassName, String[] jobArgs, String configPath, boolean waitForCompletion) {
+  public void run(String jarPath, String assemblerClassName, String[] jobArgs, String configPath, String jobManagerAddress, String jobManagerPort, boolean waitForCompletion) {
 
     File jar = new File(jarPath);
 
@@ -111,6 +118,12 @@ public class JobRunner {
         config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, "127.0.0.1");
         config.setInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT);
       }
+      // Overwrite the values in the conf dir and in the 
+      if (!"".equals(jobManagerAddress))
+          config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, jobManagerAddress);
+      if (!"".equals(jobManagerPort))
+        config.setString(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, jobManagerPort);
+          
       Client client = new Client(config);
 
       // Client.run(...)
@@ -142,8 +155,9 @@ public class JobRunner {
     } catch (ErrorInPlanAssemblerException e) {
       System.out.println(e.toString());
     }
-
   }
+  
+  
 
   /**
    * Starts a Ozone job with the parameters defined in an java property file
@@ -170,7 +184,7 @@ public class JobRunner {
 
     String configPath = prop.getProperty("system.configpath", "");
 
-    run(jobJar, "", params, configPath, waitForCompletion);
+    run(jobJar, "", params, configPath, "", "", waitForCompletion);
   }
   
   /**
@@ -181,7 +195,7 @@ public class JobRunner {
   }
   
   /**
-   * Attention: Not supported if we run on a cluster.
+   * Attention: Not supported if we run on a cluster!
    * 
    * @return The runtime for the internal JobEvent of the last job.
    */

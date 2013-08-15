@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.tuberlin.dima</groupId>
+    <artifactId>ml</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>logreg-experiments</artifactId>
+  <name>Machine Learning Experiments for Stratosphere and Hadoop</name>
+
+  <packaging>jar</packaging>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>de.tuberlin.dima</groupId>
+      <artifactId>logreg-common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>de.tuberlin.dima</groupId>
+      <artifactId>logreg-mapred</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>de.tuberlin.dima</groupId>
+      <artifactId>logreg-pact</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+  </dependencies>
+
+</project>

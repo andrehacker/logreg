@@ -10,7 +10,6 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
 import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
 
@@ -37,12 +36,13 @@ public class TrainingErrorJob extends AbstractHadoopJob {
   public TrainingErrorJob(
       String inputFile,
       String outputPath,
-      int labelDimension) {
+      int labelDimension,
+      int numFeatures) {
     this.inputFile = inputFile;
     this.outputPath = outputPath;
     this.labelDimension = labelDimension;
 
-    Vector weights = new SequentialAccessSparseVector((int) RCV1DatasetInfo.get().getNumFeatures());
+    Vector weights = new SequentialAccessSparseVector(numFeatures);
     this.w = new VectorWritable(weights);
   }
 

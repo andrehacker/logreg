@@ -9,6 +9,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -16,7 +18,6 @@ import org.apache.mahout.math.VectorWritable;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
-import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.inputreader.RCV1VectorReader;
 import de.tuberlin.dima.ml.util.MLUtils;
 
@@ -54,8 +55,8 @@ public class RCV1ToSeq {
         folderPath + "vectors/lyrl2004_vectors_test_pt2.dat",
         folderPath + "vectors/lyrl2004_vectors_test_pt3.dat");
     
-    int maxFeatureId = (int)RCV1DatasetInfo.get().getNumFeatures();
-    int labelRows = (int)RCV1DatasetInfo.get().getTotal();
+    int maxFeatureId = 47237;
+    int labelRows = 810935;
 
     RCV1ToSeq.transform(
         trainingFile, 
@@ -125,6 +126,82 @@ public class RCV1ToSeq {
       System.out.println("Wrote " + count  + " records into sequence file " + targetPath);
     } finally {
       Closeables.close(writer, true);
+    }
+  }
+  
+
+  public static void main(String[] args) throws Exception {
+
+    String inputPath = "/home/andre/dev/datasets/RCV1-v2/";
+    String outputPath = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/";
+    String positiveClass = "ecat"; // Singh uses ECAT
+    
+    boolean createBig = false;
+    boolean createSmall = true;
+//    int[] smallSizes = new int[] {5000, 10000, 20000};
+    int[] smallSizes = new int[] {100, 500, 1000, 2000};
+    
+    // ---- Create sequence files with single label ----
+    if (createBig) {
+      RCV1ToSeq.transform(
+          inputPath, 
+          positiveClass,
+          outputPath + "lyrl2004_vectors_" + positiveClass + "_train.seq", 
+          outputPath + "lyrl2004_vectors_" + positiveClass + "_test.seq",
+          -1);
+  
+      // ---- Create sequence files with all labels ----
+      RCV1ToSeqMultiLabel.transform(
+          inputPath,
+          outputPath + "lyrl2004_vectors_train.seq", 
+          outputPath + "lyrl2004_vectors_test.seq",
+          -1);
+      
+      printFirstRecords(outputPath + "lyrl2004_vectors_" + positiveClass + "_train.seq");
+    }
+
+    if (createSmall) {
+      // ---- Produce a smaller version (single and multi label) ----
+      for (int size : smallSizes) {
+        String smallTrainingOutputPath = outputPath + "lyrl2004_vectors_" + positiveClass + "_train_" + size + ".seq";
+        String smallTestOutputPath = outputPath + "lyrl2004_vectors_" + positiveClass + "_test_" + size + ".seq";
+        RCV1ToSeq.transform(
+            inputPath, 
+            positiveClass, 
+            smallTrainingOutputPath, 
+            smallTestOutputPath, 
+            size);
+        
+        RCV1ToSeqMultiLabel.transform(
+            inputPath,
+            outputPath + "lyrl2004_vectors_train_" + size + ".seq", 
+            outputPath + "lyrl2004_vectors_test_" + size + ".seq",
+            size);
+      }
+    }
+  }
+  
+  private static void printFirstRecords(String sequenceFilePath) {
+    
+    Configuration conf = new Configuration();
+    
+    System.out.println("Print first records out of training sequence file:");
+    
+    int n = 0;
+    for (Pair<IntWritable, VectorWritable> labeledRecord : 
+        new SequenceFileIterable<IntWritable, VectorWritable>(new Path(sequenceFilePath), conf)) {
+
+      IntWritable label = labeledRecord.getFirst();
+      System.out.println("Label: " + label.get());
+
+      Vector features = labeledRecord.getSecond().get();
+
+      System.out.println("- Features: " + features.getNumNondefaultElements() + " of " + features.size());
+      System.out.println("- Vec: " + features.toString());
+      
+      if (++n == 5) {
+        break;
+      }
     }
   }
 

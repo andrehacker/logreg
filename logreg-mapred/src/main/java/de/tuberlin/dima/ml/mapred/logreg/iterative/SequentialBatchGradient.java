@@ -43,6 +43,7 @@ public class SequentialBatchGradient {
 
     double learningRate = 0.04;
     double regularization = 0.5;
+    @SuppressWarnings("unused")
     Vector model = bgd.train(learningRate, regularization);
     
     System.out.println("Best accuracy=" + bestAccuracy + " (in iteration " + bestIteration + ")");

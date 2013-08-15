@@ -1,9 +1,7 @@
 package de.tuberlin.dima.ml.logreg;
 
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.Functions;
 
 import de.tuberlin.dima.ml.util.MLUtils;
 

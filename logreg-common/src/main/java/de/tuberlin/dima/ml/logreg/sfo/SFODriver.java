@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface SFODriver {
 
-  public List<FeatureGain> computeGainsSFO() throws Exception;
+  public List<FeatureGain> computeGainsSFO(int dop) throws Exception;
 
   public void addBestFeature() throws IOException;
 

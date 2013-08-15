@@ -45,7 +45,8 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     setConf(conf);
     System.out.println("EQUALITY? " + getConf().equals(conf));
 
-    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
+    // If this job should be run on a cluster the calling method must supply an specific Configuration object
+//    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
     
     boolean runLocal = HadoopUtils.detectLocalMode(conf);
     if (runLocal) {
@@ -66,7 +67,8 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
       // This is needed if we run from eclipse, which won't build a jar automatically
       // In this case we have to build the jar manually before!
       // mvn package will build a jar with all required dependencies
-      conf.set("mapred.jar", GlobalSettings.JAR_PATH);
+      // Deactivated, needs to be done by caller
+//      conf.set("mapred.jar", GlobalSettings.JAR_PATH);
       
 //      job.setNumReduceTasks(4);
       conf.setInt("mapred.reduce.tasks", numReducers);

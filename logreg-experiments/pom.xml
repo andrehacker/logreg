@@ -1,0 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.tuberlin.dima</groupId>
+    <artifactId>ml</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>logreg-experiments</artifactId>
+  <name>Machine Learning Experiments for Stratosphere and Hadoop</name>
+
+  <packaging>jar</packaging>
+
+  <properties>
+    <scala.version>2.10.2</scala.version>
+  </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    
+    <!-- Comes with dependencies for 2.10.0 scala libraries -->
+    <!--
+    <dependency>
+      <groupId>org.json4s</groupId>
+		  <artifactId>json4s-native_2.10</artifactId>
+		  <version>3.2.5</version>
+		</dependency>
+		-->
+
+    <dependency>
+      <groupId>de.tuberlin.dima</groupId>
+      <artifactId>logreg-common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>de.tuberlin.dima</groupId>
+      <artifactId>logreg-mapred</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>de.tuberlin.dima</groupId>
+      <artifactId>logreg-pact</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  
+  <!--
+    Need to install:
+    - Scala IDE
+    - m2e-scala from update site http://alchim31.free.fr/m2e-scala/update-site/
+
+    Documentation for plugin scala-maven-plugin (previously maven-scala-plugin):
+    http://davidb.github.io/scala-maven-plugin/index.html
+
+    Documentation for Java Scala mixed mode:
+    http://davidb.github.io/scala-maven-plugin/example_java.html
+
+    Documentation for m2e-scala and great example poms (inspirations for this pom)
+    https://www.assembla.com/wiki/show/scala-ide/with_m2eclipse
+
+    This pom is for java and scala mixed mode, with dependencies in both directions.
+  -->
+  <build>
+    <!-- I ignored pluginManagement since this is not a parent pom -->
+    <plugins>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.1.5</version>
+        <executions>
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- maven-compiler-plugin is for java compilation -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+          <compilerArgument></compilerArgument>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

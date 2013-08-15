@@ -1,12 +1,10 @@
-package de.tuberlin.dima.ml.mapred;
-
-import org.junit.Test;
+package de.tuberlin.dima.ml.experiments.mapred;
 
 import de.tuberlin.dima.ml.datasets.DatasetInfo;
 import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.mapred.logreg.iterative.BatchGradientDriver;
 
-public class BatchGradientJobTest {
+public class BatchGradientTest {
   
   private static final DatasetInfo DATASET = RCV1DatasetInfo.get();
   
@@ -21,12 +19,14 @@ public class BatchGradientJobTest {
   
   private static final int MAX_ITERATIONS = 3;
 
-  @Test
-  public void test() throws Exception {
+  public static void main(String[] args) throws Exception {
     
     int labelDimension = DATASET.getLabelIdByName(TARGET_POSITIVE);
 
     double initial = 1;
+    
+    String hdfsAddress = "";
+    String jobtrackerAddress = "";
     
     BatchGradientDriver bgDriver = new BatchGradientDriver(
         INPUT_FILE_TRAIN, 
@@ -34,8 +34,11 @@ public class BatchGradientJobTest {
         MAX_ITERATIONS,
         initial,
         labelDimension,
-        (int)DATASET.getNumFeatures());
+        (int)DATASET.getNumFeatures(),
+        hdfsAddress,
+        jobtrackerAddress);
     
     bgDriver.train();
   }
+  
 }

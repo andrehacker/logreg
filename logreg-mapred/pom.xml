@@ -12,13 +12,25 @@
 	<name>Logistic Regression Implementations for Hadoop/MapReduce</name>
 
 	<packaging>jar</packaging>
-
+	
 	<dependencies>
+	
+    <!-- YARN -->
+    <!-- 
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+    </dependency>
+    -->
 
+    <!-- "Old" Hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
-      <version>1.1.2</version>
     </dependency>
 	
 		<dependency>
@@ -26,6 +38,15 @@
 			<artifactId>logreg-common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-math</artifactId>
+    </dependency>
 		
     <dependency>
       <groupId>edu.stanford.nlp</groupId>

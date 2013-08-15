@@ -125,4 +125,12 @@ public class LogRegSGDRCV1 {
 //    System.out.println(aucGlobal.confusion().asFormatString());
   }
   
+  public static void main(String[] args) throws IOException {
+    String trainingFile = "/home/andre/dev/datasets/RCV1-v2/vectors/lyrl2004_vectors_train_5000.dat";
+    String testFile = "/home/andre/dev/datasets/RCV1-v2/vectors/lyrl2004_vectors_test_pt0.dat";
+    
+    LogRegSGDRCV1 lr = new LogRegSGDRCV1();
+    lr.trainRCV1(trainingFile, testFile);
+  }
+  
 }

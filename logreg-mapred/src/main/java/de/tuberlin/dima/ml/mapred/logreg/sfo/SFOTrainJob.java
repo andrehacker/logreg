@@ -12,8 +12,6 @@ import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
  * Parallel implementation of Single Feature Optimization algorithm
  * Based on Paper "Parallel Large Scale Feature Selection for Logistic Regression" by Singh et al. 
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.188.3782
- * 
- * Assumption: Requires total number of features
  */
 public class SFOTrainJob extends AbstractHadoopJob {
   
@@ -38,6 +36,9 @@ public class SFOTrainJob extends AbstractHadoopJob {
   
   @Override
   public int run(String[] args) throws Exception {
+    
+    // TODO To really implement Tool we need to parse the arguments!
+    // Currently the client has to call the constructor before
     
     Job job = prepareJob(
         JOB_NAME, 

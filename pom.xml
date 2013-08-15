@@ -14,8 +14,16 @@
 		<module>logreg-common</module>
 		<module>logreg-mapred</module>
 		<module>logreg-pact</module>
+		<module>logreg-experiments</module>
 		<module>rcv1-preprocess</module>
 	</modules>
+
+  <properties>
+    <mahout.version>0.8-hdp1.2.1</mahout.version>
+    <!-- <mahout.version>0.8-hdp1.2.1</mahout.version> -->
+    <hadoop.yarn.version>2.0.5-alpha</hadoop.yarn.version>
+    <hadoop.v1.version>1.2.1</hadoop.v1.version>
+  </properties>
 
 	<build>
 		<plugins>
@@ -42,6 +50,8 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<!-- Snapshots were needed only for snapshot versions of mahout -->
+		<!-- 
 		<repository>
 			<id>apache-snapshots</id>
 			<url>http://repository.apache.org/snapshots/</url>
@@ -49,44 +59,78 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+		-->
 	</repositories>
 
-	<dependencies>
+  <dependencyManagement>
+	<!-- this section defines the module VERSIONS that are used for submodules 
+		if nothing else is specified. The dependencies are NOT automatically included 
+		in submodules. -->
+    <dependencies>
+      <dependency>
+				<groupId>org.apache.mahout</groupId>
+				<artifactId>mahout-core</artifactId>
+				<version>${mahout.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.mahout</groupId>
+				<artifactId>mahout-math</artifactId>
+				<version>${mahout.version}</version>
+			</dependency>
+			
+			<!-- Hadoop YARN -->
+	    <dependency>
+	      <groupId>org.apache.hadoop</groupId>
+	      <artifactId>hadoop-common</artifactId>
+	      <version>2.0.5-alpha</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.hadoop</groupId>
+	      <artifactId>hadoop-hdfs</artifactId>
+	      <version>2.0.5-alpha</version>
+	    </dependency>
+	
+	    <!-- "Old" Hadoop -->
+	    <dependency>
+	      <groupId>org.apache.hadoop</groupId>
+	      <artifactId>hadoop-core</artifactId>
+	      <version>1.2.1</version>
+	    </dependency>
+		</dependencies>
+	</dependencyManagement>
 
-		<dependency>
-			<groupId>org.apache.mahout</groupId>
-			<artifactId>mahout-core</artifactId>
-			<version>0.8-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.mahout</groupId>
-			<artifactId>mahout-math</artifactId>
-			<version>0.8-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.mahout</groupId>
-			<artifactId>mahout-integration</artifactId>
-			<version>0.8-SNAPSHOT</version>
-		</dependency>
+	<dependencies>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
 		</dependency>
+    
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version> <!-- Hadoop 1.0.4 has 1.2.15 included, latest version is 1.2.17 -->
 		</dependency>
+		
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>14.0.1</version>
 		</dependency>
-	</dependencies>
 
-	<properties>
-	</properties>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.1</version>
+		</dependency>
+	</dependencies>
 
 </project>

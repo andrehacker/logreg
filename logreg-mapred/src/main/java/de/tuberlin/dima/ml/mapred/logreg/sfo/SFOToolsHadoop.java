@@ -19,7 +19,7 @@ import com.google.common.io.Closeables;
 
 import de.tuberlin.dima.ml.logreg.sfo.FeatureGain;
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
-import de.tuberlin.dima.ml.mapred.GlobalSettings;
+import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
 
 public class SFOToolsHadoop {
   
@@ -34,9 +34,8 @@ public class SFOToolsHadoop {
    * TODO Improvement: Appending only every single added dimension would be nice
    * to reduce startup costs
    */
-  static void writeBaseModel(IncrementalModel baseModel) throws IOException {
-    Configuration conf = new Configuration();
-    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
+  static void writeBaseModel(IncrementalModel baseModel, String hdfsAddress) throws IOException {
+    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress);
     
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer writer = null;
@@ -65,12 +64,11 @@ public class SFOToolsHadoop {
     return baseModel;
   }
   
-  static List<FeatureGain> readEvalResult(String path) throws IOException {
+  static List<FeatureGain> readEvalResult(String path, String hdfsAddress) throws IOException {
     
     List<FeatureGain> list = Lists.newArrayList();
     
-    Configuration conf = new Configuration();
-    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
+    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress);
     
     Path dir = new Path(path);
     FileSystem fs = FileSystem.get(conf);

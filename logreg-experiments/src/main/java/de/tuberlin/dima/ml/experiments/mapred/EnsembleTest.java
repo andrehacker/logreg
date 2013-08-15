@@ -1,14 +1,13 @@
-package de.tuberlin.dima.ml.mapred;
+package de.tuberlin.dima.ml.experiments.mapred;
 
 import org.apache.hadoop.util.ToolRunner;
-import org.junit.Test;
 
 import de.tuberlin.dima.ml.datasets.DatasetInfo;
 import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.mapred.eval.EvalJob;
 import de.tuberlin.dima.ml.mapred.logreg.ensemble.EnsembleJob;
 
-public class EnsembleJobTest {
+public class EnsembleTest {
   
   private static final DatasetInfo DATASET = RCV1DatasetInfo.get();
   
@@ -25,9 +24,8 @@ public class EnsembleJobTest {
   
   private static final String OUTPUT_TRAIN_PATH = "output-aim3-ensemble";
   private static final String OUTPUT_TEST_PATH = "output-aim3-validation";
-
-  @Test
-  public void test() throws Exception {
+  
+  public static void main(String[] args) throws Exception {
     
     int labelDimension = DATASET.getLabelIdByName(TARGET_POSITIVE);
     
@@ -44,5 +42,6 @@ public class EnsembleJobTest {
         OUTPUT_TRAIN_PATH,
         labelDimension), null);
   }
+
 
 }

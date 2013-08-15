@@ -11,32 +11,41 @@ import eu.stratosphere.nephele.fs.Path;
 import eu.stratosphere.pact.common.contract.GenericDataSource;
 import eu.stratosphere.pact.common.type.Value;
 
-public class SingleRuntimeValueDataSource extends GenericDataSource<SingleRuntimeValueInputFormat> {
+public class SingleValueDataSource extends GenericDataSource<SingleValueInputFormat> {
 
   /**
    * Using this DataSource you can use a single object (inheriting from
    * {@link Value}) as a DataSource. It will automatically serialize the object
    * to a file at any folder (that must be accessible from all nodes). The
-   * related {@link SingleRuntimeValueInputFormat} will deserialize it and emit
+   * related {@link SingleValueInputFormat} will deserialize it and emit
    * a single record with just a single value. The contract is defined to have
    * only a single split.<br/>
    * 
-   * TODO Improvement: It would be nice to just ask for the folder path and
-   * automatically create a unique file name.
+   * TODO Improvement: Ask for the folder path only and automatically create a
+   * unique file name.
    * 
-   * @param value The actual instance we want to use as input
+   * TODO Improvement: Find a better way to distribute the file to a node (or to
+   * all nodes). Currently the file is stored in any blocks on any nodes and
+   * potentially any other node will read this and actually emit the record.
+   * This matters for big objects. We should either consider the blocks or not
+   * use the hdfs. If we know that this input contract will be used at all nodes
+   * (e.g. via cross) we can also set replication factor to total number of
+   * nodes so all nodes will have it locally.
+   * 
+   * @param value
+   *          The actual instance we want to use as input
    * @param uniqueTmpFilePath
    *          This file path must be accessible from JobManager and
    *          Taskmanagers. Everytime you use this contract you must define a
    *          unique path. E.g. hdfs://my-namenode/tmp/unique-name-for-my-object
    * @throws IOException
    */
-  public SingleRuntimeValueDataSource(Value value, String uniqueTmpFilePath) throws IOException {
+  public SingleValueDataSource(Value value, String uniqueTmpFilePath) throws IOException {
     
-    super(SingleRuntimeValueInputFormat.class);
+    super(SingleValueInputFormat.class);
 
     // Send class name as parameter
-    this.parameters.setString(SingleRuntimeValueInputFormat.CONF_KEY_VALUE_CLASS, value.getClass().getName());
+    this.parameters.setString(SingleValueInputFormat.CONF_KEY_VALUE_CLASS, value.getClass().getName());
     System.out.println("SingleRuntimeValueDataSource Class name: " + value.getClass().getName());
     
     // Serialize value to file (on the currently used filesystem)
@@ -56,7 +65,7 @@ public class SingleRuntimeValueDataSource extends GenericDataSource<SingleRuntim
     stream.close();
 
     // Send location
-    this.parameters.setString(SingleRuntimeValueInputFormat.CONF_KEY_FILE_PATH, uniqueTmpFilePath);
+    this.parameters.setString(SingleValueInputFormat.CONF_KEY_FILE_PATH, uniqueTmpFilePath);
   }
 
 }

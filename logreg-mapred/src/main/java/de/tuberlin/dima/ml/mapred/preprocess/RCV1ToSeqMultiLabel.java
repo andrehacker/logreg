@@ -8,6 +8,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -16,7 +18,6 @@ import org.apache.mahout.math.VectorWritable;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
-import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.inputreader.RCV1VectorReader;
 import de.tuberlin.dima.ml.mapred.writables.IDAndLabels;
 import de.tuberlin.dima.ml.util.MLUtils;
@@ -54,9 +55,9 @@ public class RCV1ToSeqMultiLabel {
         folderPath + "vectors/lyrl2004_vectors_test_pt1.dat",
         folderPath + "vectors/lyrl2004_vectors_test_pt2.dat",
         folderPath + "vectors/lyrl2004_vectors_test_pt3.dat");
-    
-    int maxFeatureId = (int)RCV1DatasetInfo.get().getNumFeatures();
-    int labelRows = (int)RCV1DatasetInfo.get().getTotal();
+
+    int maxFeatureId = 47237;
+    int labelRows = 810935;
 
     RCV1ToSeqMultiLabel.transform(trainingFile, 
         labelPath,
@@ -131,6 +132,43 @@ public class RCV1ToSeqMultiLabel {
     } finally {
       Closeables.close(writer, true);
     }
+  }
+  
+  public static void main(String[] args) throws Exception {
+    
+    String folderPath = "/home/andre/dev/datasets/RCV1-v2/";
+    String trainingOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_train.seq";
+    String testOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_test.seq";
+    
+    RCV1ToSeqMultiLabel.transform(folderPath, trainingOutputPath, testOutputPath, -1);
+
+    // Produce a smaller version
+    int limit = 10000;
+    String smallTrainingOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_train_" + limit + ".seq";
+    String smallTestOutputPath = folderPath + "sequencefiles/lyrl2004_vectors_test_" + limit + ".seq";
+    RCV1ToSeqMultiLabel.transform(folderPath, smallTrainingOutputPath, smallTestOutputPath, limit);
+    
+    Configuration conf = new Configuration();
+    
+    System.out.println("Print first records out of training sequence file:");
+    
+    int n = 0;
+    for (Pair<IDAndLabels, VectorWritable> labeledRecord : 
+        new SequenceFileIterable<IDAndLabels, VectorWritable>(new Path(trainingOutputPath), conf)) {
+
+      IDAndLabels idAndLabels = labeledRecord.getFirst();
+      System.out.println("Label:" + idAndLabels.getId() + " Label (CCAT): " + idAndLabels.getLabels().get(0));
+
+      Vector features = labeledRecord.getSecond().get();
+
+      System.out.println("- Features: " + features.getNumNondefaultElements() + " of " + features.size());
+      System.out.println("- Vec: " + features.toString());
+
+      if (++n == 5) {
+        break;
+      }
+    }
+    
   }
 
 }

@@ -17,7 +17,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo;
 import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
 import edu.stanford.nlp.optimization.DiffFunction;
 
@@ -79,7 +78,8 @@ public class LBFGSDiffFunction implements DiffFunction {
 
   @Override
   public int domainDimension() {
-    return (int) RCV1DatasetInfo.get().getNumFeatures();
+    // TODO Add a parameter for numFeatures
+    return 47237;
   }
 
   @Override

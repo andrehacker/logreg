@@ -31,4 +31,24 @@ public class HadoopUtils {
     DistributedCache.addCacheFile(cachePath.toUri(), conf);
   }
   
+  public static Configuration createConfiguration(String hdfsAddress, String jobtrackerAddress, String jarPath) {
+    Configuration conf = new Configuration();
+    if (!"".equals(jobtrackerAddress))
+        conf.set("mapred.job.tracker", jobtrackerAddress);
+    if (!"".equals(hdfsAddress))
+      conf.set("fs.default.name", hdfsAddress);
+    if (!"".equals(jarPath))
+      conf.set("mapred.jar", jarPath);
+    return conf;
+  }
+  
+  public static Configuration createConfiguration(String hdfsAddress, String jobtrackerAddress) {
+    return createConfiguration(hdfsAddress, jobtrackerAddress, "");
+  }
+  
+  public static Configuration createConfiguration(String hdfsAddress) {
+    return createConfiguration(hdfsAddress, "");
+  }
+  
+  
 }

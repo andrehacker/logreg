@@ -39,6 +39,22 @@
       <version>0.2-ozone</version>
       <scope>compile</scope>
     </dependency>
+    <!-- for FileSystem access -->
+    <dependency>
+      <groupId>eu.stratosphere</groupId>
+      <artifactId>nephele-hdfs</artifactId>
+      <version>0.2-ozone</version>
+      <scope>compile</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-math</artifactId>
+    </dependency>
 
     <dependency>
 			<groupId>org.mockito</groupId>

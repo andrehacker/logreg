@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 /**
- * Provides information about Donut dataset, as used in Mahout in action
- * 
+ * Provides information about Donut dataset, as used in Mahout in action.
+ * Dataset can be used for test cases
  */
 public class DonutDatasetInfo {
 
@@ -21,8 +21,11 @@ public class DonutDatasetInfo {
   private static final Map<Integer, String> labelMap = ImmutableMap.of(
       0, "color");
 
-  private static DatasetInfo datasetInfo = new DatasetInfo.Builder(predictorNames.size(), TOTAL).
-      labelMap(labelMap).predictorNames(predictorNames).build();
+  private static DatasetInfo datasetInfo = new DatasetInfo.Builder()
+      .numFeatures(predictorNames.size())
+      .total(TOTAL)
+      .labelMap(labelMap)
+      .predictorNames(predictorNames).build();
   
   public static DatasetInfo get() {
     return datasetInfo;

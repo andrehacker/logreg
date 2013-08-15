@@ -8,18 +8,17 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 
 /**
- * Provides additional information about a model (usually meta data)
+ * Provides additional information about a dataset (usually meta data)
  * E.g. mapping from feature dimension to feature name, number of features or size
  * 
  * For MapReduce we can make static instances of this class,
  *  that are accessible also from Mappers and Reducers
- * 
  */
 public class DatasetInfo {
 
   private long numFeatures=0;
   private long total=0;
-  private List<String> predictorNames = Lists.newArrayList();
+  private List<String> featureNames = Lists.newArrayList();
   private BiMap<Integer, String> labelMap = HashBiMap.create();
   
   /**
@@ -28,23 +27,27 @@ public class DatasetInfo {
    */
   public static class Builder {
     
-    // Required parameters
-    private long numFeatures = 0;
-    private long total = 0;
+    // Required parameters (currently none)
     
     // Optional parameters
-    private List<String> predictorNames = null;
+    private long numFeatures = 0;
+    private long total = 0;
+    private List<String> featureNames = null;
     private BiMap<Integer, String> labelMap = null;
     
-    public Builder(
-      long numFeatures,
-      long total) {
-      this.numFeatures = numFeatures;
-      this.total = total;
+    public Builder() {
+    }
+    
+    public Builder numFeatures(long val) {
+      numFeatures = val; return this;
+    }
+    
+    public Builder total(long val) {
+      total = val; return this;
     }
     
     public Builder predictorNames(List<String> val) {
-      predictorNames = val; return this;
+      featureNames = val; return this;
     }
     
     public Builder labelMap(Map<Integer, String> val) {
@@ -59,13 +62,13 @@ public class DatasetInfo {
   private DatasetInfo(Builder builder) {
     numFeatures = builder.numFeatures;
     total = builder.total;
-    predictorNames = builder.predictorNames;
+    featureNames = builder.featureNames;
     labelMap = builder.labelMap;
   }
   
   public String getFeatureName(int dimension) {
-    if (predictorNames != null && predictorNames.size() > dimension)
-      return predictorNames.get(dimension);
+    if (featureNames != null && featureNames.size() > dimension)
+      return featureNames.get(dimension);
     return "unknown feature";
   }
   
@@ -86,7 +89,7 @@ public class DatasetInfo {
   }
   
   public void setPredictorNames(List<String> predictorNames) {
-    this.predictorNames = predictorNames;
+    this.featureNames = predictorNames;
   }
   
 }
