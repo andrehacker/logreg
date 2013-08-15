@@ -100,7 +100,7 @@ object SFOExperiment {
     
     val jarPathPact = "/home/andre/dev/logreg-repo/logreg-pact/target/logreg-pact-0.0.1-SNAPSHOT-job.jar"
     val inputTrainLocalPact = "file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_1000.svm"
-    val inputTrainPact = hdfsAddress + "/experiments/input/rcv1"
+    val inputTrainPact = hdfsAddress + "/experiments/input/rcv1/rcv1_topics_train_1000.svm"
     val labelIndex = 59 // CCAT=33, ECAT=59, GCAT=70, MCAT=102
     val outputPact = hdfsAddress + "/output-sfo-pact"
     
@@ -145,7 +145,7 @@ object SFOExperiment {
 
     // --------------- RUN HADOOP EXPERIMENT ----------
     
-    val hadoop = new HadoopSUT("/home/andre/experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-1.2.1.properties")
+    val hadoop = new HadoopSUT("/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-1.2.1.properties")
     
     val experimentPrefixHadoop = "%s-%s-%s-%s".format(experimentName, "hdp", "rcv1small", getDate("yyyy-MM-dd-HHmmss"))
     val dataToLoadHadoop = Array((inputTrainLocalHadoop, inputTrainHadoop))
@@ -156,8 +156,8 @@ object SFOExperiment {
 
     // --------------- RUN OZONE EXPERIMENT ----------
     
-    val ozone = new OzoneSUT("/home/andre/experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-1.2.1.properties")
-//    val ozone = new OzoneSUT("/home/andre/experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-2.0.5-alpha.properties")
+    val ozone = new OzoneSUT("/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-1.2.1.properties")
+//    val ozone = new OzoneSUT("/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-2.0.5-alpha.properties")
     
     val experimentPrefixPact = "%s-%s-%s-%s".format(experimentName, "ozn", "rcv1small", getDate("yyyy-MM-dd-HHmmss"))
     val dataToLoadPact = Array((inputTrainLocalPact, inputTrainPact))
@@ -173,7 +173,7 @@ object SFOExperiment {
       dataToLoad: Array[(String, String)], 
       outputToRemove: Array[String],
       logFilesToBackup: Array[(String, String)],
-      driver: SFODriver,
+      jobDriver: SFODriver,
       experimentPrefix: String) = {
     sut.deploy()
     
@@ -191,24 +191,17 @@ object SFOExperiment {
       
       for (rep <- 1 to numRepetitions) {
         
-//          sut.removeOutputFolder(outputTrainHadoop)
-//          sut.removeOutputFolder(outputTestHadoop)
         for (outputFolder <- outputToRemove) {
           sut.removeOutputFolder(outputFolder)
         }
 
-        // Hdfs may be faster after first time, not sure if we want to accept this
-        driver.computeGainsSFO(dop)
-//          val gains = driver.getGains()
-//          printTopGains(gains, dataset)
+        jobDriver.computeGainsSFO(dop)
 
         val experimentID = experimentPrefix + "-dop%04d-run%02d".format(dop, rep)
         for ((outputFolder, logname) <- logFilesToBackup) {
           sut.backupJobLogs(outputFolder, experimentID, logname)
-          sut.backupJobLogs(outputFolder, experimentID, logname)
         }
         
-        // TODO Copy java properties file to experiment log folder 
       }
       
       sut.stop()
@@ -217,18 +210,18 @@ object SFOExperiment {
     }
   }
   
+  def getDate(format: String) = {
+    val df = new SimpleDateFormat(format)
+    val today = Calendar.getInstance().getTime()
+    df.format(today)
+  }
+  
   def printTopGains(gains: List[FeatureGain], datasetInfo: DatasetInfo) = {
     for (i <- 0 until 10) {
       println("d " + gains.get(i).getDimension() + 
           " (" + datasetInfo.getFeatureName(gains.get(i).getDimension()) 
           + ") gain: " + gains.get(i).getGain() + " coefficient(pact-only): " + gains.get(i).getCoefficient())
     }
-  }
-  
-  def getDate(format: String) = {
-    val df = new SimpleDateFormat(format)
-    val today = Calendar.getInstance().getTime()
-    df.format(today)
   }
 
 }

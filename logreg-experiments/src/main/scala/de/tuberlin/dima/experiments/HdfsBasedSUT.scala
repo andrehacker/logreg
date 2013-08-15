@@ -191,7 +191,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
         nodesConnected = 0
         println("- Nodes connected unknown (logfile not existing)")
       }
-      Thread.sleep(500);
+      Thread.sleep(1000);
     }
   }
   

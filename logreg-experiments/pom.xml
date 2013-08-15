@@ -111,7 +111,48 @@
           </execution>
         </executions>
       </plugin>
+      
+      <!-- Create jar with all dependencies - to execute experiments on any computer -->
+      
+      
     </plugins>
   </build>
+
+
+  <!--
+    This profile creates a jar with all dependencies
+    It can be triggered with a call of mvn ... -Pfull-jar
+  -->
+	<profiles>
+		<profile>
+		  <id>full-jar</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>job</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/main/assembly/full-jar.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+  
 
 </project>

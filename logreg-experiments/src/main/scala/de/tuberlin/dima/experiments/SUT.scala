@@ -12,6 +12,10 @@ import org.apache.commons.io.FileUtils
  * Wraps functionality for deployment, running and logging
  * 
  * Convention: All directory have no trailing /. E.g. /path/to/config-dir 
+ * 
+ * TODO Copy java properties file to experiment log folder 
+ * TODO Minor: We should add methods fsStart and fsStop.
+ * So we can restart the hdfs after every execution of the experiment to always use the cold-cache-mode 
  */
 abstract class SUT(confFile: String) {
   
@@ -24,14 +28,34 @@ abstract class SUT(confFile: String) {
   
   def deploy()
   
+  /**
+   * Adapt the number of slaves for the whole system under test (e.g. hdfs and stratosphere).
+   */
   def adaptSlaves(numSlaves: Int)
   
+  /**
+   * Format the underlying filesystem, start it and wait 
+   * until all slaves have connected (datanodes for hdfs) 
+   */
   def fsFormatStartWait(numSlaves: Int)
   
+  /**
+   * Remove all files from the filesystem and stop it.
+   * May not return before the system stopped.
+   * You must call stop() before to stop the system on top of the filesystem
+   */
   def fsCleanStop()
   
+  /**
+   * Load a single file or directory from local filesystem to the distributed filesystem 
+   */
   def fsLoadData(localPath: String, destinationPath: String): Boolean
   
+  /**
+   * Start the system under test
+   * and wait until all nodes (e.g. tasktrackers) have connected.
+   * fsFormatStartWait must be called before.
+   */
   def startWait(numSlaves: Int)
   
   /**
@@ -56,7 +80,9 @@ abstract class SUT(confFile: String) {
    */
   def backupJobLogs(outputPath: String, experimentID: String, logName: String)
   
-  // ---------- BASE METHODS ----------
+  
+  // ---------- BASE IMPLEMENTATIONS ----------
+  
   
   def p(str: String, verbose: Boolean = true) = {
     if (verbose) { printf("- exec %s\n", str) }
