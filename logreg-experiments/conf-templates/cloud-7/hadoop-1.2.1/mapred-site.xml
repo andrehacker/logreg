@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+  <!-- DIRECTORIES -->
+  <property>
+    <name>mapred.local.dir</name>
+    <value>${hadoop.tmp.dir}/mapred/local</value>
+  </property>
+
+  <property>
+    <name>hadoop.job.history.user.location</name>
+    <value>/benchmarks/output</value>
+  </property>
+
+  <!-- DIRECTORIES END -->
+
+  <!-- PORTS -->
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>cloud-7:45030</value>
+  </property>
+
+  <property>
+    <name>mapred.job.tracker.http.address</name>
+    <value>0.0.0.0:4507</value>
+  </property>
+
+  <property>
+    <name>mapred.task.tracker.http.address</name>
+    <value>0.0.0.0:4506</value>
+  </property>
+  <!-- PORTS END -->
+
+  <property>
+    <name>mapred.job.reuse.jvm.num.tasks</name>
+    <value>-1</value>
+  </property>
+
+  <property>
+    <name>mapred.child.java.opts</name>
+    <value>-Xms1536m -Xmx1536m</value>
+  </property>
+
+  <property>
+    <name>mapred.tasktracker.map.tasks.maximum</name>
+    <value>8</value>
+  </property>
+
+  <property>
+    <name>mapred.tasktracker.reduce.tasks.maximum</name>
+    <value>8</value>
+  </property>
+
+  <!--
+  <property>
+    <name>mapred.map.tasks</name>
+    <value>32</value>
+  </property>
+
+  <property>
+    <name>mapred.reduce.tasks</name>
+    <value>32</value>
+  </property>
+  -->
+
+  <property>
+    <name>io.sort.mb</name>
+    <value>1024</value>
+  </property>
+
+  <property>
+    <name>io.sort.factor</name>
+    <value>64</value>
+  </property>
+
+  <property>
+    <name>mapred.task.timeout</name>
+    <value>7200000</value>
+  </property>
+
+  <property>
+    <name>mapred.map.max.attempts</name>
+    <value>3</value>
+  </property>
+
+  <property>
+    <name>mapred.reduce.parallel.copies</name>
+    <value>20</value>
+  </property>
+
+  <property>
+    <name>mapred.map.tasks.speculative.execution</name>
+    <value>false</value>
+  </property>
+
+  <property>
+    <name>mapred.reduce.tasks.speculative.execution</name>
+    <value>false</value>
+  </property>
+
+
+</configuration>

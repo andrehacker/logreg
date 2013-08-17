@@ -16,7 +16,6 @@ import java.io.PrintWriter
 class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   val experimentLogDir = getProperty("experiment_log_dir")
-  val hadoopPidFolder = getProperty("hadoop_pid_folder")
   
   val SEARCH_STRING_TASKTRACKER_CONNECTED = "adding a new node:"
   val SEARCH_STRING_TASKTRACKER_CONNECTED_YARN = "Added node "
@@ -68,9 +67,9 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     // TODO Minor: Why do the jp-scripts sleep here and look for ghost JVMs?
   }
   
-  override def backupJobLogs(outputPath: String, experimentID: String, logName: String) = {
+  override def backupJobLogs(outputPath: String, experimentID: String, logName: String): Boolean = {
     
-    println("\n-------------------- LOG BACKUP --------------------\n")
+    println("\n-------------------- JOB LOG BACKUP --------------------\n")
     
     // Create local folder for log backup
     (new File(experimentLogDir)).mkdirs()
@@ -80,9 +79,15 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     val target = experimentLogDir + "/" + experimentID + "/" + logName
     
     printf("Backup job logs from %s to %s\n", src, target)
-    getHDFSFileSystem.copyToLocalFile(
-        new Path(src),
-        new Path(target))
+    if (getHDFSFileSystem.exists(new Path(src))) {
+      getHDFSFileSystem.copyToLocalFile(
+          new Path(src),
+          new Path(target))
+          true
+    } else {
+      printf("Error: Log folder %s does not exist\n", src)
+      false
+    }
   }
 
   private def isJobtrackerRunning(): Boolean = {

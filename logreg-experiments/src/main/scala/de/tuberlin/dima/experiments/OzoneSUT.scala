@@ -86,7 +86,13 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     val src = ozoneSystemHome + "/log"
     val target = experimentLogDir + "/" + experimentID + "/" + logName + "/"
     printf("Backup job logs from %s to %s\n", src, target)
-    FileUtils.copyDirectory(new File(src), new File(target))
+    if (new File(src).exists()) {
+      FileUtils.copyDirectory(new File(src), new File(target))
+      true
+    } else {
+      printf("Error: Log folder %s does not exist\n", src)
+      false
+    }
   }
   
   private def isNepheleRunning(): Boolean = {

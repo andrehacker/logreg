@@ -26,10 +26,14 @@ abstract class SUT(confFile: String) {
   
   // ---------- ABSTRACT METHODS ----------
   
+  /**
+   * Deploy the system under test such as hadoop or stratosphere
+   * May throw exception in case of problems (makes no sense to continue)
+   */
   def deploy()
   
   /**
-   * Adapt the number of slaves for the whole system under test (e.g. hdfs and stratosphere).
+   * Adapt the number of slaves for the whole system under test (e.g. hadoop and stratosphere).
    */
   def adaptSlaves(numSlaves: Int)
   
@@ -68,7 +72,7 @@ abstract class SUT(confFile: String) {
    * Remove output from a previous job (e.g. hadoop, ozone).
    * Does nothing if the folder does not exists.
    */
-  def removeOutputFolder(outputPath: String)
+  def removeOutputFolder(outputPath: String): Boolean
   
   /**
    * Create a backup of the files of a single job (e.g. one hadoop mapred job).
@@ -78,7 +82,7 @@ abstract class SUT(confFile: String) {
    * 
    * TODO What about the backup of the job results/output?
    */
-  def backupJobLogs(outputPath: String, experimentID: String, logName: String)
+  def backupJobLogs(outputPath: String, experimentID: String, logName: String): Boolean
   
   
   // ---------- BASE IMPLEMENTATIONS ----------

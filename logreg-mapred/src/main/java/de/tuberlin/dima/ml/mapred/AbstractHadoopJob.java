@@ -55,14 +55,22 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
       System.out.println("RUN IN PSEUDO-DISTRIBUTED/CLUSTER MODE");
     }
     
-    if (reducer.equals(Reducer.class)) {
-      if (mapper.equals(Mapper.class)) {
-        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
+    // JAR DETECTION
+    if ("".equals(job.getJar())) {
+      System.out.println("No jar file defined, try to infer it from mapper or reducer");
+      if (reducer.equals(Reducer.class)) {
+        if (mapper.equals(Mapper.class)) {
+          throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
+        }
+        job.setJarByClass(mapper);
+      } else {
+        job.setJarByClass(reducer);
       }
-      job.setJarByClass(mapper);
     } else {
-      job.setJarByClass(reducer);
+      System.out.println("Jar file already defined, don't infer it.");
     }
+    System.out.println("Jar path: " + job.getJar());
+    
     if (!runLocal) {
       // This is needed if we run from eclipse, which won't build a jar automatically
       // In this case we have to build the jar manually before!
@@ -73,7 +81,6 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
 //      job.setNumReduceTasks(4);
       conf.setInt("mapred.reduce.tasks", numReducers);
     }
-    System.out.println("Jar path: " + job.getJar());
     
     // ----- Set classes -----
 

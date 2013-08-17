@@ -25,6 +25,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   val hadoopConfPath = getProperty("hadoop_conf")
   val hadoopLog = getProperty("hadoop_log")
   val hadoopSlavesFile = getProperty("hadoop_slaves_file")
+  val hadoopPidFolder = getProperty("hadoop_pid_folder")
   val hdfsDataDir = getProperty("hdfs_data_dir")
   val hdfsAddress = getProperty("hdfs_address")
   val hdfsNameNodeHostname = getProperty("hdfs_namenode_hostname")
@@ -42,6 +43,15 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     }
     
     deployFromTar(hadoopTar, hadoopSystemHome, hadoopConfTemplatePath, hadoopConfPath, user, group)
+    
+    // Workaround for /share -> /export link. Overwrite hadoop-config.sh in bin and libexec
+    val hadoopConfScriptOverwrite = getProperty("hadoop_conf_script_overwrite")
+    if (hadoopConfScriptOverwrite != "") {
+      p("cp " + hadoopConfScriptOverwrite + " " + hadoopSystemHome + "/bin/hadoop-config.sh") !;
+      if (new File(hadoopSystemHome + "/libexec/hadoop-config.sh").exists) {
+        p("cp " + hadoopConfScriptOverwrite + " " + hadoopSystemHome + "/libexec/hadoop-config.sh") !;
+      }
+    } 
   }
   
   
@@ -120,7 +130,8 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     println("\n-------------------- HDFS CLEAN STOP --------------------\n")
     
 //    p(hadoopSystemHome + "/bin/hadoop fs -rmr '/*'") !;
-    getHDFSFileSystem.delete(new Path("/"), true)
+    val recursive = true
+    getHDFSFileSystem.delete(new Path("/"), recursive)
     
     if (isYarn) {
       p(hadoopSystemHome + "/sbin/hadoop-daemon.sh --config " + hadoopConfPath + " --script hdfs stop namenode")!;
@@ -142,35 +153,39 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     // See copy method in http://svn.apache.org/viewvc/hadoop/common/tags/release-1.2.1/src/core/org/apache/hadoop/fs/FileUtil.java?view=markup
     // Old: ${HDFS_BIN}/hadoop fs -copyFromLocal $INPUT $OUTPUT
     val delSource = false; val overWrite = false
-    var success = false
     try {
       fs.copyFromLocalFile(delSource, overWrite, new Path(localPath), new Path(destinationPath))
-      success = true
+      true
     } catch {
-      case ioex: IOException => println("IOException: " + ioex.toString())
       case ex: Exception => println("Exception: " + ex.toString())
+      false
     }
-    success
   }
 
-  override def removeOutputFolder(outputPath: String) = {
+  override def removeOutputFolder(outputPath: String): Boolean = {
     val fs = getHDFSFileSystem
     if (fs.exists(new Path(outputPath))) {
       printf("Remove output folder %s\n", outputPath)
       val recursive = true
       fs.delete(new Path(outputPath), recursive)
+      true
     } else {
       printf("Output path %s is empty, nothing to delete\n", outputPath)
+      false
     }
   }
  
   
   
   protected def adaptSlavesFile(sourceFile: String, targetFile: String, numSlaves: Int) = {
+    requirePathExists(sourceFile)
     val allSlaves = Source.fromFile(new File(sourceFile)).getLines;
     val writer = new PrintWriter(new File(targetFile))
     println("Write current slaves (" + numSlaves + ") to " + targetFile + ":")
     for (i <- 1 to numSlaves) {
+      if (!allSlaves.hasNext) {
+        throw new Exception("All slaves file has less slaves specified than you specified in numSlaves (dop)")
+      }
       val slave = allSlaves.next
       writer.println(slave)
       println("- " + slave)
@@ -203,7 +218,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   
   protected def isNameNodeRunning(): Boolean = {
     println("Check if hdfs namenode is running")
-    checkPIDRunning("/tmp/hadoop-" + user + "-namenode.pid")
+    checkPIDRunning(hadoopPidFolder + "/hadoop-" + user + "-namenode.pid")
   }
   
   protected def checkPIDRunning(pidFile: String): Boolean = {

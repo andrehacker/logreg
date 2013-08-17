@@ -111,8 +111,26 @@
           </execution>
         </executions>
       </plugin>
-      
-      <!-- Create jar with all dependencies - to execute experiments on any computer -->
+
+	<!-- Create jar with dependencies to other logreg-modules -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>job</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/experiments.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
       
       
     </plugins>
@@ -121,11 +139,11 @@
 
   <!--
     This profile creates a jar with all dependencies
-    It can be triggered with a call of mvn ... -Pfull-jar
+    It can be triggered with a call of mvn package -Pdependency-build
   -->
 	<profiles>
 		<profile>
-		  <id>full-jar</id>
+		  <id>dependency-build</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
@@ -143,7 +161,7 @@
 								</goals>
 								<configuration>
 									<descriptors>
-										<descriptor>src/main/assembly/full-jar.xml</descriptor>
+										<descriptor>src/main/assembly/all-dependencies.xml</descriptor>
 									</descriptors>
 								</configuration>
 							</execution>
