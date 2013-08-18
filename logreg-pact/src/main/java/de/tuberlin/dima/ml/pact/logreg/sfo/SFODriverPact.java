@@ -20,6 +20,7 @@ public class SFODriverPact implements SFODriver {
   private String outputPath;
   private int numFeatures;
   private boolean runLocal;
+  private String confPath;
   private String jarPath;
   private String jobManagerAddress;
   private String jobManagerPort;
@@ -34,6 +35,7 @@ public class SFODriverPact implements SFODriver {
       String outputPath,
       int numFeatures,
       boolean runLocal,
+      String confPath,
       String jarPath,
       String jobManagerAddress,
       String jobManagerPort) {
@@ -43,6 +45,7 @@ public class SFODriverPact implements SFODriver {
     this.outputPath = outputPath;
     this.numFeatures = numFeatures;
     this.runLocal = runLocal;
+    this.confPath = confPath;
     this.jarPath = jarPath;
     this.jobManagerAddress = jobManagerAddress;
     this.jobManagerPort = jobManagerPort;
@@ -66,7 +69,8 @@ public class SFODriverPact implements SFODriver {
     } else {
       // TODO _SFO Major: Basemodel does not get transmitted
       String[] jobArgs = SFOPlanAssembler.buildArgs(numSubTasks, inputPathTrain, inputPathTest, outputPath, numFeatures, labelIndex, applyBest);
-      runner.run(jarPath, SFOPlanAssembler.class.getName(), jobArgs, "", jobManagerAddress, jobManagerPort, true);
+      //runner.run(jarPath, SFOPlanAssembler.class.getName(), jobArgs, "", jobManagerAddress, jobManagerPort, true);
+      runner.run(jarPath, SFOPlanAssembler.class.getName(), jobArgs, confPath, "", "", true);
     }
     
     // Read results from hdfs into memory

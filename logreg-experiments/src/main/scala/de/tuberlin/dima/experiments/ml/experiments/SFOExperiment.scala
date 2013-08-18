@@ -134,6 +134,7 @@ object SFOExperiment extends Experiment {
     
     val jobManagerAddress = getSysProperty("job_manager_address")
     val jobManagerPort = getSysProperty("job_manager_port")
+    val ozoneConfPath = getSysProperty("ozone_conf")
 
     val sfoDriverPact = new SFODriverPact(
       inputTrainOzone,
@@ -142,6 +143,7 @@ object SFOExperiment extends Experiment {
       outputOzone,
       dataset.getNumFeatures().toInt,
       false,
+      ozoneConfPath,
       jarPathOzone,
       jobManagerAddress,
       jobManagerPort.toString)
@@ -203,6 +205,7 @@ object SFOExperiment extends Experiment {
           sut.removeOutputFolder(outputFolder)
         }
 
+        println("\n-------------------- RUN EXPERIMENT --------------------\n")
         jobDriver.computeGainsSFO(dop)
 
         val experimentID = experimentPrefix + "-dop%04d-run%02d".format(dop, rep)

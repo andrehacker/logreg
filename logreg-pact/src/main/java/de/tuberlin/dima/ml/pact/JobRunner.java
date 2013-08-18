@@ -109,21 +109,27 @@ public class JobRunner {
       // - Reads all files in specified directory
       // - results in warning, because nephele-plugins.xml does not start with
       // configuration
-      if (configPath.equals("")) {
+      if (!configPath.equals("")) {
+        System.out.println("JobRunner: Load configuration from " + configPath);
         GlobalConfiguration.loadConfiguration(configPath);
       }
       Configuration config = GlobalConfiguration.getConfiguration();
       if (configPath.equals("")) {
         // Apply defaults (is there another way to get a default configuration?)
+        System.out.println("JobRunner: No config path defined, load defaults (127.0.0.1:" + ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT + ")");
         config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, "127.0.0.1");
         config.setInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT);
       }
       // Overwrite the values in the conf dir and in the 
-      if (!"".equals(jobManagerAddress))
-          config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, jobManagerAddress);
-      if (!"".equals(jobManagerPort))
+      if (!"".equals(jobManagerAddress)) {
+        System.out.println("JobRunner: Overwrite JobManager address: " + jobManagerAddress);
+        config.setString(ConfigConstants.JOB_MANAGER_IPC_ADDRESS_KEY, jobManagerAddress);
+      }
+      if (!"".equals(jobManagerPort)) {
+        System.out.println("JobRunner: Overwrite JobManager port: " + jobManagerPort);
         config.setString(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY, jobManagerPort);
-          
+      }
+      
       Client client = new Client(config);
 
       // Client.run(...)
@@ -142,6 +148,7 @@ public class JobRunner {
       // This cannot be compiled from maven / javac. Works only if Eclipse built the class file for this class before
       //  http://stackoverflow.com/questions/9693889/maven-class-file-for-not-found-compilation-error
       //  http://maven.40175.n5.nabble.com/Maven-project-can-t-access-class-file-td4599976.html
+      System.out.println("JobRunner: Run Job");
       final Stopwatch stop = new Stopwatch();
       stop.start();
       client.run(prog, waitForCompletion);
@@ -149,6 +156,7 @@ public class JobRunner {
 
       lastNetRuntime = 0;   // not available
       lastRuntime = stop.elapsed(TimeUnit.MILLISECONDS);
+      System.out.println("Elapsed time (ms): " + lastRuntime);
 
     } catch (ProgramInvocationException e) {
       System.out.println(e.toString());

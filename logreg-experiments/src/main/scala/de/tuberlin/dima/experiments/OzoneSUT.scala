@@ -35,6 +35,12 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
 
     deployFromTar(ozoneTar, ozoneSystemHome, ozoneConfTemplatePath, ozoneConfPath, user, group)
     
+    // Overwrite nephele-config.sh in bin, e.g. for custom pid folder
+    val nepheleConfScriptOverwrite = getOptionalProperty("nephele_conf_script_overwrite")
+    if (nepheleConfScriptOverwrite != "") {
+      p("cp " + nepheleConfScriptOverwrite + " " + ozoneSystemHome + "/bin/nephele-config.sh") !;
+    } 
+
   }
   
   override def adaptSlaves(numSlaves: Int) = {

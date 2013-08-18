@@ -45,7 +45,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     deployFromTar(hadoopTar, hadoopSystemHome, hadoopConfTemplatePath, hadoopConfPath, user, group)
     
     // Workaround for /share -> /export link. Overwrite hadoop-config.sh in bin and libexec
-    val hadoopConfScriptOverwrite = getProperty("hadoop_conf_script_overwrite")
+    val hadoopConfScriptOverwrite = getOptionalProperty("hadoop_conf_script_overwrite")
     if (hadoopConfScriptOverwrite != "") {
       p("cp " + hadoopConfScriptOverwrite + " " + hadoopSystemHome + "/bin/hadoop-config.sh") !;
       if (new File(hadoopSystemHome + "/libexec/hadoop-config.sh").exists) {

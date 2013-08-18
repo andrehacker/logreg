@@ -100,7 +100,11 @@ abstract class SUT(confFile: String) {
       value
     } else throw new RuntimeException("Could not read property " + name)
   }
-  
+
+  def getOptionalProperty(name: String): String = {
+    prop.getProperty(name, "")
+  }
+
   def requirePathExists(path: String) = {
     // Check if this path exists
     if (! (new File(path).exists()))
