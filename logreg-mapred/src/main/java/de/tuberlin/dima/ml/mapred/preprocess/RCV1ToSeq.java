@@ -131,54 +131,77 @@ public class RCV1ToSeq {
   
 
   public static void main(String[] args) throws Exception {
-
-    String inputPath = "/home/andre/dev/datasets/RCV1-v2/";
-    String outputPath = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/";
-    String positiveClass = "ecat"; // Singh uses ECAT
     
-    boolean createBig = false;
-    boolean createSmall = true;
-//    int[] smallSizes = new int[] {5000, 10000, 20000};
-    int[] smallSizes = new int[] {100, 500, 1000, 2000};
-    
-    // ---- Create sequence files with single label ----
-    if (createBig) {
+    if (args.length != 0) {
+      if (args.length < 3) {
+        System.out.println("Usage: <folder containing input> <output-folder> <name-of-positive-class> [<limit>]");
+        return;
+      }
+      String inputPath = args[0];
+      String outputPath = args[1];
+      String positiveClass = args[2];
+      int smallSize = args.length > 3 ? Integer.parseInt(args[3]) : -1;
+      String suffix = "";
+      if (smallSize != -1) {
+        suffix = "_" + Integer.toString(smallSize);
+      }
       RCV1ToSeq.transform(
           inputPath, 
           positiveClass,
-          outputPath + "lyrl2004_vectors_" + positiveClass + "_train.seq", 
-          outputPath + "lyrl2004_vectors_" + positiveClass + "_test.seq",
-          -1);
-  
-      // ---- Create sequence files with all labels ----
-      RCV1ToSeqMultiLabel.transform(
-          inputPath,
-          outputPath + "lyrl2004_vectors_train.seq", 
-          outputPath + "lyrl2004_vectors_test.seq",
-          -1);
+          outputPath + "lyrl2004_vectors_" + positiveClass + "_train" + suffix + ".seq", 
+          outputPath + "lyrl2004_vectors_" + positiveClass + "_test" + suffix + ".seq",
+          smallSize);
+    } else {
+      // Run hardcoded stuff
+      String inputPath = "/home/andre/dev/datasets/RCV1-v2/";
+      String outputPath = "/home/andre/dev/datasets/RCV1-v2/sequencefiles/";
+      String positiveClass = "ecat"; // Singh uses ECAT
       
-      printFirstRecords(outputPath + "lyrl2004_vectors_" + positiveClass + "_train.seq");
-    }
-
-    if (createSmall) {
-      // ---- Produce a smaller version (single and multi label) ----
-      for (int size : smallSizes) {
-        String smallTrainingOutputPath = outputPath + "lyrl2004_vectors_" + positiveClass + "_train_" + size + ".seq";
-        String smallTestOutputPath = outputPath + "lyrl2004_vectors_" + positiveClass + "_test_" + size + ".seq";
+      boolean createBig = false;
+      boolean createSmall = true;
+//      int[] smallSizes = new int[] {5000, 10000, 20000};
+      int[] smallSizes = new int[] {100, 500, 1000, 2000};
+      
+      // ---- Create sequence files with single label ----
+      if (createBig) {
         RCV1ToSeq.transform(
             inputPath, 
-            positiveClass, 
-            smallTrainingOutputPath, 
-            smallTestOutputPath, 
-            size);
-        
+            positiveClass,
+            outputPath + "lyrl2004_vectors_" + positiveClass + "_train.seq", 
+            outputPath + "lyrl2004_vectors_" + positiveClass + "_test.seq",
+            -1);
+    
+        // ---- Create sequence files with all labels ----
         RCV1ToSeqMultiLabel.transform(
             inputPath,
-            outputPath + "lyrl2004_vectors_train_" + size + ".seq", 
-            outputPath + "lyrl2004_vectors_test_" + size + ".seq",
-            size);
+            outputPath + "lyrl2004_vectors_train.seq", 
+            outputPath + "lyrl2004_vectors_test.seq",
+            -1);
+        
+        printFirstRecords(outputPath + "lyrl2004_vectors_" + positiveClass + "_train.seq");
+      }
+
+      if (createSmall) {
+        // ---- Produce a smaller version (single and multi label) ----
+        for (int size : smallSizes) {
+          String smallTrainingOutputPath = outputPath + "lyrl2004_vectors_" + positiveClass + "_train_" + size + ".seq";
+          String smallTestOutputPath = outputPath + "lyrl2004_vectors_" + positiveClass + "_test_" + size + ".seq";
+          RCV1ToSeq.transform(
+              inputPath, 
+              positiveClass, 
+              smallTrainingOutputPath, 
+              smallTestOutputPath, 
+              size);
+          
+          RCV1ToSeqMultiLabel.transform(
+              inputPath,
+              outputPath + "lyrl2004_vectors_train_" + size + ".seq", 
+              outputPath + "lyrl2004_vectors_test_" + size + ".seq",
+              size);
+        }
       }
     }
+
   }
   
   private static void printFirstRecords(String sequenceFilePath) {

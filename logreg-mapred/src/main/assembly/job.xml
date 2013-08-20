@@ -20,11 +20,14 @@
       -->
       <!-- For documentation see http://maven.apache.org/plugins/maven-assembly-plugin/assembly.html -->
       <includes>
-        <include>de.tuberlin.dima.*</include>
+<!--         <include>de.tuberlin.dima.*</include> -->
         <include>de.tuberlin.dima:logreg-common</include>
+        <!-- I prefer to copy the jars to the hadoop lib directory -->
+        <!-- 
         <include>org.apache.mahout:mahout-core</include>
         <include>org.apache.mahout:mahout-math</include>
         <include>com.google.guava:guava</include>
+        -->
       </includes>
     </dependencySet>
   </dependencySets>

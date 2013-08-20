@@ -1,19 +1,18 @@
 package de.tuberlin.dima.experiments
 
 import java.io.File
-import scala.io.Source
-import scala.sys.process._
-import org.apache.commons.io.FileUtils
-import org.apache.hadoop.fs.FileSystem
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
-import de.tuberlin.dima.ml.mapred.GlobalSettings
-import java.io.IOException
-import java.util.Properties
-import java.io.FileInputStream
 import java.io.PrintWriter
 
+import scala.io.Source
+
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.fs.Path
+import org.slf4j.LoggerFactory
+
 abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
+  
+  private val logger = LoggerFactory.getLogger(this.getClass())
   
   val isYarn = getProperty("is_yarn").toBoolean
   val allSlavesFilePath = getProperty("all_slaves")
@@ -35,7 +34,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   
   override def deploy() = {
     
-    println("\n-------------------- DEPLOY HDFS (incl. Hadoop) --------------------\n")
+    logger.info("-------------------- DEPLOY HDFS (incl. Hadoop) --------------------\n")
     
     // HDFS already running?
     if (isNameNodeRunning()) {
@@ -45,19 +44,26 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     deployFromTar(hadoopTar, hadoopSystemHome, hadoopConfTemplatePath, hadoopConfPath, user, group)
     
     // Workaround for /share -> /export link. Overwrite hadoop-config.sh in bin and libexec
-    val hadoopConfScriptOverwrite = getOptionalProperty("hadoop_conf_script_overwrite")
+    val hadoopConfScriptOverwrite = getOptionalProperty("hadoop_conf_script_overwrite", "")
     if (hadoopConfScriptOverwrite != "") {
-      p("cp " + hadoopConfScriptOverwrite + " " + hadoopSystemHome + "/bin/hadoop-config.sh") !;
+      bash("cp " + hadoopConfScriptOverwrite + " " + hadoopSystemHome + "/bin/hadoop-config.sh");
       if (new File(hadoopSystemHome + "/libexec/hadoop-config.sh").exists) {
-        p("cp " + hadoopConfScriptOverwrite + " " + hadoopSystemHome + "/libexec/hadoop-config.sh") !;
+        bash("cp " + hadoopConfScriptOverwrite + " " + hadoopSystemHome + "/libexec/hadoop-config.sh");
       }
-    } 
+    }
+    
+    // Optional: Copy libs to hadoop lib dir
+    val hadoopLibDirToCopy = getOptionalProperty("hadoop_lib_dir_to_copy", "")
+    if (hadoopLibDirToCopy != "") {
+      logger.info("Copy additional libs to sut's lib dir")
+      bash("cp " + hadoopLibDirToCopy + "/* " + hadoopSystemHome + "/lib/")
+    }
   }
   
   
   override def adaptSlaves(numSlaves: Int) = {
     
-    println("\n-------------------- ADAPT HADOOP SLAVES --------------------\n")
+    logger.info("-------------------- ADAPT HADOOP SLAVES --------------------\n")
     
     adaptSlavesFile(allSlavesFilePath, hadoopSlavesFile, numSlaves)
   }
@@ -65,49 +71,49 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   
   override def fsFormatStartWait(numSlaves: Int) = {
     
-    println("\n-------------------- HDFS FORMAT START WAIT --------------------\n")
+    logger.info("-------------------- HDFS FORMAT START WAIT --------------------\n")
     
     // Delete hdfs log files
     // Filename: hadoop-<user-running-hadoop>-<daemon>-<hostname>.log
     // We ignore .out files
     // See http://blog.cloudera.com/blog/2009/09/apache-hadoop-log-files-where-to-find-them-in-cdh-and-what-info-they-contain/
-    p("rm -Rf " + hadoopLog + "/hadoop-" + user + "-*node-*.log*") !
+    bash("rm -Rf " + hadoopLog + "/hadoop-" + user + "-*node-*.log*")
     
     // Delete data dir on all slaves
     val slaves = Source.fromFile(new File(hadoopSlavesFile)).getLines;
     for (slave <- slaves) {
-      printf("Delete %s on slave %s", hdfsDataDir + "\n", slave)
-      Process("ssh", Seq(user + "@" + slave, "rm -Rf " + hdfsDataDir)).!
+      logger.info("Delete " + hdfsDataDir + " on slave " + slave)
+//      Process("ssh", Seq(user + "@" + slave, "rm -Rf " + hdfsDataDir)).!
 //      Seq("sh", "-c", "ulimit -n").!!;
-//      p("ssh " + user + "@" + slave + " 'rm -Rf " + dataDir + "'") !;
+      bash("ssh " + user + "@" + slave + " 'rm -Rf " + hdfsDataDir + "'")
     }
     
     if (isYarn) {
-      p(hadoopSystemHome + "/bin/hdfs namenode -format " + hdfsNameNodeHostname + " -force") !;
+      bash(hadoopSystemHome + "/bin/hdfs namenode -format " + hdfsNameNodeHostname + " -force")
     } else {
-      p(hadoopSystemHome + "/bin/hadoop namenode -format -force") !
+      bash(hadoopSystemHome + "/bin/hadoop namenode -format -force")
     }
     
     // The last parameter is the ClusterID, which is only relevant if we have multiple namenodes (HA HDFS)
     // Description of ClusterID: A new identifier ClusterID is added to identify all the nodes in the cluster. When a Namenode is formatted, this identifier is provided or auto generated. This ID should be used for formatting the other Namenodes into the cluster.
     if (isYarn) {
-      p(hadoopSystemHome + "/sbin/hadoop-daemon.sh --config " + hadoopConfPath + " --script hdfs start namenode")!;
-      p(hadoopSystemHome + "/sbin/hadoop-daemons.sh --config " + hadoopConfPath + " --script hdfs start datanode")!;
-//      p(hadoopSystemHome + "/bin/start-dfs.sh") !
+      bash(hadoopSystemHome + "/sbin/hadoop-daemon.sh --config " + hadoopConfPath + " --script hdfs start namenode")
+      bash(hadoopSystemHome + "/sbin/hadoop-daemons.sh --config " + hadoopConfPath + " --script hdfs start datanode")
+//      bash(hadoopSystemHome + "/bin/start-dfs.sh")
     } else{
-      p(hadoopSystemHome + "/bin/start-dfs.sh") !
+      bash(hadoopSystemHome + "/bin/start-dfs.sh")
     }
 
-    println("Waiting for safe mode to be off")
+    logger.info("Waiting for safe mode to be off")
     var safeModeOff = false
     while(!safeModeOff) {
-      val safeModeResult = p(hadoopSystemHome + "/bin/hadoop dfsadmin -safemode get", false) !!;
+      val (safeModeResult, _, _) = bash(hadoopSystemHome + "/bin/hadoop dfsadmin -safemode get", false)
       safeModeOff = safeModeResult.toLowerCase().contains("off");
-      printf("- Safemode-OFF=%s\n", safeModeOff.toString)
+      logger.info("- Safemode-OFF=" + safeModeOff.toString)
       Thread.sleep(500);
     }
     
-    println("Waiting for " + numSlaves + " datanodes to connect")
+    logger.info("Waiting for " + numSlaves + " datanodes to connect")
     waitForNodesConnected(
         numSlaves, 
         hadoopLog + "/hadoop-" + user + "-namenode-" + hdfsNameNodeHostname + ".log", 
@@ -127,26 +133,26 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   
   override def fsCleanStop() = {
     
-    println("\n-------------------- HDFS CLEAN STOP --------------------\n")
+    logger.info("-------------------- HDFS CLEAN STOP --------------------\n")
     
-//    p(hadoopSystemHome + "/bin/hadoop fs -rmr '/*'") !;
+//    bash(hadoopSystemHome + "/bin/hadoop fs -rmr '/*'")
     val recursive = true
     getHDFSFileSystem.delete(new Path("/"), recursive)
     
     if (isYarn) {
-      p(hadoopSystemHome + "/sbin/hadoop-daemon.sh --config " + hadoopConfPath + " --script hdfs stop namenode")!;
-      p(hadoopSystemHome + "/sbin/hadoop-daemons.sh --config " + hadoopConfPath + " --script hdfs stop datanode")!;
-//      p(hadoopSystemHome + "/bin/stop-dfs.sh") !;
+      bash(hadoopSystemHome + "/sbin/hadoop-daemon.sh --config " + hadoopConfPath + " --script hdfs stop namenode")
+      bash(hadoopSystemHome + "/sbin/hadoop-daemons.sh --config " + hadoopConfPath + " --script hdfs stop datanode")
+//      bash(hadoopSystemHome + "/bin/stop-dfs.sh")
     } else {
-      p(hadoopSystemHome + "/bin/stop-dfs.sh") !;
+      bash(hadoopSystemHome + "/bin/stop-dfs.sh")
     }
   }
   
   
   override def fsLoadData(localPath: String, destinationPath: String): Boolean = {
     
-    println("\n-------------------- LOAD DATA --------------------\n")
-    printf("Copy %s to %s using hdfs %s\n", localPath, destinationPath, hdfsAddress)
+    logger.info("-------------------- LOAD DATA --------------------\n")
+    logger.info("Copy {} to {} using hdfs {}", localPath, destinationPath, hdfsAddress)
     
     val fs = getHDFSFileSystem
     
@@ -157,7 +163,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
       fs.copyFromLocalFile(delSource, overWrite, new Path(localPath), new Path(destinationPath))
       true
     } catch {
-      case ex: Exception => println("Exception: " + ex.toString())
+      case ex: Exception => logger.error("Exception: " + ex.toString())
       false
     }
   }
@@ -165,30 +171,29 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   override def removeOutputFolder(outputPath: String): Boolean = {
     val fs = getHDFSFileSystem
     if (fs.exists(new Path(outputPath))) {
-      printf("Remove output folder %s\n", outputPath)
+      logger.info("Remove output folder " + outputPath)
       val recursive = true
       fs.delete(new Path(outputPath), recursive)
       true
     } else {
-      printf("Output path %s is empty, nothing to delete\n", outputPath)
+      logger.info("Output path {} is empty, nothing to delete", outputPath)
       false
     }
   }
- 
   
   
   protected def adaptSlavesFile(sourceFile: String, targetFile: String, numSlaves: Int) = {
     requirePathExists(sourceFile)
     val allSlaves = Source.fromFile(new File(sourceFile)).getLines;
     val writer = new PrintWriter(new File(targetFile))
-    println("Write current slaves (" + numSlaves + ") to " + targetFile + ":")
+    logger.info("Write current slaves (" + numSlaves + ") to " + targetFile + ":")
     for (i <- 1 to numSlaves) {
       if (!allSlaves.hasNext) {
         throw new Exception("All slaves file has less slaves specified than you specified in numSlaves (dop)")
       }
       val slave = allSlaves.next
       writer.println(slave)
-      println("- " + slave)
+      logger.info("- " + slave)
     }
     writer.close()
   }
@@ -201,10 +206,10 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
       if ((new File(logfile)).exists()) {
         val logLines = Source.fromFile(logfile).getLines.toArray
         nodesConnected = logLines.count(str => str.toLowerCase.contains(searchString.toLowerCase));
-        printf("- Nodes connected=%d\n", nodesConnected)
+        logger.info("- Nodes connected=" + nodesConnected)
       } else {
         nodesConnected = 0
-        println("- Nodes connected unknown (logfile not existing)")
+        logger.info("- Nodes connected unknown (logfile not existing)")
       }
       Thread.sleep(1000);
     }
@@ -217,14 +222,14 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   }
   
   protected def isNameNodeRunning(): Boolean = {
-    println("Check if hdfs namenode is running")
+    logger.info("Check if hdfs namenode is running")
     checkPIDRunning(hadoopPidFolder + "/hadoop-" + user + "-namenode.pid")
   }
   
   protected def checkPIDRunning(pidFile: String): Boolean = {
     if (new File(pidFile).exists) {
       val pid = Source.fromFile(pidFile).mkString.trim()
-      val killExitValue = p("kill -0 " + pid) !;
+      val (_, _, killExitValue) = bash("kill -0 " + pid)
       (killExitValue == 0)    // exit value = 0 => process is running
     } else false
   }

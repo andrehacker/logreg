@@ -1,19 +1,13 @@
 package de.tuberlin.dima.experiments
 
 import java.io.File
-import scala.io.Source
-import scala.sys.process._
-import org.apache.commons.io.FileUtils
-import org.apache.hadoop.fs.FileSystem
-import org.apache.hadoop.conf.Configuration
+
 import org.apache.hadoop.fs.Path
-import de.tuberlin.dima.ml.mapred.GlobalSettings
-import java.io.IOException
-import java.util.Properties
-import java.io.FileInputStream
-import java.io.PrintWriter
+import org.slf4j.LoggerFactory
 
 class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
+  
+  private val logger = LoggerFactory.getLogger(this.getClass())
   
   val experimentLogDir = getProperty("experiment_log_dir")
   
@@ -22,7 +16,7 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   override def startWait(numSlaves: Int) = {
     
-    println("\n-------------------- START MAPRED --------------------\n")
+    logger.info("-------------------- START MAPRED --------------------\n")
     
     // Jobtracker already running?
     if (isJobtrackerRunning()) {
@@ -30,19 +24,19 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     }
     
     // Delete Jobtracker logfiles
-    p("rm -Rf " + hadoopLog + "/hadoop-" + user + "-*tracker-*.log*") !;
+    bash("rm -Rf " + hadoopLog + "/hadoop-" + user + "-*tracker-*.log*")
     
     // Start Hadoop MapRed
     if (isYarn) {
-      p(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " start resourcemanager") !;
-      p(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " start nodemanager") !;
-//      p(hadoopSystemHome + "/bin/yarn start proxyserver --config " + hadoopConfPath)!;
-//      p(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh start historyserver --config " + hadoopConfPath)!;
+      bash(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " start resourcemanager")
+      bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " start nodemanager")
+//      bash(hadoopSystemHome + "/bin/yarn start proxyserver --config " + hadoopConfPath)
+//      bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh start historyserver --config " + hadoopConfPath)
     } else{
-      p(hadoopSystemHome + "/bin/start-mapred.sh") !;
+      bash(hadoopSystemHome + "/bin/start-mapred.sh")
     }
     
-    println("Waiting for " + numSlaves + " nodes (tasktracker or nodemanager) to connect")
+    logger.info("Waiting for " + numSlaves + " nodes (tasktracker or nodemanager) to connect")
     waitForNodesConnected(
         numSlaves, 
         if (isYarn) hadoopLog + "/yarn-" + user + "-resourcemanager-" + hdfsNameNodeHostname + ".log"
@@ -53,15 +47,15 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   override def stop() = {
     
-    println("\n-------------------- STOP MAPRED --------------------\n")
+    logger.info("-------------------- STOP MAPRED --------------------\n")
     
     if (isYarn) {
-      p(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " stop resourcemanager") !;
-      p(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " stop nodemanager") !;
-//      p(hadoopSystemHome + "/bin/yarn stop proxyserver --config " + hadoopConfPath)!;
-//      p(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh stop historyserver --config " + hadoopConfPath)!;
+      bash(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " stop resourcemanager")
+      bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " stop nodemanager")
+//      bash(hadoopSystemHome + "/bin/yarn stop proxyserver --config " + hadoopConfPath)
+//      bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh stop historyserver --config " + hadoopConfPath)
     } else{
-      p(hadoopSystemHome + "/bin/stop-mapred.sh") !;
+      bash(hadoopSystemHome + "/bin/stop-mapred.sh")
     }
     
     // TODO Minor: Why do the jp-scripts sleep here and look for ghost JVMs?
@@ -69,7 +63,7 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   override def backupJobLogs(outputPath: String, experimentID: String, logName: String): Boolean = {
     
-    println("\n-------------------- JOB LOG BACKUP --------------------\n")
+    logger.info("-------------------- JOB LOG BACKUP --------------------\n")
     
     // Create local folder for log backup
     (new File(experimentLogDir)).mkdirs()
@@ -78,20 +72,20 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     val src = outputPath + "/_logs/history"
     val target = experimentLogDir + "/" + experimentID + "/" + logName
     
-    printf("Backup job logs from %s to %s\n", src, target)
+    logger.info("Backup job logs from " + src + " to " + target)
     if (getHDFSFileSystem.exists(new Path(src))) {
       getHDFSFileSystem.copyToLocalFile(
           new Path(src),
           new Path(target))
           true
     } else {
-      printf("Error: Log folder %s does not exist\n", src)
+      logger.error("Log folder %s does not exist", src)
       false
     }
   }
 
   private def isJobtrackerRunning(): Boolean = {
-    println("Check if jobtracker is running")
+    logger.info("Check if jobtracker is running")
     checkPIDRunning(hadoopPidFolder + "/hadoop-" + user + "-jobtracker.pid")
   }
 

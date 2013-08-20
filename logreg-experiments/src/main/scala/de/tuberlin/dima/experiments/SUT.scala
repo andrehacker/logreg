@@ -5,6 +5,8 @@ import java.util.Properties
 import java.io.FileInputStream
 import java.io.File
 import org.apache.commons.io.FileUtils
+import org.slf4j.LoggerFactory
+import scala.collection.mutable.StringBuilder
 
 /**
  * Abstract class for a system under test such as Hadoop or Stratosphere.
@@ -18,6 +20,8 @@ import org.apache.commons.io.FileUtils
  * So we can restart the hdfs after every execution of the experiment to always use the cold-cache-mode 
  */
 abstract class SUT(confFile: String) {
+  
+  private val logger = LoggerFactory.getLogger(this.getClass())
   
   // ---------- PRIMARY CONSTRUCTOR ----------
   
@@ -87,22 +91,34 @@ abstract class SUT(confFile: String) {
   
   // ---------- BASE IMPLEMENTATIONS ----------
   
-  
-  def p(str: String, verbose: Boolean = true) = {
-    if (verbose) { printf("- exec %s\n", str) }
-    stringToProcess(str)
+  def bash(str: String, logOutput: Boolean = true) = {
+    logger.info("- exec (bash): " + str)
+    var out = new StringBuilder
+    var err = new StringBuilder
+    // Use ProcessLogger to catch the results of stdout and strerr
+    // Use bash to enable the use of bash features (e.g. wildcards)
+    val exitcode = Process("/bin/bash", Seq("-c", str)) ! ProcessLogger(
+        (s) => out.append(s+"\n"),
+        (s) => err.append(s+"\n"));
+    if (logOutput) {
+      if (!out.toString.trim.isEmpty) {
+        logger.info(" - result stdout: " + out) }
+      if (!err.toString.trim.isEmpty) {
+        logger.info(" - result strerr: " + err) }
+    }
+    (out.toString, err.toString, exitcode)
   }
   
   def getProperty(name: String): String = {
     val value = prop.getProperty(name)
     if (value != null) {
-      printf("Loaded Property: %s = %s\n", name, value)
+      logger.info("Loaded Property: " + name + " = " + value)
       value
     } else throw new RuntimeException("Could not read property " + name)
   }
 
-  def getOptionalProperty(name: String): String = {
-    prop.getProperty(name, "")
+  def getOptionalProperty(name: String, default: String): String = {
+    prop.getProperty(name, default)
   }
 
   def requirePathExists(path: String) = {
@@ -120,24 +136,27 @@ abstract class SUT(confFile: String) {
     requirePathExists(tarPath)
     requirePathExists(confTemplatePath)
 
-    println("- Removing old SUT home folder")
-    p("rm -Rf " + systemHome) !;
+    logger.info("- Removing old SUT home folder")
+    bash("rm -Rf " + systemHome)
     
     val systemHomeParent = systemHome.substring(0, systemHome.lastIndexOf("/"))
     if (!(new File(systemHomeParent)).exists()) {
       (new File(systemHomeParent)).mkdir()
     }
-    println("- Unpacking tar")
-    p("tar -xzvf " + tarPath + " -C " + systemHomeParent) !!;
+    logger.info("- Unpacking tar")
+    bash("tar -xzvf " + tarPath + " -C " + systemHomeParent, false)
     
-    printf("Copy config files from %s to %s\n", confTemplatePath, confPath)
+    logger.info("Copy config files from " + confTemplatePath + " to " + confPath)
     (new File(confPath)).mkdirs()  // create folder if it does not yet exist (the case for yarn config folder)
     FileUtils.copyDirectory(new File(confTemplatePath), new File(confPath));
     
-    println("- Setting proper rights in SUT home")
-    p("chown -R " + user + ":" + group + " " + systemHome) !;
-    p("find " + systemHome + " -type f") #| p("xargs -I{} chmod g+w {}") !;
-    p("find " + systemHome + " -type d") #| p("xargs -I{} chmod g+w {}") !;
+    // Grants write permissions to group for all files and directories (by default only for some) 
+    logger.info("- Setting proper rights in SUT home")
+    bash("chown -R " + user + ":" + group + " " + systemHome)
+    bash("find " + systemHome + " -type f | xargs -I{} chmod g+w {}")
+    bash("find " + systemHome + " -type d | xargs -I{} chmod g+w {}")
+//    p("find " + systemHome + " -type f") #| p("xargs -I{} chmod g+w {}") !;
+//    p("find " + systemHome + " -type d") #| p("xargs -I{} chmod g+w {}") !;
   }
 
 }

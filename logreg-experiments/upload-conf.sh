@@ -15,3 +15,6 @@ scp -r conf-templates/cloud-7/stratosphere-0.2-ozone ahacker@cloud-7.dima.tu-ber
 # hadoop-config.sh + nephele-config.sh
 scp conf-templates/cloud-7/hadoop-config.sh ahacker@cloud-7.dima.tu-berlin.de:~/experiments/conf-templates/
 scp conf-templates/cloud-7/nephele-config.sh ahacker@cloud-7.dima.tu-berlin.de:~/experiments/conf-templates/
+
+#
+scp run-sfo-cloud7.sh ahacker@cloud-7.dima.tu-berlin.de:~/experiments/

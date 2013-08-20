@@ -80,6 +80,10 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     };
   }
   
+  /**
+   * Delete this as soon as a solution is found to transfer the basemodel
+   * (currently only supported by this version) 
+   */
   public Plan createPlan(
       int numSubTasks, 
       String inputPathTrain, 

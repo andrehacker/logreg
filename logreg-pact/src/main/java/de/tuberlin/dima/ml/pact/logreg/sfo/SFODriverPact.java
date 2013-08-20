@@ -3,8 +3,12 @@ package de.tuberlin.dima.ml.pact.logreg.sfo;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import de.tuberlin.dima.ml.logreg.sfo.FeatureGain;
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
@@ -27,6 +31,10 @@ public class SFODriverPact implements SFODriver {
 
   private IncrementalModel baseModel;
   private List<FeatureGain> gains = Lists.newArrayList();
+  
+  private Map<String, Long> counters = Maps.newHashMap();
+  public static final String COUNTER_KEY_TOTAL_WALLCLOCK = "total-wall-clock";
+  private static final String COUNTER_KEY_READ_RESULT = "read-result-gains-and-coefficients";
   
   public SFODriverPact(
       String inputPathTrain,
@@ -60,8 +68,11 @@ public class SFODriverPact implements SFODriver {
 
     // TODO _SFO: Pass new base model, not the empty initial one!
     
+    final Stopwatch stopReadResults = new Stopwatch();
+
     boolean applyBest = false;
     
+    // RUN
     JobRunner runner = new JobRunner();
     if (runLocal) {
       Plan sfoPlan = new SFOPlanAssembler().createPlan(numSubTasks, inputPathTrain, inputPathTest, outputPath, numFeatures, labelIndex, applyBest, this.baseModel);
@@ -72,9 +83,13 @@ public class SFODriverPact implements SFODriver {
       //runner.run(jarPath, SFOPlanAssembler.class.getName(), jobArgs, "", jobManagerAddress, jobManagerPort, true);
       runner.run(jarPath, SFOPlanAssembler.class.getName(), jobArgs, confPath, "", "", true);
     }
+    counters.put(COUNTER_KEY_TOTAL_WALLCLOCK, runner.getLastWallClockRuntime());
     
     // Read results from hdfs into memory
+    stopReadResults.start();
     this.gains = SFOToolsPact.readGainsAndCoefficients(outputPath);
+    stopReadResults.stop();
+    counters.put(COUNTER_KEY_READ_RESULT, stopReadResults.elapsed(TimeUnit.MILLISECONDS));
     Collections.sort(this.gains, Collections.reverseOrder());
     
     return getGains();
@@ -109,6 +124,18 @@ public class SFODriverPact implements SFODriver {
   @Override
   public List<FeatureGain> getGains() {
     return gains;
+  }
+
+
+  @Override
+  public long getLastWallClockTime() {
+    return counters.get(COUNTER_KEY_TOTAL_WALLCLOCK);
+  }
+
+
+  @Override
+  public Map<String, Long> getAllCounters() {
+    return counters;
   }
 
 }

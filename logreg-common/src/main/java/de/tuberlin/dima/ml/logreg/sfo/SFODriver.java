@@ -2,6 +2,7 @@ package de.tuberlin.dima.ml.logreg.sfo;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface SFODriver {
 
@@ -14,5 +15,15 @@ public interface SFODriver {
   public void retrainBaseModel();
 
   public List<FeatureGain> getGains();
+  
+  /**
+   * @return elapsed time (wall-clock time) for the run of computeGainSFO
+   */
+  public long getLastWallClockTime();
+
+  /**
+   * @return All available counters (also timers), e.g. the time for training, testing, ...
+   */
+  public Map<String, Long> getAllCounters();
   
 }

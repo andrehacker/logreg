@@ -3,8 +3,11 @@ package de.tuberlin.dima.experiments
 import java.io.File
 import java.util.Properties
 import java.io.FileInputStream
+import org.slf4j.LoggerFactory
 
 abstract class Experiment {
+  
+  private val logger = LoggerFactory.getLogger(this.getClass())
   
   val sysProp = new Properties()
   val experimentProp = new Properties()
@@ -38,7 +41,7 @@ abstract class Experiment {
   private def getProperty(name: String, prop: Properties): String = {
     val value = prop.getProperty(name)
     if (value != null) {
-      printf("Loaded Property: %s = %s\n", name, value)
+      logger.info("Loaded Property: " + name + " = " + value)
       value
     } else throw new RuntimeException("Could not read property " + name)
   }

@@ -1,0 +1,144 @@
+14:07:59,204 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: experiment_name = sfo
+14:07:59,206 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: sut = ozone
+14:07:59,259 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_hadoop = /home/andre/dev/logreg-repo/logreg-mapred/target/logreg-mapred-0.0.1-SNAPSHOT-job.jar
+14:07:59,260 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_hadoop = /home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_1000.seq
+14:07:59,260 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_hadoop = experiments/input/rcv1/lyrl2004_vectors_ecat_train_1000.seq
+14:07:59,260 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_train_hadoop = output-sfo-train
+14:07:59,261 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_test_hadoop = output-sfo-test
+14:07:59,261 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_ozone = /home/andre/dev/logreg-repo/logreg-pact/target/logreg-pact-0.0.1-SNAPSHOT-job.jar
+14:07:59,261 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_ozone = file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_1000.svm
+14:07:59,261 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_ozone = hdfs://localhost:9000/experiments/input/rcv1/rcv1_topics_train_1000.svm
+14:07:59,322 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: label_index_ozone = 59
+14:07:59,322 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_ozone = hdfs://localhost:9000/output-sfo-pact
+14:07:59,322 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hadoop_jobtracker_address = localhost:9001
+14:07:59,323 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hdfs_address = hdfs://localhost:9000
+14:07:59,341 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_address = localhost
+14:07:59,341 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_port = 6123
+14:07:59,341 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: ozone_conf = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+14:07:59,342 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dops = 1
+14:07:59,347 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: repetitions = 1
+14:07:59,348 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: add_per_iteration = 1
+14:07:59,348 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dataset_name = rcv1small
+14:07:59,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: is_yarn = false
+14:07:59,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: all_slaves = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/all_slaves
+14:07:59,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: user = andre
+14:07:59,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: group = andre
+14:07:59,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_tar = /home/andre/experiments/setups/hadoop-1.2.1-bin.tar.gz
+14:07:59,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_home = /home/andre/experiments/suts/hadoop-1.2.1
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_conf_template = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/hadoop-1.2.1
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_conf = /home/andre/experiments/suts/hadoop-1.2.1/conf
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_log = /home/andre/experiments/suts/hadoop-1.2.1/logs
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_slaves_file = /home/andre/experiments/suts/hadoop-1.2.1/conf/slaves
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_pid_folder = /tmp
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_data_dir = /data/hdfs/data
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_address = hdfs://localhost:9000
+14:07:59,357 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_namenode_hostname = andre-sam-ubuntu
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_tar = /home/andre/experiments/setups/stratosphere-0.2-ozone-hdp1.2.1.tar.gz
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_home = /home/andre/experiments/suts/stratosphere-0.2-ozone
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_conf_template = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/stratosphere-0.2-ozone
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_conf = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_log = /home/andre/experiments/suts/stratosphere-0.2-ozone/log
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_slaves_file = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf/slaves
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_pid_folder = /tmp
+14:07:59,358 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: experiment_log_dir = /home/andre/experiments/log
+14:07:59,359 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Deploy hdfs before deploying ozone
+14:07:59,359 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- DEPLOY HDFS (incl. Hadoop) --------------------
+
+14:07:59,359 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Check if hdfs namenode is running
+14:07:59,364 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec kill -0 29772
+14:07:59,374 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Removing old SUT home folder
+14:07:59,374 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec rm -Rf /home/andre/experiments/suts/hadoop-1.2.1
+14:07:59,410 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Unpacking tar
+14:07:59,410 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec tar -xzvf /home/andre/experiments/setups/hadoop-1.2.1-bin.tar.gz -C /home/andre/experiments/suts
+14:08:00,122 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy config files from /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/hadoop-1.2.1 to /home/andre/experiments/suts/hadoop-1.2.1/conf
+14:08:00,153 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Setting proper rights in SUT home
+14:08:00,154 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec chown -R andre:andre /home/andre/experiments/suts/hadoop-1.2.1
+14:08:00,158 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec find /home/andre/experiments/suts/hadoop-1.2.1 -type f
+14:08:00,158 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec xargs -I{} chmod g+w {}
+14:08:00,732 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec find /home/andre/experiments/suts/hadoop-1.2.1 -type d
+14:08:00,733 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec xargs -I{} chmod g+w {}
+14:08:00,878 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy additional libs to sut's lib dir
+14:08:00,879 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec cp /home/andre/dev/logreg-repo/logreg-experiments/lib-templates/hadoop-1.2.1/* /home/andre/experiments/suts/hadoop-1.2.1/lib/
+14:08:00,902 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- DEPLOY OZONE --------------------
+
+14:08:00,903 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Check if nephele jobmanager is running
+14:08:00,905 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec kill -0 30508
+14:08:00,918 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Removing old SUT home folder
+14:08:00,918 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec rm -Rf /home/andre/experiments/suts/stratosphere-0.2-ozone
+14:08:00,929 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Unpacking tar
+14:08:00,929 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec tar -xzvf /home/andre/experiments/setups/stratosphere-0.2-ozone-hdp1.2.1.tar.gz -C /home/andre/experiments/suts
+14:08:01,295 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy config files from /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/stratosphere-0.2-ozone to /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+14:08:01,296 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Setting proper rights in SUT home
+14:08:01,296 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec chown -R andre:andre /home/andre/experiments/suts/stratosphere-0.2-ozone
+14:08:01,302 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec find /home/andre/experiments/suts/stratosphere-0.2-ozone -type f
+14:08:01,302 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec xargs -I{} chmod g+w {}
+14:08:01,555 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec find /home/andre/experiments/suts/stratosphere-0.2-ozone -type d
+14:08:01,556 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec xargs -I{} chmod g+w {}
+14:08:01,593 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy additional libs to sut's lib dir
+14:08:01,594 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec cp /home/andre/dev/logreg-repo/logreg-experiments/lib-templates/hadoop-1.2.1/* /home/andre/experiments/suts/stratosphere-0.2-ozone/lib/
+14:08:01,620 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- ADAPT HADOOP SLAVES --------------------
+
+14:08:01,621 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Write current slaves (1) to /home/andre/experiments/suts/hadoop-1.2.1/conf/slaves:
+14:08:01,624 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - localhost
+14:08:01,624 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Write current slaves (1) to /home/andre/experiments/suts/stratosphere-0.2-ozone/conf/slaves:
+14:08:01,624 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - localhost
+14:08:01,625 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- HDFS FORMAT START WAIT --------------------
+
+14:08:01,625 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec rm -Rf /home/andre/experiments/suts/hadoop-1.2.1/logs/hadoop-andre-*node-*.log*
+14:08:01,629 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Delete /data/hdfs/data on slave localhost
+14:08:01,851 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec /home/andre/experiments/suts/hadoop-1.2.1/bin/hadoop namenode -format -force
+14:08:03,757 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec /home/andre/experiments/suts/hadoop-1.2.1/bin/start-dfs.sh
+14:08:07,628 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Waiting for safe mode to be off
+14:08:11,153 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Safemode-OFF=true
+14:08:11,653 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Waiting for 1 datanodes to connect
+14:08:11,666 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:12,669 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:13,672 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:14,673 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:15,676 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:16,678 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:17,681 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:18,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:19,688 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:20,692 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:21,695 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:22,699 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=1
+14:08:23,703 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- LOAD DATA --------------------
+
+14:08:23,708 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_1000.svm to hdfs://localhost:9000/experiments/input/rcv1/rcv1_topics_train_1000.svm using hdfs hdfs://localhost:9000
+14:08:24,827 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- START OZONE --------------------
+
+14:08:24,827 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Check if nephele jobmanager is running
+14:08:24,827 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec kill -0 30508
+14:08:24,835 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec rm -Rf /home/andre/experiments/suts/stratosphere-0.2-ozone/log/nephele-andre-*.log*
+14:08:24,840 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec rm -Rf /home/andre/experiments/suts/stratosphere-0.2-ozone/log/nephele-andre-*.out*
+14:08:24,844 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec /home/andre/experiments/suts/stratosphere-0.2-ozone/bin/start-cluster.sh
+14:08:25,269 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Waiting for 1 taskmanager to connect
+14:08:25,270 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:26,271 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:27,273 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+14:08:28,275 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=1
+14:08:29,308 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Output path hdfs://localhost:9000/output-sfo-pact is empty, nothing to delete
+14:08:29,309 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - 
+-------------------- RUN EXPERIMENT --------------------
+
+14:08:29,331 WARN  eu.stratosphere.nephele.configuration.GlobalConfiguration     - Cannot load configuration: unknown element plugins
+14:08:29,623 WARN  eu.stratosphere.pact.compiler.PactCompiler                    - Pact compiler could not determine the size of input 'de.tuberlin.dima.ml.pact.logreg.sfo.EmptyBaseModelInputFormat@40b86944'.
+14:08:37,897 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- LOG BACKUP --------------------
+
+14:08:37,897 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Backup job logs from /home/andre/experiments/suts/stratosphere-0.2-ozone/log to /home/andre/experiments/log/sfo-ozone-rcv1small-2013-08-19-140759-dop0001-run01/job-logs-hdfs://localhost:9000/output-sfo-pact/
+14:08:37,900 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- STOP OZONE --------------------
+
+14:08:37,900 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec /home/andre/experiments/suts/stratosphere-0.2-ozone/bin/stop-cluster.sh
+14:08:38,172 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - 
+-------------------- HDFS CLEAN STOP --------------------
+
+14:08:38,200 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec /home/andre/experiments/suts/hadoop-1.2.1/bin/stop-dfs.sh

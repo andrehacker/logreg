@@ -3,11 +3,15 @@ package de.tuberlin.dima.ml.mapred.logreg.sfo;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ToolRunner;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import de.tuberlin.dima.ml.logreg.sfo.FeatureGain;
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
@@ -39,8 +43,14 @@ public class SFODriverHadoop implements SFODriver {
   private int numFeatures;
 
   private IncrementalModel baseModel;
-
+  
   private List<FeatureGain> gains = Lists.newArrayList();
+  
+  private Map<String, Long> counters = Maps.newHashMap();
+  public static final String COUNTER_KEY_TOTAL_WALLCLOCK = "total-wall-clock";
+  public static final String COUNTER_KEY_TRAIN_TIME = "train-wall-clock";
+  public static final String COUNTER_KEY_TEST_TIME = "test-wall-clock";
+  public static final String COUNTER_KEY_READ_RESULT_GAINS = "read-result-gains";
 
   /**
    * Initializes a new empty base model
@@ -78,25 +88,38 @@ public class SFODriverHadoop implements SFODriver {
   @Override
   public List<FeatureGain> computeGainsSFO(int dop) throws Exception {
 
+    final Stopwatch stopTotal = new Stopwatch();
+    final Stopwatch stopTrain = new Stopwatch();
+    final Stopwatch stopTest = new Stopwatch();
+    final Stopwatch stopReadResults = new Stopwatch();
+
     // Make base model available for train/test mappers
     SFOToolsHadoop.writeBaseModel(baseModel, hdfsAddress);
 
     // ----- TRAIN -----
-    
+    stopTotal.start();
+    stopTrain.start();
     Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress, jarPath);
     ToolRunner.run(conf, new SFOTrainJob(trainInputFile, trainOutputPath, dop),
         null);
+    stopTrain.stop();
+    counters.put(COUNTER_KEY_TRAIN_TIME, stopTrain.elapsed(TimeUnit.MILLISECONDS));
     System.out.println("Done training");
 
     // ----- TEST -----
-    
+    stopTest.start();
     ToolRunner.run(conf, new SFOEvalJob(testInputFile, testOutputPath, dop,
         numFeatures, trainOutputPath), null);
+    stopTest.stop(); stopTotal.stop();
+    counters.put(COUNTER_KEY_TEST_TIME, stopTest.elapsed(TimeUnit.MILLISECONDS));
+    counters.put(COUNTER_KEY_TOTAL_WALLCLOCK, stopTotal.elapsed(TimeUnit.MILLISECONDS));
     System.out.println("Done validation");
 
     // ----- READ RESULTS -----
-
+    stopReadResults.start();
     gains = SFOToolsHadoop.readEvalResult(testOutputPath, hdfsAddress);
+    stopReadResults.stop();
+    counters.put(COUNTER_KEY_READ_RESULT_GAINS, stopReadResults.elapsed(TimeUnit.MILLISECONDS));
     Collections.sort(gains, Collections.reverseOrder());
     
     return getGains();
@@ -155,6 +178,17 @@ public class SFODriverHadoop implements SFODriver {
   @Override
   public List<FeatureGain> getGains() {
     return gains;
+  }
+
+  @Override
+  public long getLastWallClockTime() {
+    return counters.get(COUNTER_KEY_TOTAL_WALLCLOCK);
+  }
+
+
+  @Override
+  public Map<String, Long> getAllCounters() {
+    return counters;
   }
 
 }

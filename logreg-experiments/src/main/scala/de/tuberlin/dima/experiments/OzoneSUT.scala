@@ -4,8 +4,11 @@ import scala.io.Source
 import java.io.File
 import org.apache.hadoop.fs.Path
 import org.apache.commons.io.FileUtils
+import org.slf4j.LoggerFactory
 
 class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
+  
+  private val logger = LoggerFactory.getLogger(this.getClass())
   
   val ozoneTar = getProperty("ozone_tar")
   val ozoneSystemHome = getProperty("ozone_home")
@@ -21,12 +24,12 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   override def deploy() = {
     
-    println("Deploy hdfs before deploying ozone")
+    logger.info("Deploy hdfs before deploying ozone")
     
     // Deploy hdfs 
     super.deploy
 
-    println("\n-------------------- DEPLOY OZONE --------------------\n")
+    logger.info("-------------------- DEPLOY OZONE --------------------\n")
     
     // Nephele jobmanager running?
     if (isNepheleRunning()) {
@@ -36,10 +39,17 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     deployFromTar(ozoneTar, ozoneSystemHome, ozoneConfTemplatePath, ozoneConfPath, user, group)
     
     // Overwrite nephele-config.sh in bin, e.g. for custom pid folder
-    val nepheleConfScriptOverwrite = getOptionalProperty("nephele_conf_script_overwrite")
+    val nepheleConfScriptOverwrite = getOptionalProperty("nephele_conf_script_overwrite", "")
     if (nepheleConfScriptOverwrite != "") {
-      p("cp " + nepheleConfScriptOverwrite + " " + ozoneSystemHome + "/bin/nephele-config.sh") !;
-    } 
+      bash("cp " + nepheleConfScriptOverwrite + " " + ozoneSystemHome + "/bin/nephele-config.sh")
+    }
+    
+    // Optional: Copy libs to hadoop lib dir
+    val ozoneLibDirToCopy = getOptionalProperty("ozone_lib_dir_to_copy", "")
+    if (ozoneLibDirToCopy != "") {
+      logger.info("Copy additional libs to sut's lib dir")
+      bash("cp " + ozoneLibDirToCopy + "/* " + ozoneSystemHome + "/lib/")
+    }
 
   }
   
@@ -54,7 +64,7 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   override def startWait(numSlaves: Int) = {
 
-    println("\n-------------------- START OZONE --------------------\n")
+    logger.info("-------------------- START OZONE --------------------\n")
     
     // Nephele jobmanager running?
     if (isNepheleRunning()) {
@@ -62,13 +72,13 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     }
     
     // Delete JobManager logfiles
-    p("rm -Rf " + ozoneLog + "/nephele-" + user + "-*.log*") !;
-    p("rm -Rf " + ozoneLog + "/nephele-" + user + "-*.out*") !;
+    bash("rm -Rf " + ozoneLog + "/nephele-" + user + "-*.log*")
+    bash("rm -Rf " + ozoneLog + "/nephele-" + user + "-*.out*")
     
     // Start cluster
-    p(ozoneSystemHome + "/bin/start-cluster.sh") !;
+    bash(ozoneSystemHome + "/bin/start-cluster.sh")
     
-    println("Waiting for " + numSlaves + " taskmanager to connect")
+    logger.info("Waiting for " + numSlaves + " taskmanager to connect")
     waitForNodesConnected(
         numSlaves, 
         ozoneLog + "/nephele-" + user + "-jobmanager-" + hdfsNameNodeHostname + ".log",
@@ -77,13 +87,13 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   }
   
   override def stop() = {
-    println("\n-------------------- STOP OZONE --------------------\n")
-    p(ozoneSystemHome + "/bin/stop-cluster.sh") !;
+    logger.info("-------------------- STOP OZONE --------------------\n")
+    bash(ozoneSystemHome + "/bin/stop-cluster.sh")
   }
   
   override def backupJobLogs(outputPath: String, experimentID: String, logName: String) = {
 
-    println("\n-------------------- LOG BACKUP --------------------\n")
+    logger.info("-------------------- LOG BACKUP --------------------\n")
     
     // Create local folder for log backup
     (new File(experimentLogDir)).mkdirs()
@@ -91,18 +101,18 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     // Copy job logfiles (stored locally by ozone)
     val src = ozoneSystemHome + "/log"
     val target = experimentLogDir + "/" + experimentID + "/" + logName + "/"
-    printf("Backup job logs from %s to %s\n", src, target)
+    logger.info("Backup job logs from " + src + " to " + target)
     if (new File(src).exists()) {
       FileUtils.copyDirectory(new File(src), new File(target))
       true
     } else {
-      printf("Error: Log folder %s does not exist\n", src)
+      logger.error("Log folder {} does not exist\n", src)
       false
     }
   }
   
   private def isNepheleRunning(): Boolean = {
-    println("Check if nephele jobmanager is running")
+    logger.info("Check if nephele jobmanager is running")
     checkPIDRunning(ozonePidFolder + "/nephele-" + user + "-jobmanager.pid")
   }
 

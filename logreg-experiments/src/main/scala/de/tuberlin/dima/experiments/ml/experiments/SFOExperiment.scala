@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import scala.collection.JavaConversions._
+import de.tuberlin.dima.experiments.Experiment
 import de.tuberlin.dima.experiments.HadoopSUT
 import de.tuberlin.dima.experiments.OzoneSUT
 import de.tuberlin.dima.experiments.SUT
@@ -19,10 +20,13 @@ import de.tuberlin.dima.ml.logreg.sfo.SFODriver
 import de.tuberlin.dima.ml.logreg.sfo.SFODriver
 import de.tuberlin.dima.ml.mapred.logreg.sfo.SFODriverHadoop
 import de.tuberlin.dima.ml.pact.logreg.sfo.SFODriverPact
-import eu.stratosphere.nephele.configuration.ConfigConstants
-import de.tuberlin.dima.experiments.Experiment
+import com.google.common.base.Stopwatch
+import java.util.concurrent.TimeUnit
+import org.slf4j.LoggerFactory
 
 object SFOExperiment extends Experiment {
+  
+  private val logger = LoggerFactory.getLogger(this.getClass())
   
   def main(args: Array[String]) {
     runExperiment(args)
@@ -130,7 +134,6 @@ object SFOExperiment extends Experiment {
       jobTrackerAddress,
       hdfsAddress,
       jarPathHadoop)
-    println("jarPathHadoop: " + jarPathHadoop)
     
     val jobManagerAddress = getSysProperty("job_manager_address")
     val jobManagerPort = getSysProperty("job_manager_port")
@@ -201,24 +204,36 @@ object SFOExperiment extends Experiment {
       
       for (rep <- 1 to numRepetitions) {
         
+        val experimentID = experimentPrefix + "-dop%04d-run%02d".format(dop, rep)
+        
         for (outputFolder <- outputToRemove) {
           sut.removeOutputFolder(outputFolder)
         }
 
-        println("\n-------------------- RUN EXPERIMENT --------------------\n")
+        logger.info("\n-------------------- RUN EXPERIMENT --------------------\n")
         jobDriver.computeGainsSFO(dop)
+        logTimers(jobDriver, experimentID)
 
-        val experimentID = experimentPrefix + "-dop%04d-run%02d".format(dop, rep)
         for (outputFolder <- logFilesToBackup) {
           sut.backupJobLogs(outputFolder, experimentID, "job-logs-" + outputFolder)
         }
-        
       }
       
       sut.stop()
       
       sut.fsCleanStop()
     }
+  }
+  
+  def logTimers(driver: SFODriver, description: String) = {
+    logger.info("--------------------------------------------------")
+    logger.info("Statistics for: " + description)
+    logger.info("WALL CLOCK TIME: " + driver.getLastWallClockTime())
+    logger.info("Additional timers")
+    for ((key, value) <- driver.getAllCounters()) {
+      logger.info(" - " + key + ": " + value)
+    }
+    logger.info("--------------------------------------------------")
   }
   
   def getDate(format: String) = {
@@ -229,7 +244,7 @@ object SFOExperiment extends Experiment {
   
   def printTopGains(gains: List[FeatureGain], datasetInfo: DatasetInfo) = {
     for (i <- 0 until 10) {
-      println("d " + gains.get(i).getDimension() + 
+      logger.info("d " + gains.get(i).getDimension() + 
           " (" + datasetInfo.getFeatureName(gains.get(i).getDimension()) 
           + ") gain: " + gains.get(i).getGain() + " coefficient(pact-only): " + gains.get(i).getCoefficient())
     }

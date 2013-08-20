@@ -26,7 +26,7 @@ import eu.stratosphere.pact.common.plan.Plan;
  */
 public class JobRunner {
   
-  private long lastRuntime = 0;    // runtime as seen from the client
+  private long lastWallClockRuntime = 0;    // runtime as seen from the client
   private long lastNetRuntime = 0;  // net runtime of the JobEvent
   
   /**
@@ -57,7 +57,7 @@ public class JobRunner {
     
     executor.stop();
     
-    lastRuntime = stop.elapsed(TimeUnit.MILLISECONDS);
+    lastWallClockRuntime = stop.elapsed(TimeUnit.MILLISECONDS);
     lastNetRuntime = netRuntime; 
   }
 
@@ -155,8 +155,8 @@ public class JobRunner {
       stop.stop();
 
       lastNetRuntime = 0;   // not available
-      lastRuntime = stop.elapsed(TimeUnit.MILLISECONDS);
-      System.out.println("Elapsed time (ms): " + lastRuntime);
+      lastWallClockRuntime = stop.elapsed(TimeUnit.MILLISECONDS);
+      System.out.println("Elapsed time (ms): " + lastWallClockRuntime);
 
     } catch (ProgramInvocationException e) {
       System.out.println(e.toString());
@@ -198,8 +198,8 @@ public class JobRunner {
   /**
    * @return The runtime for the last job as seen from the client
    */
-  public long getLastRuntime() {
-    return lastRuntime;
+  public long getLastWallClockRuntime() {
+    return lastWallClockRuntime;
   }
   
   /**

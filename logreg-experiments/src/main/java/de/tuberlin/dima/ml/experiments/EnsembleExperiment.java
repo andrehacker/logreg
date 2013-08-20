@@ -40,7 +40,7 @@ public class EnsembleExperiment {
       runner.run(jarPath, "de.tuberlin.dima.ml.pact.logreg.ensemble.EnsembleJob", jobArgs, "", "", "", true);
       
     }
-    System.out.println("Job completed. Runtime=" + runner.getLastRuntime());
+    System.out.println("Job completed. Runtime=" + runner.getLastWallClockRuntime());
   }
 
 }

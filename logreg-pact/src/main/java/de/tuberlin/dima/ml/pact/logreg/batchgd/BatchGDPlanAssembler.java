@@ -151,7 +151,7 @@ public class BatchGDPlanAssembler implements PlanAssemblerDescription {
       runner.run(jarPath, "de.tuberlin.dima.ml.pact.logreg.batchgd.BatchGDJob", jobArgs, "", "", "", true);
       
     }
-    System.out.println("Job completed. Runtime=" + runner.getLastRuntime());
+    System.out.println("Job completed. Runtime=" + runner.getLastWallClockRuntime());
 
   }
 
