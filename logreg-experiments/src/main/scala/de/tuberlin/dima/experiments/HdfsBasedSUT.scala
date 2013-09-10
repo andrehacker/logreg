@@ -56,7 +56,11 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     val hadoopLibDirToCopy = getOptionalProperty("hadoop_lib_dir_to_copy", "")
     if (hadoopLibDirToCopy != "") {
       logger.info("Copy additional libs to sut's lib dir")
-      bash("cp " + hadoopLibDirToCopy + "/* " + hadoopSystemHome + "/lib/")
+      if(isYarn) {
+        bash("cp " + hadoopLibDirToCopy + "/* " + hadoopSystemHome + "/share/hadoop/mapreduce/lib")
+      } else {
+        bash("cp " + hadoopLibDirToCopy + "/* " + hadoopSystemHome + "/lib/")
+      }
     }
   }
   

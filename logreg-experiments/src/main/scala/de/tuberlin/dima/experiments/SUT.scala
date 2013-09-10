@@ -15,9 +15,11 @@ import scala.collection.mutable.StringBuilder
  * 
  * Convention: All directory have no trailing /. E.g. /path/to/config-dir 
  * 
- * TODO Copy java properties file to experiment log folder 
+ * TODO Avoid redundant specification of properties (in sys-conf file and conf-templates).
+ *      Read properties from conf-templates directly (not possible for PID folder, defined in .sh file)
+ * TODO Copy java properties file to experiment log folder
  * TODO Minor: We should add methods fsStart and fsStop.
- * So we can restart the hdfs after every execution of the experiment to always use the cold-cache-mode 
+ *             So we can restart the hdfs after every execution of the experiment to always use the cold-cache-mode 
  */
 abstract class SUT(confFile: String) {
   

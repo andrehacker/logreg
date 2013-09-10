@@ -2,27 +2,20 @@ package de.tuberlin.dima.experiments.ml.experiments
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.JavaConversions.seqAsJavaList
+import org.slf4j.LoggerFactory
 import de.tuberlin.dima.experiments.Experiment
 import de.tuberlin.dima.experiments.HadoopSUT
 import de.tuberlin.dima.experiments.OzoneSUT
 import de.tuberlin.dima.experiments.SUT
 import de.tuberlin.dima.ml.datasets.DatasetInfo
-import de.tuberlin.dima.ml.datasets.DatasetInfo
-import de.tuberlin.dima.ml.datasets.DatasetInfo
 import de.tuberlin.dima.ml.datasets.RCV1DatasetInfo
 import de.tuberlin.dima.ml.logreg.sfo.FeatureGain
-import de.tuberlin.dima.ml.logreg.sfo.FeatureGain
-import de.tuberlin.dima.ml.logreg.sfo.FeatureGain
-import de.tuberlin.dima.ml.logreg.sfo.SFODriver
-import de.tuberlin.dima.ml.logreg.sfo.SFODriver
 import de.tuberlin.dima.ml.logreg.sfo.SFODriver
 import de.tuberlin.dima.ml.mapred.logreg.sfo.SFODriverHadoop
 import de.tuberlin.dima.ml.pact.logreg.sfo.SFODriverPact
-import com.google.common.base.Stopwatch
-import java.util.concurrent.TimeUnit
-import org.slf4j.LoggerFactory
+import com.google.common.base.Throwables
 
 object SFOExperiment extends Experiment {
   
@@ -48,24 +41,6 @@ object SFOExperiment extends Experiment {
    * - Compile job jar first!
    * - Create new SUT deployment package if SUT changed (e.g. changed hadoop-dependencies for ozone)
    * 
-   * If you run with yarn
-   * - Ozone is configured for CDH4.2.1 (yarn)
-   *   - recompile with regular hadoop 2.0.5-alpha
-   * - Mahout has to be compiled with yarn
-   *   - change mahout version to distinguish from other!
-   *   - change 
-   *   - Only BuildTools, Math and Core will compile, integration fails due to hbase dependency 
-   *   - run mvn install for needed tools
-   *   - Alternative: set -Dhadoop.profile=2.0 (see what profile mahout uses)
-   * - Own Modules:
-   *   - Change all references to yarn
-   *   - Change mahout version to 0.8-yarn
-   * 
-   * If you run with Hadoop MapRedv1 (1.2.* or 1.1.*)
-   * - Compile Ozone with old hadoop references (only dependency to hadoop-core)
-   *   - Change pom of ozone, nephele-hdfs and pact-runtime
-   * - Compile Mahout with hadoop-core 1.2.1. Change artifact-id!
-   * 
    * Ozone uses
    * - repo url: https://repository.cloudera.com/artifactory/cloudera-repos
    * - repo id: cloudera-releases
@@ -83,98 +58,111 @@ object SFOExperiment extends Experiment {
    *   - endTS=`date +%s`
    *   - (( jobDuration=$endTS - $startTS ))
    * 
-   * TODO Drop cache??? This is what stonebraker does in flushCache
+   * TODO Drop cache? This is what stonebraker does in flushCache
    */
   def runExperiment(args: Array[String]) = {
     
-    val sysConfPath = if (args.length>=2) args(0)
-        else "/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-1.2.1.properties"
-    val experimentConfPath = if (args.length>=2) args(1)
-        else "/home/andre/dev/logreg-repo/logreg-experiments/sfo-experiment-andre-sam-ubuntu.properties";
+    try {
     
-    init(sysConfPath, experimentConfPath)
-    
-    val experimentName = getProperty("experiment_name")
-    
-    val currentSut = getProperty("sut")
-
-    // --------------- JOB PARAMETERS ----------
-    
-    val dataset = RCV1DatasetInfo.get()
-//    val predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt"
-//    RCV1DatasetInfo.readPredictorNames(predictorNamePath)
-
-    // --------------- JOB PARAMETERS HADOOP ----------
-
-    val jarPathHadoop = getProperty("jar_hadoop")
-    val inputTrainLocalHadoop = getProperty("input_local_hadoop")
-    val inputTrainHadoop = getProperty("input_hadoop")
-    val outputTrainHadoop = getProperty("output_train_hadoop")
-    val outputTestHadoop = getProperty("output_test_hadoop")
-
-    // --------------- JOB PARAMETERS OZONE ----------
-    
-    val jarPathOzone = getProperty("jar_ozone")
-    val inputTrainLocalOzone = getProperty("input_local_ozone")
-    val inputTrainOzone = getProperty("input_ozone")
-    val labelIndex = getProperty("label_index_ozone").toInt
-    val outputOzone = getProperty("output_ozone")
-    
-    // --------------- JOB DRIVER ----------
-
-    val jobTrackerAddress = getSysProperty("hadoop_jobtracker_address")
-    val hdfsAddress = getSysProperty("hdfs_address")
-
-    val sfoDriverHadoop = new SFODriverHadoop(
-      inputTrainHadoop,
-      inputTrainHadoop,
-      outputTrainHadoop,
-      outputTestHadoop,
-      dataset.getNumFeatures().toInt,
-      jobTrackerAddress,
-      hdfsAddress,
-      jarPathHadoop)
-    
-    val jobManagerAddress = getSysProperty("job_manager_address")
-    val jobManagerPort = getSysProperty("job_manager_port")
-    val ozoneConfPath = getSysProperty("ozone_conf")
-
-    val sfoDriverPact = new SFODriverPact(
-      inputTrainOzone,
-      inputTrainOzone,
-      labelIndex,
-      outputOzone,
-      dataset.getNumFeatures().toInt,
-      false,
-      ozoneConfPath,
-      jarPathOzone,
-      jobManagerAddress,
-      jobManagerPort.toString)
-    
-    // --------------- EXPERIMENT ---------------
-    
-    val dops = getPropertyArrayAsInt("dops")
-    val numRepetitions = getProperty("repetitions").toInt
-    val addPerIteration = getProperty("add_per_iteration").toInt
-    val datasetName = getProperty("dataset_name")
-    val experimentPrefix = "%s-%s-%s-%s".format(experimentName, currentSut, datasetName, getDate("yyyy-MM-dd-HHmmss"))
-
-    if (currentSut == "hadoop") {
-      val hadoop = new HadoopSUT(sysConfPath)
+      val sysConfPath = if (args.length>=2) { args(0) }
+          else {
+  //          "/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-1.2.1.properties"
+            "/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-2.1.0-beta.properties" 
+          }
+      val experimentConfPath = if (args.length>=2) args(1)
+          else "/home/andre/dev/logreg-repo/logreg-experiments/sfo-experiment-andre-sam-ubuntu.properties";
       
-      val dataToLoadHadoop = Array((inputTrainLocalHadoop, inputTrainHadoop))
-      val logFilesToBackupHadoop = Array(outputTrainHadoop, outputTestHadoop)
-      val outputToRemoveHadoop = Array(outputTrainHadoop, outputTestHadoop)
-      runExperimentSingleSUT(hadoop, dops, numRepetitions, dataToLoadHadoop, outputToRemoveHadoop, logFilesToBackupHadoop, sfoDriverHadoop, experimentPrefix)
-    }
-    
-    if (currentSut == "ozone") {
-      val ozone = new OzoneSUT(sysConfPath)
+      init(sysConfPath, experimentConfPath)
       
-      val dataToLoadPact = Array((inputTrainLocalOzone, inputTrainOzone))
-      val logFilesToBackupPact = Array(outputOzone)
-      val outputToRemovePact = Array(outputOzone)
-      runExperimentSingleSUT(ozone, dops, numRepetitions, dataToLoadPact, outputToRemovePact, logFilesToBackupPact, sfoDriverPact, experimentPrefix)
+      val experimentName = getProperty("experiment_name")
+      
+      val currentSut = getProperty("sut")
+  
+      // --------------- JOB PARAMETERS ----------
+      
+      val dataset = RCV1DatasetInfo.get()
+  //    val predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt"
+  //    RCV1DatasetInfo.readPredictorNames(predictorNamePath)
+  
+      // --------------- JOB PARAMETERS HADOOP ----------
+  
+      val jarPathHadoop = getProperty("jar_hadoop")
+      val inputTrainLocalHadoop = getProperty("input_local_hadoop")
+      val inputTrainHadoop = getProperty("input_hadoop")
+      val outputTrainHadoop = getProperty("output_train_hadoop")
+      val outputTestHadoop = getProperty("output_test_hadoop")
+  
+      // --------------- JOB PARAMETERS OZONE ----------
+      
+      val jarPathOzone = getProperty("jar_ozone")
+      val inputTrainLocalOzone = getProperty("input_local_ozone")
+      val inputTrainOzone = getProperty("input_ozone")
+      val labelIndex = getProperty("label_index_ozone").toInt
+      val outputOzone = getProperty("output_ozone")
+      
+      // --------------- JOB DRIVER ----------
+  
+      val jobTrackerAddress = getSysProperty("hadoop_jobtracker_address")
+      val hdfsAddress = getSysProperty("hdfs_address")
+      val hadoopConfDir = getSysProperty("hadoop_conf")
+  
+      val sfoDriverHadoop = new SFODriverHadoop(
+        inputTrainHadoop,
+        inputTrainHadoop,
+        outputTrainHadoop,
+        outputTestHadoop,
+        dataset.getNumFeatures().toInt,
+        jobTrackerAddress,
+        hdfsAddress,
+        hadoopConfDir,
+        jarPathHadoop)
+      
+      val jobManagerAddress = getSysProperty("job_manager_address")
+      val jobManagerPort = getSysProperty("job_manager_port")
+      val ozoneConfPath = getSysProperty("ozone_conf")
+  
+      //  Here we use the conf-path currently
+      val sfoDriverPact = new SFODriverPact(
+        inputTrainOzone,
+        inputTrainOzone,
+        labelIndex,
+        outputOzone,
+        dataset.getNumFeatures().toInt,
+        false,
+        ozoneConfPath,
+        jarPathOzone,
+        jobManagerAddress,
+        jobManagerPort.toString)
+      
+      // --------------- EXPERIMENT ---------------
+      
+      val dops = getPropertyArrayAsInt("dops")
+      val numRepetitions = getProperty("repetitions").toInt
+      val addPerIteration = getProperty("add_per_iteration").toInt
+      val datasetName = getProperty("dataset_name")
+      val experimentPrefix = "%s-%s-%s-%s".format(experimentName, currentSut, datasetName, getDate("yyyy-MM-dd-HHmmss"))
+  
+      if (currentSut == "hadoop") {
+        val hadoop = new HadoopSUT(sysConfPath)
+        
+        val dataToLoadHadoop = Array((inputTrainLocalHadoop, inputTrainHadoop))
+        val logFilesToBackupHadoop = Array((outputTrainHadoop, "sfo-train"), (outputTestHadoop, "sfo-test"))
+        val outputToRemoveHadoop = Array(outputTrainHadoop, outputTestHadoop)
+        runExperimentSingleSUT(hadoop, dops, numRepetitions, dataToLoadHadoop, outputToRemoveHadoop, logFilesToBackupHadoop, sfoDriverHadoop, experimentPrefix)
+      }
+      
+      if (currentSut == "ozone") {
+        val ozone = new OzoneSUT(sysConfPath)
+        
+        val dataToLoadPact = Array((inputTrainLocalOzone, inputTrainOzone))
+        val logFilesToBackupPact = Array((outputOzone, "sfo"))
+        val outputToRemovePact = Array(outputOzone)
+        runExperimentSingleSUT(ozone, dops, numRepetitions, dataToLoadPact, outputToRemovePact, logFilesToBackupPact, sfoDriverPact, experimentPrefix)
+      }
+      
+    } catch {
+      case ex: Throwable => logger.error("Exception: " + Throwables.getStackTraceAsString(ex))
+      false
     }
   }
   
@@ -184,7 +172,7 @@ object SFOExperiment extends Experiment {
       numRepetitions: Int, 
       dataToLoad: Array[(String, String)], 
       outputToRemove: Array[String],
-      logFilesToBackup: Array[String],
+      logFilesToBackup: Array[(String, String)],
       jobDriver: SFODriver,
       experimentPrefix: String) = {
     
@@ -210,12 +198,12 @@ object SFOExperiment extends Experiment {
           sut.removeOutputFolder(outputFolder)
         }
 
-        logger.info("\n-------------------- RUN EXPERIMENT --------------------\n")
+        logger.info("-------------------- RUN EXPERIMENT --------------------\n")
         jobDriver.computeGainsSFO(dop)
         logTimers(jobDriver, experimentID)
 
-        for (outputFolder <- logFilesToBackup) {
-          sut.backupJobLogs(outputFolder, experimentID, "job-logs-" + outputFolder)
+        for ((outputFolder, logName) <- logFilesToBackup) {
+          sut.backupJobLogs(outputFolder, experimentID, "job-logs-" + logName)
         }
       }
       

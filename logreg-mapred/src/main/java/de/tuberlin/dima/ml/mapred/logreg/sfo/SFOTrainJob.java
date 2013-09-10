@@ -54,7 +54,7 @@ public class SFOTrainJob extends AbstractHadoopJob {
         inputFile,
         outputPath);
 
-    cleanupOutputDirectory(outputPath);
+//    cleanupOutputDirectory(outputPath);
     
     return job.waitForCompletion(true) ? 0 : 1;
   }

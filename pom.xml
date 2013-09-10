@@ -19,10 +19,11 @@
 	</modules>
 
   <properties>
-    <mahout.version>0.8-hdp1.2.1</mahout.version>
     <!-- <mahout.version>0.8-hdp1.2.1</mahout.version> -->
-    <hadoop.yarn.version>2.0.5-alpha</hadoop.yarn.version>
-    <hadoop.v1.version>1.2.1</hadoop.v1.version>
+    <mahout.version>0.8-yarn</mahout.version>
+    <!-- <mahout.version>0.8</mahout.version> -->
+    <!-- <hadoop.version>1.2.1</hadoop.version> -->
+    <hadoop.version>2.1.0-beta</hadoop.version>
   </properties>
 
 	<build>
@@ -62,6 +63,48 @@
 		-->
 	</repositories>
 
+
+	<profiles>
+    <profile>
+      <id>hadoop_yarn</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencyManagement>
+        <dependencies>
+          <!-- YARN -->
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${hadoop.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs</artifactId>
+            <version>${hadoop.version}</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+    <profile>
+      <id>hadoop_v1</id>
+		  <dependencyManagement>
+	      <dependencies>
+	        <!-- "Old" Hadoop = MapReduce v1 -->
+	        <dependency>
+	          <groupId>org.apache.hadoop</groupId>
+	          <artifactId>hadoop-core</artifactId>
+	      		<version>${hadoop.version}</version>
+	        </dependency>
+	      </dependencies>
+		  </dependencyManagement>
+    </profile>
+  </profiles>
+
+
+
+
+
   <dependencyManagement>
 	<!-- this section defines the module VERSIONS that are used for submodules 
 		if nothing else is specified. The dependencies are NOT automatically included 
@@ -77,25 +120,7 @@
 				<artifactId>mahout-math</artifactId>
 				<version>${mahout.version}</version>
 			</dependency>
-			
-			<!-- Hadoop YARN -->
-	    <dependency>
-	      <groupId>org.apache.hadoop</groupId>
-	      <artifactId>hadoop-common</artifactId>
-	      <version>2.0.5-alpha</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.hadoop</groupId>
-	      <artifactId>hadoop-hdfs</artifactId>
-	      <version>2.0.5-alpha</version>
-	    </dependency>
-	
-	    <!-- "Old" Hadoop -->
-	    <dependency>
-	      <groupId>org.apache.hadoop</groupId>
-	      <artifactId>hadoop-core</artifactId>
-	      <version>1.2.1</version>
-	    </dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

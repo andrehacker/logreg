@@ -1,132 +1,278 @@
-10:02:06,823 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: experiment_name = sfo
-10:02:06,826 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: sut = hadoop
-10:02:06,903 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_hadoop = /home/andre/dev/logreg-repo/logreg-mapred/target/logreg-mapred-0.0.1-SNAPSHOT-job.jar
-10:02:06,904 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_hadoop = /home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_1000.seq
-10:02:06,904 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_hadoop = experiments/input/rcv1/lyrl2004_vectors_ecat_train_1000.seq
-10:02:06,905 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_train_hadoop = output-sfo-train
-10:02:06,905 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_test_hadoop = output-sfo-test
-10:02:06,905 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_ozone = /home/andre/dev/logreg-repo/logreg-pact/target/logreg-pact-0.0.1-SNAPSHOT-job.jar
-10:02:06,906 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_ozone = file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_1000.svm
-10:02:06,906 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_ozone = hdfs://localhost:9000/experiments/input/rcv1/rcv1_topics_train_1000.svm
-10:02:07,011 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: label_index_ozone = 59
-10:02:07,012 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_ozone = hdfs://localhost:9000/output-sfo-pact
-10:02:07,013 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hadoop_jobtracker_address = localhost:9001
-10:02:07,013 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hdfs_address = hdfs://localhost:9000
-10:02:07,046 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_address = localhost
-10:02:07,046 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_port = 6123
-10:02:07,047 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: ozone_conf = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
-10:02:07,049 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dops = 1
-10:02:07,055 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: repetitions = 1
-10:02:07,056 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: add_per_iteration = 1
-10:02:07,056 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dataset_name = rcv1small
-10:02:07,068 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: is_yarn = false
-10:02:07,068 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: all_slaves = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/all_slaves
-10:02:07,068 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: user = andre
-10:02:07,068 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: group = andre
-10:02:07,068 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hadoop_tar = /home/andre/experiments/setups/hadoop-1.2.1-bin.tar.gz
-10:02:07,069 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hadoop_home = /home/andre/experiments/suts/hadoop-1.2.1
-10:02:07,069 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hadoop_conf_template = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/hadoop-1.2.1
-10:02:07,069 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hadoop_conf = /home/andre/experiments/suts/hadoop-1.2.1/conf
-10:02:07,069 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hadoop_log = /home/andre/experiments/suts/hadoop-1.2.1/logs
-10:02:07,069 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hadoop_slaves_file = /home/andre/experiments/suts/hadoop-1.2.1/conf/slaves
-10:02:07,070 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hadoop_pid_folder = /tmp
-10:02:07,070 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hdfs_data_dir = /data/hdfs/data
-10:02:07,070 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hdfs_address = hdfs://localhost:9000
-10:02:07,070 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: hdfs_namenode_hostname = andre-sam-ubuntu
-10:02:07,070 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Loaded Property: experiment_log_dir = /home/andre/experiments/log
-10:02:07,072 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - -------------------- DEPLOY HDFS (incl. Hadoop) --------------------
+21:03:24,486 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: experiment_name = sfo
+21:03:24,488 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: sut = ozone
+21:03:24,580 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_hadoop = /home/andre/dev/logreg-repo/logreg-mapred/target/logreg-mapred-0.0.1-SNAPSHOT-job.jar
+21:03:24,580 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_hadoop = file:///home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train.seq
+21:03:24,580 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_hadoop = hdfs://localhost:9000/experiments/input/rcv1/lyrl2004_vectors_ecat_train.seq
+21:03:24,581 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_train_hadoop = hdfs://localhost:9000/experiments/output/output-sfo-train
+21:03:24,581 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_test_hadoop = hdfs://localhost:9000/experiments/output/output-sfo-test
+21:03:24,581 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_ozone = /home/andre/dev/logreg-repo/logreg-pact/target/logreg-pact-0.0.1-SNAPSHOT-job.jar
+21:03:24,581 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_ozone = file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_1000.svm
+21:03:24,581 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_ozone = hdfs://localhost:9000/experiments/input/rcv1/rcv1_topics_train_1000.svm
+21:03:24,645 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: label_index_ozone = 59
+21:03:24,645 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_ozone = hdfs://localhost:9000/output-sfo-pact
+21:03:24,646 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hadoop_jobtracker_address = localhost:9001
+21:03:24,646 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hdfs_address = hdfs://localhost:9000
+21:03:24,646 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hadoop_conf = /home/andre/experiments/suts/hadoop-2.1.0-beta/conf
+21:03:24,667 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_address = localhost
+21:03:24,667 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_port = 6123
+21:03:24,667 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: ozone_conf = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+21:03:24,669 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dops = 1
+21:03:24,674 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: repetitions = 1
+21:03:24,674 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: add_per_iteration = 1
+21:03:24,674 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dataset_name = rcv1small
+21:03:24,683 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: is_yarn = true
+21:03:24,683 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: all_slaves = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/all_slaves
+21:03:24,683 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: user = andre
+21:03:24,683 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: group = andre
+21:03:24,683 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_tar = /home/andre/experiments/setups/hadoop-2.1.0-beta.tar.gz
+21:03:24,684 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_home = /home/andre/experiments/suts/hadoop-2.1.0-beta
+21:03:24,684 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_conf_template = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/hadoop-2.1.0-beta
+21:03:24,684 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_conf = /home/andre/experiments/suts/hadoop-2.1.0-beta/conf
+21:03:24,684 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_log = /home/andre/experiments/suts/hadoop-2.1.0-beta/logs
+21:03:24,684 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_slaves_file = /home/andre/experiments/suts/hadoop-2.1.0-beta/conf/slaves
+21:03:24,684 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_pid_folder = /tmp
+21:03:24,684 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_data_dir = /data/hdfs/data
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_address = hdfs://localhost:9000
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_namenode_hostname = andre-sam-ubuntu
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_tar = /home/andre/experiments/setups/stratosphere-0.2-ozone-hdp2.1.0-beta.tar.gz
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_home = /home/andre/experiments/suts/stratosphere-0.2-ozone
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_conf_template = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/stratosphere-0.2-ozone
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_conf = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_log = /home/andre/experiments/suts/stratosphere-0.2-ozone/log
+21:03:24,685 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_slaves_file = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf/slaves
+21:03:24,686 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_pid_folder = /tmp
+21:03:24,686 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: experiment_log_dir = /home/andre/experiments/log
+21:03:24,964 WARN  org.apache.hadoop.conf.Configuration                          - fs.default.name is deprecated. Instead, use fs.defaultFS
+21:03:25,148 WARN  org.apache.hadoop.util.NativeCodeLoader                       - Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+21:03:25,861 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Remove output folder hdfs://localhost:9000/output-sfo-pact
+21:03:25,899 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - 
+-------------------- RUN EXPERIMENT --------------------
 
-10:02:07,072 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Check if hdfs namenode is running
-10:02:07,079 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): kill -0 17797
-10:02:07,096 INFO  de.tuberlin.dima.experiments.HadoopSUT                        -  - result strerr: /bin/bash: Zeile 0: kill: (17797) - Kein passender Prozess gefunden
+21:03:25,923 WARN  eu.stratosphere.nephele.configuration.GlobalConfiguration     - Cannot load configuration: unknown element plugins
+21:03:26,336 WARN  eu.stratosphere.pact.compiler.PactCompiler                    - Pact compiler could not determine the size of input 'de.tuberlin.dima.ml.pact.logreg.sfo.EmptyBaseModelInputFormat@2c083020'.
+21:03:32,066 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - --------------------------------------------------
+21:03:32,066 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Statistics for: sfo-ozone-rcv1small-2013-09-08-210324-dop0001-run01
+21:03:32,067 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - WALL CLOCK TIME: 5689
+21:03:32,067 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Additional timers
+21:03:32,073 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    -  - total-wall-clock: 5689
+21:03:32,073 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    -  - read-result-gains-and-coefficients: 388
+21:03:32,073 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - --------------------------------------------------
+21:03:32,074 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- LOG BACKUP --------------------
 
-10:02:07,097 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Removing old SUT home folder
-10:02:07,098 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): rm -Rf /home/andre/experiments/suts/hadoop-1.2.1
-10:02:07,153 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Unpacking tar
-10:02:07,153 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): tar -xzvf /home/andre/experiments/setups/hadoop-1.2.1-bin.tar.gz -C /home/andre/experiments/suts
-10:02:08,199 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Copy config files from /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/hadoop-1.2.1 to /home/andre/experiments/suts/hadoop-1.2.1/conf
-10:02:08,229 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Setting proper rights in SUT home
-10:02:08,229 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): chown -R andre:andre /home/andre/experiments/suts/hadoop-1.2.1
-10:02:08,240 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): find /home/andre/experiments/suts/hadoop-1.2.1 -type f | xargs -I{} chmod g+w {}
-10:02:08,789 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): find /home/andre/experiments/suts/hadoop-1.2.1 -type d | xargs -I{} chmod g+w {}
-10:02:08,937 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Copy additional libs to sut's lib dir
-10:02:08,937 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): cp /home/andre/dev/logreg-repo/logreg-experiments/lib-templates/hadoop-1.2.1/* /home/andre/experiments/suts/hadoop-1.2.1/lib/
-10:02:08,961 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - -------------------- ADAPT HADOOP SLAVES --------------------
+21:03:32,074 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Backup job logs from /home/andre/experiments/suts/stratosphere-0.2-ozone/log to /home/andre/experiments/log/sfo-ozone-rcv1small-2013-09-08-210324-dop0001-run01/job-logs-sfo/
+11:12:27,149 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: experiment_name = sfo
+11:12:27,152 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: sut = ozone
+11:12:27,233 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_hadoop = /home/andre/dev/logreg-repo/logreg-mapred/target/logreg-mapred-0.0.1-SNAPSHOT-job.jar
+11:12:27,233 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_hadoop = file:///home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train.seq
+11:12:27,233 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_hadoop = hdfs://localhost:9000/experiments/input/rcv1/lyrl2004_vectors_ecat_train.seq
+11:12:27,234 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_train_hadoop = hdfs://localhost:9000/experiments/output/output-sfo-train
+11:12:27,234 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_test_hadoop = hdfs://localhost:9000/experiments/output/output-sfo-test
+11:12:27,234 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: jar_ozone = /home/andre/dev/logreg-repo/logreg-pact/target/logreg-pact-0.0.1-SNAPSHOT-job.jar
+11:12:27,234 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_local_ozone = file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_1000.svm
+11:12:27,234 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: input_ozone = hdfs://localhost:9000/experiments/input/rcv1/rcv1_topics_train_1000.svm
+11:12:27,304 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: label_index_ozone = 59
+11:12:27,304 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: output_ozone = hdfs://localhost:9000/output-sfo-pact
+11:12:27,304 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hadoop_jobtracker_address = localhost:9001
+11:12:27,305 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hdfs_address = hdfs://localhost:9000
+11:12:27,305 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: hadoop_conf = /home/andre/experiments/suts/hadoop-2.1.0-beta/conf
+11:12:27,328 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_address = localhost
+11:12:27,328 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: job_manager_port = 6123
+11:12:27,328 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: ozone_conf = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+11:12:27,330 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dops = 1
+11:12:27,337 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: repetitions = 1
+11:12:27,337 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: add_per_iteration = 1
+11:12:27,338 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Loaded Property: dataset_name = rcv1small
+11:12:27,350 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: is_yarn = true
+11:12:27,350 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: all_slaves = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/all_slaves
+11:12:27,350 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: user = andre
+11:12:27,351 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: group = andre
+11:12:27,351 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_tar = /home/andre/experiments/setups/hadoop-2.1.0-beta.tar.gz
+11:12:27,351 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_home = /home/andre/experiments/suts/hadoop-2.1.0-beta
+11:12:27,351 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_conf_template = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/hadoop-2.1.0-beta
+11:12:27,351 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_conf = /home/andre/experiments/suts/hadoop-2.1.0-beta/conf
+11:12:27,352 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_log = /home/andre/experiments/suts/hadoop-2.1.0-beta/logs
+11:12:27,352 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_slaves_file = /home/andre/experiments/suts/hadoop-2.1.0-beta/conf/slaves
+11:12:27,352 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hadoop_pid_folder = /tmp
+11:12:27,352 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_data_dir = /data/hdfs/data
+11:12:27,352 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_address = hdfs://localhost:9000
+11:12:27,353 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: hdfs_namenode_hostname = andre-sam-ubuntu
+11:12:27,353 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_tar = /home/andre/experiments/setups/stratosphere-0.2-ozone-hdp2.1.0-beta.tar.gz
+11:12:27,353 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_home = /home/andre/experiments/suts/stratosphere-0.2-ozone
+11:12:27,353 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_conf_template = /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/stratosphere-0.2-ozone
+11:12:27,353 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_conf = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+11:12:27,354 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_log = /home/andre/experiments/suts/stratosphere-0.2-ozone/log
+11:12:27,354 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_slaves_file = /home/andre/experiments/suts/stratosphere-0.2-ozone/conf/slaves
+11:12:27,354 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: ozone_pid_folder = /tmp
+11:12:27,354 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Loaded Property: experiment_log_dir = /home/andre/experiments/log
+11:12:27,355 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Deploy hdfs before deploying ozone
+11:12:27,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- DEPLOY HDFS (incl. Hadoop) --------------------
 
-10:02:08,963 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Write current slaves (1) to /home/andre/experiments/suts/hadoop-1.2.1/conf/slaves:
-10:02:08,968 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - localhost
-10:02:08,968 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - -------------------- HDFS FORMAT START WAIT --------------------
+11:12:27,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Check if hdfs namenode is running
+11:12:27,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Removing old SUT home folder
+11:12:27,356 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): rm -Rf /home/andre/experiments/suts/hadoop-2.1.0-beta
+11:12:28,176 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Unpacking tar
+11:12:28,176 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): tar -xzvf /home/andre/experiments/setups/hadoop-2.1.0-beta.tar.gz -C /home/andre/experiments/suts
+11:12:30,856 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy config files from /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/hadoop-2.1.0-beta to /home/andre/experiments/suts/hadoop-2.1.0-beta/conf
+11:12:31,007 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Setting proper rights in SUT home
+11:12:31,008 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): chown -R andre:andre /home/andre/experiments/suts/hadoop-2.1.0-beta
+11:12:31,052 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): find /home/andre/experiments/suts/hadoop-2.1.0-beta -type f | xargs -I{} chmod g+w {}
+11:12:39,926 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): find /home/andre/experiments/suts/hadoop-2.1.0-beta -type d | xargs -I{} chmod g+w {}
+11:12:41,106 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy additional libs to sut's lib dir
+11:12:41,107 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): cp /home/andre/dev/logreg-repo/logreg-experiments/lib-templates/hadoop-2.1.0-beta/* /home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib
+11:12:41,241 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- DEPLOY OZONE --------------------
 
-10:02:08,968 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): rm -Rf /home/andre/experiments/suts/hadoop-1.2.1/logs/hadoop-andre-*node-*.log*
-10:02:08,977 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Delete /data/hdfs/data on slave localhost
-10:02:08,977 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): ssh andre@localhost 'rm -Rf /data/hdfs/data'
-10:02:09,416 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): /home/andre/experiments/suts/hadoop-1.2.1/bin/hadoop namenode -format -force
-10:02:11,807 INFO  de.tuberlin.dima.experiments.HadoopSUT                        -  - result strerr: 13/08/20 10:02:09 INFO namenode.NameNode: STARTUP_MSG: 
+11:12:41,242 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Check if nephele jobmanager is running
+11:12:41,243 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Removing old SUT home folder
+11:12:41,243 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): rm -Rf /home/andre/experiments/suts/stratosphere-0.2-ozone
+11:12:41,323 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Unpacking tar
+11:12:41,323 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): tar -xzvf /home/andre/experiments/setups/stratosphere-0.2-ozone-hdp2.1.0-beta.tar.gz -C /home/andre/experiments/suts
+11:12:42,325 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy config files from /home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/stratosphere-0.2-ozone to /home/andre/experiments/suts/stratosphere-0.2-ozone/conf
+11:12:42,327 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Setting proper rights in SUT home
+11:12:42,327 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): chown -R andre:andre /home/andre/experiments/suts/stratosphere-0.2-ozone
+11:12:42,337 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): find /home/andre/experiments/suts/stratosphere-0.2-ozone -type f | xargs -I{} chmod g+w {}
+11:12:42,666 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): find /home/andre/experiments/suts/stratosphere-0.2-ozone -type d | xargs -I{} chmod g+w {}
+11:12:42,704 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy additional libs to sut's lib dir
+11:12:42,705 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): cp /home/andre/dev/logreg-repo/logreg-experiments/lib-templates/hadoop-2.1.0-beta/* /home/andre/experiments/suts/stratosphere-0.2-ozone/lib/
+11:12:42,759 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- ADAPT HADOOP SLAVES --------------------
+
+11:12:42,764 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Write current slaves (1) to /home/andre/experiments/suts/hadoop-2.1.0-beta/conf/slaves:
+11:12:42,818 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - localhost
+11:12:42,820 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Write current slaves (1) to /home/andre/experiments/suts/stratosphere-0.2-ozone/conf/slaves:
+11:12:42,820 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - localhost
+11:12:42,820 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- HDFS FORMAT START WAIT --------------------
+
+11:12:42,821 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): rm -Rf /home/andre/experiments/suts/hadoop-2.1.0-beta/logs/hadoop-andre-*node-*.log*
+11:12:42,830 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Delete /data/hdfs/data on slave localhost
+11:12:42,830 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): ssh andre@localhost 'rm -Rf /data/hdfs/data'
+11:12:43,501 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/hadoop-2.1.0-beta/bin/hdfs namenode -format andre-sam-ubuntu -force
+11:12:46,181 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result stdout: Formatting using clusterid: CID-ae09d39c-fe1d-46ee-8e2a-ea6b48cd5171
+
+11:12:46,181 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result strerr: 13/09/09 11:12:44 INFO namenode.NameNode: STARTUP_MSG: 
 /************************************************************
 STARTUP_MSG: Starting NameNode
 STARTUP_MSG:   host = andre-sam-ubuntu/127.0.1.1
-STARTUP_MSG:   args = [-format, -force]
-STARTUP_MSG:   version = 1.2.1
-STARTUP_MSG:   build = https://svn.apache.org/repos/asf/hadoop/common/branches/branch-1.2 -r 1503152; compiled by 'mattf' on Mon Jul 22 15:23:09 PDT 2013
+STARTUP_MSG:   args = [-format, andre-sam-ubuntu, -force]
+STARTUP_MSG:   version = 2.1.0-beta
+STARTUP_MSG:   classpath = /home/andre/experiments/suts/hadoop-2.1.0-beta/conf:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/avro-1.5.3.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jetty-6.1.26.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-math-2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jackson-mapper-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/hadoop-auth-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-httpclient-3.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/stax-api-1.0.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/guava-11.0.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jackson-xc-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jersey-core-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-collections-3.2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-lang-2.5.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/xz-1.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jersey-server-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/zookeeper-3.4.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/paranamer-2.3.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/snappy-java-1.0.3.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/log4j-1.2.17.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-beanutils-1.7.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jackson-jaxrs-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/hadoop-annotations-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jasper-runtime-5.5.23.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-compress-1.4.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-el-1.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-cli-1.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jsch-0.1.42.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-net-3.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-codec-1.4.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/protobuf-java-2.5.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jetty-util-6.1.26.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/activation-1.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/slf4j-api-1.6.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jets3t-0.6.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/servlet-api-2.5.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jackson-core-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jasper-compiler-5.5.23.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jettison-1.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/xmlenc-0.52.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jsr305-1.3.9.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/asm-3.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jersey-json-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-logging-1.1.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jsp-api-2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-configuration-1.6.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-digester-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/slf4j-log4j12-1.6.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-beanutils-core-1.8.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jaxb-impl-2.2.3-1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/jaxb-api-2.2.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/lib/commons-io-2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/hadoop-common-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/common/hadoop-common-2.1.0-beta-tests.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jetty-6.1.26.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jackson-mapper-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/guava-11.0.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jersey-core-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/commons-lang-2.5.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jersey-server-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/log4j-1.2.17.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jasper-runtime-5.5.23.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/commons-el-1.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/commons-cli-1.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/commons-codec-1.4.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/protobuf-java-2.5.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jetty-util-6.1.26.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/servlet-api-2.5.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jackson-core-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/xmlenc-0.52.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jsr305-1.3.9.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/asm-3.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/commons-logging-1.1.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/jsp-api-2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/commons-daemon-1.0.13.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/lib/commons-io-2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/hadoop-hdfs-2.1.0-beta-tests.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/hdfs/hadoop-hdfs-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/avro-1.5.3.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/jersey-guice-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/jackson-mapper-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/javax.inject-1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/netty-3.5.11.Final.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/jersey-core-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/jersey-server-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/hamcrest-core-1.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/paranamer-2.3.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/snappy-java-1.0.3.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/log4j-1.2.17.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/hadoop-annotations-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/guice-3.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/protobuf-java-2.5.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/aopalliance-1.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/guice-servlet-3.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/jackson-core-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/junit-4.10.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/asm-3.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/lib/commons-io-2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-server-tests-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-applications-unmanaged-am-launcher-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-server-nodemanager-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-site-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-server-common-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-common-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-api-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-server-web-proxy-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-client-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/yarn/hadoop-yarn-server-resourcemanager-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/avro-1.5.3.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/jersey-guice-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/jackson-mapper-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/mahout-math-0.8-yarn.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/mahout-core-0.8-yarn.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/javax.inject-1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/netty-3.5.11.Final.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/jersey-core-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/jersey-server-1.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/hamcrest-core-1.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/paranamer-2.3.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/snappy-java-1.0.3.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/log4j-1.2.17.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/hadoop-annotations-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/guice-3.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/protobuf-java-2.5.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/aopalliance-1.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/guice-servlet-3.0.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/jackson-core-asl-1.8.8.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/junit-4.10.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/guava-14.0.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/asm-3.2.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/lib/commons-io-2.1.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-shuffle-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-hs-plugins-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-app-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-hs-2.1.0-beta.jar:/home/andre/experiments/suts/hadoop-2.1.0-beta/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-2.1.0-beta-tests.jar:/contrib/capacity-scheduler/*.jar
+STARTUP_MSG:   build = https://svn.apache.org/repos/asf/hadoop/common -r 1514472; compiled by 'hortonmu' on 2013-08-15T20:48Z
 STARTUP_MSG:   java = 1.6.0_43
 ************************************************************/
-13/08/20 10:02:10 INFO util.GSet: Computing capacity for map BlocksMap
-13/08/20 10:02:10 INFO util.GSet: VM type       = 64-bit
-13/08/20 10:02:10 INFO util.GSet: 2.0% max memory = 932118528
-13/08/20 10:02:10 INFO util.GSet: capacity      = 2^21 = 2097152 entries
-13/08/20 10:02:10 INFO util.GSet: recommended=2097152, actual=2097152
-13/08/20 10:02:10 INFO namenode.FSNamesystem: fsOwner=andre
-13/08/20 10:02:10 INFO namenode.FSNamesystem: supergroup=supergroup
-13/08/20 10:02:10 INFO namenode.FSNamesystem: isPermissionEnabled=true
-13/08/20 10:02:10 INFO namenode.FSNamesystem: dfs.block.invalidate.limit=100
-13/08/20 10:02:10 INFO namenode.FSNamesystem: isAccessTokenEnabled=false accessKeyUpdateInterval=0 min(s), accessTokenLifetime=0 min(s)
-13/08/20 10:02:10 INFO namenode.FSEditLog: dfs.namenode.edits.toleration.length = 0
-13/08/20 10:02:10 INFO namenode.NameNode: Caching file names occuring more than 10 times 
-13/08/20 10:02:11 INFO common.Storage: Image file /data/hdfs/name/current/fsimage of size 111 bytes saved in 0 seconds.
-13/08/20 10:02:11 INFO namenode.FSEditLog: closing edit log: position=4, editlog=/data/hdfs/name/current/edits
-13/08/20 10:02:11 INFO namenode.FSEditLog: close success: truncate to 4, editlog=/data/hdfs/name/current/edits
-13/08/20 10:02:11 INFO common.Storage: Storage directory /data/hdfs/name has been successfully formatted.
-13/08/20 10:02:11 INFO namenode.NameNode: SHUTDOWN_MSG: 
+13/09/09 11:12:44 INFO namenode.NameNode: registered UNIX signal handlers for [TERM, HUP, INT]
+13/09/09 11:12:44 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+13/09/09 11:12:45 INFO namenode.HostFileManager: read includes:
+HostSet(
+)
+13/09/09 11:12:45 INFO namenode.HostFileManager: read excludes:
+HostSet(
+)
+13/09/09 11:12:45 INFO blockmanagement.DatanodeManager: dfs.block.invalidate.limit=1000
+13/09/09 11:12:45 INFO util.GSet: Computing capacity for map BlocksMap
+13/09/09 11:12:45 INFO util.GSet: VM type       = 64-bit
+13/09/09 11:12:45 INFO util.GSet: 2.0% max memory = 888.9 MB
+13/09/09 11:12:45 INFO util.GSet: capacity      = 2^21 = 2097152 entries
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: dfs.block.access.token.enable=false
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: defaultReplication         = 1
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: maxReplication             = 512
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: minReplication             = 1
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: maxReplicationStreams      = 2
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: shouldCheckForEnoughRacks  = false
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: replicationRecheckInterval = 3000
+13/09/09 11:12:45 INFO blockmanagement.BlockManager: encryptDataTransfer        = false
+13/09/09 11:12:45 INFO namenode.FSNamesystem: fsOwner             = andre (auth:SIMPLE)
+13/09/09 11:12:45 INFO namenode.FSNamesystem: supergroup          = supergroup
+13/09/09 11:12:45 INFO namenode.FSNamesystem: isPermissionEnabled = true
+13/09/09 11:12:45 INFO namenode.FSNamesystem: HA Enabled: false
+13/09/09 11:12:45 INFO namenode.FSNamesystem: Append Enabled: true
+13/09/09 11:12:45 INFO util.GSet: Computing capacity for map INodeMap
+13/09/09 11:12:45 INFO util.GSet: VM type       = 64-bit
+13/09/09 11:12:45 INFO util.GSet: 1.0% max memory = 888.9 MB
+13/09/09 11:12:45 INFO util.GSet: capacity      = 2^20 = 1048576 entries
+13/09/09 11:12:45 INFO namenode.NameNode: Caching file names occuring more than 10 times
+13/09/09 11:12:45 INFO namenode.FSNamesystem: dfs.namenode.safemode.threshold-pct = 0.9990000128746033
+13/09/09 11:12:45 INFO namenode.FSNamesystem: dfs.namenode.safemode.min.datanodes = 0
+13/09/09 11:12:45 INFO namenode.FSNamesystem: dfs.namenode.safemode.extension     = 30000
+13/09/09 11:12:45 INFO namenode.FSNamesystem: Retry cache on namenode is enabled
+13/09/09 11:12:45 INFO namenode.FSNamesystem: Retry cache will use 0.03 of total heap and retry cache entry expiry time is 600000 millis
+13/09/09 11:12:45 INFO util.GSet: Computing capacity for map Namenode Retry Cache
+13/09/09 11:12:45 INFO util.GSet: VM type       = 64-bit
+13/09/09 11:12:45 INFO util.GSet: 0.029999999329447746% max memory = 888.9 MB
+13/09/09 11:12:45 INFO util.GSet: capacity      = 2^15 = 32768 entries
+Data exists in Storage Directory /data/hdfs/name. Formatting anyway.
+13/09/09 11:12:46 INFO common.Storage: Storage directory /data/hdfs/name has been successfully formatted.
+13/09/09 11:12:46 INFO namenode.FSImage: Saving image file /data/hdfs/name/current/fsimage.ckpt_0000000000000000000 using no compression
+13/09/09 11:12:46 INFO namenode.FSImage: Image file /data/hdfs/name/current/fsimage.ckpt_0000000000000000000 of size 197 bytes saved in 0 seconds.
+13/09/09 11:12:46 INFO namenode.NNStorageRetentionManager: Going to retain 1 images with txid >= 0
+13/09/09 11:12:46 INFO util.ExitUtil: Exiting with status 0
+13/09/09 11:12:46 INFO namenode.NameNode: SHUTDOWN_MSG: 
 /************************************************************
 SHUTDOWN_MSG: Shutting down NameNode at andre-sam-ubuntu/127.0.1.1
 ************************************************************/
 
-10:02:11,807 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): /home/andre/experiments/suts/hadoop-1.2.1/bin/start-dfs.sh
-10:02:15,645 INFO  de.tuberlin.dima.experiments.HadoopSUT                        -  - result stdout: starting namenode, logging to /home/andre/experiments/suts/hadoop-1.2.1/libexec/../logs/hadoop-andre-namenode-andre-sam-ubuntu.out
-localhost: starting datanode, logging to /home/andre/experiments/suts/hadoop-1.2.1/libexec/../logs/hadoop-andre-datanode-andre-sam-ubuntu.out
-localhost: starting secondarynamenode, logging to /home/andre/experiments/suts/hadoop-1.2.1/libexec/../logs/hadoop-andre-secondarynamenode-andre-sam-ubuntu.out
+11:12:46,182 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/hadoop-2.1.0-beta/sbin/hadoop-daemon.sh --config /home/andre/experiments/suts/hadoop-2.1.0-beta/conf --script hdfs start namenode
+11:12:50,289 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result stdout: starting namenode, logging to /home/andre/experiments/suts/hadoop-2.1.0-beta/logs/hadoop-andre-namenode-andre-sam-ubuntu.out
 
-10:02:15,646 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Waiting for safe mode to be off
-10:02:15,646 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): /home/andre/experiments/suts/hadoop-1.2.1/bin/hadoop dfsadmin -safemode get
-10:02:19,914 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Safemode-OFF=true
-10:02:20,415 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Waiting for 1 datanodes to connect
-10:02:20,434 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:21,437 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:22,441 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:23,444 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:24,447 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:25,449 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:26,452 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:27,454 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:28,457 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:29,460 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:30,464 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:31,467 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=1
-10:02:32,471 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - -------------------- LOAD DATA --------------------
+11:12:50,289 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/hadoop-2.1.0-beta/sbin/hadoop-daemons.sh --config /home/andre/experiments/suts/hadoop-2.1.0-beta/conf --script hdfs start datanode
+11:12:54,849 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result stdout: localhost: starting datanode, logging to /home/andre/experiments/suts/hadoop-2.1.0-beta/logs/hadoop-andre-datanode-andre-sam-ubuntu.out
 
-10:02:32,476 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Copy /home/andre/dev/datasets/RCV1-v2/sequencefiles/lyrl2004_vectors_ecat_train_1000.seq to experiments/input/rcv1/lyrl2004_vectors_ecat_train_1000.seq using hdfs hdfs://localhost:9000
-10:02:33,909 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - -------------------- START MAPRED --------------------
+11:12:54,850 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Waiting for safe mode to be off
+11:12:54,850 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/hadoop-2.1.0-beta/bin/hadoop dfsadmin -safemode get
+11:12:57,526 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Safemode-OFF=true
+11:12:58,027 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Waiting for 1 datanodes to connect
+11:12:58,045 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:12:59,055 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:00,060 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:01,063 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:02,068 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:03,072 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:04,073 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:05,077 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=1
+11:13:06,083 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- LOAD DATA --------------------
 
-10:02:33,910 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Check if jobtracker is running
-10:02:33,910 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): kill -0 18505
-10:02:33,920 INFO  de.tuberlin.dima.experiments.HadoopSUT                        -  - result strerr: /bin/bash: Zeile 0: kill: (18505) - Kein passender Prozess gefunden
+11:13:06,088 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Copy file:///home/andre/dev/datasets/libsvm-rcv1v2-topics/rcv1_topics_train_1000.svm to hdfs://localhost:9000/experiments/input/rcv1/rcv1_topics_train_1000.svm using hdfs hdfs://localhost:9000
+11:13:06,506 WARN  org.apache.hadoop.conf.Configuration                          - fs.default.name is deprecated. Instead, use fs.defaultFS
+11:13:06,762 WARN  org.apache.hadoop.util.NativeCodeLoader                       - Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+11:13:08,377 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- START OZONE --------------------
 
-10:02:33,920 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): rm -Rf /home/andre/experiments/suts/hadoop-1.2.1/logs/hadoop-andre-*tracker-*.log*
-10:02:33,925 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - exec (bash): /home/andre/experiments/suts/hadoop-1.2.1/bin/start-mapred.sh
-10:02:36,390 INFO  de.tuberlin.dima.experiments.HadoopSUT                        -  - result stdout: starting jobtracker, logging to /home/andre/experiments/suts/hadoop-1.2.1/libexec/../logs/hadoop-andre-jobtracker-andre-sam-ubuntu.out
-localhost: starting tasktracker, logging to /home/andre/experiments/suts/hadoop-1.2.1/libexec/../logs/hadoop-andre-tasktracker-andre-sam-ubuntu.out
+11:13:08,378 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Check if nephele jobmanager is running
+11:13:08,378 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): rm -Rf /home/andre/experiments/suts/stratosphere-0.2-ozone/log/nephele-andre-*.log*
+11:13:08,383 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): rm -Rf /home/andre/experiments/suts/stratosphere-0.2-ozone/log/nephele-andre-*.out*
+11:13:08,391 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/stratosphere-0.2-ozone/bin/start-cluster.sh
+11:13:08,859 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result stdout: Starting Nephele job manager
+Starting Nephele task manager on host andre-sam-ubuntu
 
-10:02:36,390 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - Waiting for 1 nodes (tasktracker or nodemanager) to connect
-10:02:36,391 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:37,393 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
-10:02:38,395 INFO  de.tuberlin.dima.experiments.HadoopSUT                        - - Nodes connected=0
+11:13:08,860 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Waiting for 1 taskmanager to connect
+11:13:08,860 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected unknown (logfile not existing)
+11:13:09,861 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:10,862 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=0
+11:13:11,864 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - Nodes connected=1
+11:13:12,928 WARN  org.apache.hadoop.conf.Configuration                          - fs.default.name is deprecated. Instead, use fs.defaultFS
+11:13:12,931 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Output path hdfs://localhost:9000/output-sfo-pact is empty, nothing to delete
+11:13:12,931 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - -------------------- RUN EXPERIMENT --------------------
+
+11:13:12,963 WARN  eu.stratosphere.nephele.configuration.GlobalConfiguration     - Cannot load configuration: unknown element plugins
+11:13:13,542 WARN  eu.stratosphere.pact.compiler.PactCompiler                    - Pact compiler could not determine the size of input 'de.tuberlin.dima.ml.pact.logreg.sfo.EmptyBaseModelInputFormat@6dcee361'.
+11:13:25,337 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - --------------------------------------------------
+11:13:25,337 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Statistics for: sfo-ozone-rcv1small-2013-09-09-111227-dop0001-run01
+11:13:25,338 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - WALL CLOCK TIME: 11734
+11:13:25,338 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - Additional timers
+11:13:25,346 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    -  - total-wall-clock: 11734
+11:13:25,794 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    -  - read-result-gains-and-coefficients: 507
+11:13:25,794 INFO  de.tuberlin.dima.experiments.ml.experiments.SFOExperiment$    - --------------------------------------------------
+11:13:25,798 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- LOG BACKUP --------------------
+
+11:13:25,798 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - Backup job logs from /home/andre/experiments/suts/stratosphere-0.2-ozone/log to /home/andre/experiments/log/sfo-ozone-rcv1small-2013-09-09-111227-dop0001-run01/job-logs-sfo/
+11:13:26,258 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- STOP OZONE --------------------
+
+11:13:26,258 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/stratosphere-0.2-ozone/bin/stop-cluster.sh
+11:13:27,213 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result stdout: Stopping Nephele job manager
+Stopping Nephele task manager on host andre-sam-ubuntu
+
+11:13:27,213 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - -------------------- HDFS CLEAN STOP --------------------
+
+11:13:27,252 WARN  org.apache.hadoop.conf.Configuration                          - fs.default.name is deprecated. Instead, use fs.defaultFS
+11:13:27,272 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/hadoop-2.1.0-beta/sbin/hadoop-daemon.sh --config /home/andre/experiments/suts/hadoop-2.1.0-beta/conf --script hdfs stop namenode
+11:13:32,341 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result stdout: stopping namenode
+
+11:13:32,341 INFO  de.tuberlin.dima.experiments.OzoneSUT                         - - exec (bash): /home/andre/experiments/suts/hadoop-2.1.0-beta/sbin/hadoop-daemons.sh --config /home/andre/experiments/suts/hadoop-2.1.0-beta/conf --script hdfs stop datanode
+11:13:37,897 INFO  de.tuberlin.dima.experiments.OzoneSUT                         -  - result stdout: localhost: stopping datanode
+

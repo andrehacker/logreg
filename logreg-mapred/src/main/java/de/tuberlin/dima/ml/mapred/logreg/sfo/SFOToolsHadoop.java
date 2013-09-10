@@ -39,8 +39,10 @@ public class SFOToolsHadoop {
     
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer writer = null;
+    String baseModelPath = hdfsAddress + "/" + BASE_MODEL_PATH;
+    System.out.println("Write basemodel to " + baseModelPath);
     try {
-      writer = SequenceFile.createWriter(fs, conf, new Path(BASE_MODEL_PATH),
+      writer = SequenceFile.createWriter(fs, conf, new Path(baseModelPath),
           IncrementalModelWritable.class, NullWritable.class);
       writer.append(new IncrementalModelWritable(baseModel), NullWritable.get());
     } finally {
@@ -49,9 +51,13 @@ public class SFOToolsHadoop {
   }
     
   static IncrementalModel readBaseModel(Configuration conf) throws IOException {
+    System.out.println("READ BASE MODEL FS.DEFAULTFS: " + conf.get("fs.defaultFS"));
     IncrementalModel baseModel = null;
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(BASE_MODEL_PATH), conf);
+//    String baseModelPath = "hdfs://localhost:9000/" + BASE_MODEL_PATH;
+    String baseModelPath = conf.get("fs.defaultFS") + "/" + BASE_MODEL_PATH;
+    System.out.println("Read basemodel from " + baseModelPath);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(baseModelPath), conf);
     try {
       IncrementalModelWritable baseModelWritable = new IncrementalModelWritable();
       // model is stored in key

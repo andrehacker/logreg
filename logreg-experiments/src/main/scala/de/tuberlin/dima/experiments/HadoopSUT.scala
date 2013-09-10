@@ -30,8 +30,8 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     if (isYarn) {
       bash(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " start resourcemanager")
       bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " start nodemanager")
-//      bash(hadoopSystemHome + "/bin/yarn start proxyserver --config " + hadoopConfPath)
-//      bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh start historyserver --config " + hadoopConfPath)
+      bash(hadoopSystemHome + "/bin/yarn start proxyserver --config " + hadoopConfPath)
+      bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh start historyserver --config " + hadoopConfPath)
     } else{
       bash(hadoopSystemHome + "/bin/start-mapred.sh")
     }
@@ -52,8 +52,8 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     if (isYarn) {
       bash(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " stop resourcemanager")
       bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " stop nodemanager")
-//      bash(hadoopSystemHome + "/bin/yarn stop proxyserver --config " + hadoopConfPath)
-//      bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh stop historyserver --config " + hadoopConfPath)
+      bash(hadoopSystemHome + "/bin/yarn stop proxyserver --config " + hadoopConfPath)
+      bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh stop historyserver --config " + hadoopConfPath)
     } else{
       bash(hadoopSystemHome + "/bin/stop-mapred.sh")
     }
@@ -79,7 +79,7 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
           new Path(target))
           true
     } else {
-      logger.error("Log folder %s does not exist", src)
+      logger.error("Log folder {} does not exist", src)
       false
     }
   }

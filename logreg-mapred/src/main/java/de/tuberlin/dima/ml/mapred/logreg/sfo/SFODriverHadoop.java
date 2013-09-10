@@ -36,6 +36,7 @@ public class SFODriverHadoop implements SFODriver {
   private String trainOutputPath;
   private String testOutputPath;
   
+  private String hadoopConfDir;
   private String jobTrackerAddress;
   private String hdfsAddress;
   private String jarPath;   // might be empty
@@ -63,6 +64,7 @@ public class SFODriverHadoop implements SFODriver {
       int numFeatures,
       String jobTrackerAddress,
       String hdfsAddress,
+      String hadoopConfDir,
       String jarPath) {
     this.trainInputFile = trainInputFile;
     this.testInputFile = testInputFile;
@@ -71,6 +73,7 @@ public class SFODriverHadoop implements SFODriver {
     this.numFeatures = numFeatures;
     this.jobTrackerAddress = jobTrackerAddress;
     this.hdfsAddress = hdfsAddress;
+    this.hadoopConfDir = hadoopConfDir;
     this.jarPath = jarPath;
 
     // Create empty model
@@ -99,7 +102,9 @@ public class SFODriverHadoop implements SFODriver {
     // ----- TRAIN -----
     stopTotal.start();
     stopTrain.start();
-    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress, jarPath);
+//    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress, jarPath);
+    Configuration conf = HadoopUtils.createConfigurationUsingConfDir(hadoopConfDir, jarPath);
+    
     ToolRunner.run(conf, new SFOTrainJob(trainInputFile, trainOutputPath, dop),
         null);
     stopTrain.stop();

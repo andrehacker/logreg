@@ -66,6 +66,8 @@ class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
 
     logger.info("-------------------- START OZONE --------------------\n")
     
+    // TODO Create pid dir if it does not exist
+    
     // Nephele jobmanager running?
     if (isNepheleRunning()) {
       throw new RuntimeException("Nephele jobmanager is already running. Please stop it before.");

@@ -17,6 +17,7 @@
 .project
 .settings
 target
+.cache
 
 # Sequence file
 *.seq

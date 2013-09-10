@@ -73,7 +73,7 @@ public class SFOEvalJob extends AbstractHadoopJob {
     job.getConfiguration().set(CONF_KEY_NUM_FEATURES, Integer.toString(numFeatures));
     job.getConfiguration().set(CONF_KEY_TRAIN_OUTPUT, trainOutputPath);
     
-    cleanupOutputDirectory(outputPath);
+//    cleanupOutputDirectory(outputPath);
     
     return job.waitForCompletion(true) ? 0 : 1;
   }

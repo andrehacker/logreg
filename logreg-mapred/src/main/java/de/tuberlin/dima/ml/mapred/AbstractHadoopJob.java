@@ -16,9 +16,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 
-import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
-import de.tuberlin.dima.ml.util.IOUtils;
-
 public abstract class AbstractHadoopJob extends Configured implements Tool {
   
   protected Job prepareJob(
@@ -35,6 +32,8 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
       String inputPath,
       String outputPath
       ) throws IOException {
+
+    // If this job should be run on a cluster the calling method must supply an specific Configuration object
     
     System.out.println("-----------------");
     System.out.println("Prepare Job: " + jobName);
@@ -43,17 +42,6 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     Job job = new Job(getConf(), jobName);
     Configuration conf = job.getConfiguration();
     setConf(conf);
-    System.out.println("EQUALITY? " + getConf().equals(conf));
-
-    // If this job should be run on a cluster the calling method must supply an specific Configuration object
-//    conf.addResource(new Path(GlobalSettings.CONFIG_FILE_PATH));
-    
-    boolean runLocal = HadoopUtils.detectLocalMode(conf);
-    if (runLocal) {
-      System.out.println("RUN IN LOCAL MODE");
-    } else {
-      System.out.println("RUN IN PSEUDO-DISTRIBUTED/CLUSTER MODE");
-    }
     
     // JAR DETECTION
     if ("".equals(job.getJar())) {
@@ -71,16 +59,7 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     }
     System.out.println("Jar path: " + job.getJar());
     
-    if (!runLocal) {
-      // This is needed if we run from eclipse, which won't build a jar automatically
-      // In this case we have to build the jar manually before!
-      // mvn package will build a jar with all required dependencies
-      // Deactivated, needs to be done by caller
-//      conf.set("mapred.jar", GlobalSettings.JAR_PATH);
-      
-//      job.setNumReduceTasks(4);
-      conf.setInt("mapred.reduce.tasks", numReducers);
-    }
+    job.setNumReduceTasks(numReducers);
     
     // ----- Set classes -----
 
@@ -104,14 +83,12 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
   }
   
   protected void cleanupOutputDirectory(String outputPath) throws IOException {
-    boolean runLocal = HadoopUtils.detectLocalMode(getConf());
-    if (runLocal) {
-      IOUtils.deleteRecursively(outputPath);
-    } else {
-      FileSystem fs = FileSystem.get(getConf());
-      Path path = new Path(outputPath);
-      fs.delete(path, true);
-    }
+    FileSystem fs = FileSystem.get(getConf());
+    Path path = new Path(outputPath);
+    fs.delete(path, true);
+//    if (runLocal) {
+//      IOUtils.deleteRecursively(outputPath);
+//    } else {
   }
 
 }

@@ -83,4 +83,5 @@
     <name>dfs.namenode.handler.count</name>
     <value>32</value>
   </property>
+  
 </configuration>

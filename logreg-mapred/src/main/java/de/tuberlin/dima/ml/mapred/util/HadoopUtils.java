@@ -13,6 +13,7 @@ import org.apache.mahout.math.VectorWritable;
 public class HadoopUtils {
 
   public static boolean detectLocalMode(Configuration conf) {
+    // TODO This doesnt work for YARN
     String jobTracker = conf.get("mapred.job.tracker");
     if (jobTracker == null)
       return true;
@@ -32,11 +33,27 @@ public class HadoopUtils {
   }
   
   public static Configuration createConfiguration(String hdfsAddress, String jobtrackerAddress, String jarPath) {
+    // TODO: These properties no longer work for yarn (I guess)
     Configuration conf = new Configuration();
     if (!"".equals(jobtrackerAddress))
         conf.set("mapred.job.tracker", jobtrackerAddress);
     if (!"".equals(hdfsAddress))
       conf.set("fs.default.name", hdfsAddress);
+    if (!"".equals(jarPath))
+      conf.set("mapred.jar", jarPath);
+    return conf;
+  }
+
+  /**
+   * Automatically add core-site mapred-site and hdfs-site to config 
+   */
+  public static Configuration createConfigurationUsingConfDir(String confDir, String jarPath) {
+    Configuration conf = new Configuration();
+    conf.addResource(new Path(confDir + "/core-site.xml"));
+    conf.addResource(new Path(confDir + "/mapred-site.xml"));
+    conf.addResource(new Path(confDir + "/hdfs-site.xml"));
+    conf.addResource(new Path(confDir + "/yarn-site.xml"));
+    System.out.println("Add resource: " + confDir + "/yarn-site.xml");
     if (!"".equals(jarPath))
       conf.set("mapred.jar", jarPath);
     return conf;

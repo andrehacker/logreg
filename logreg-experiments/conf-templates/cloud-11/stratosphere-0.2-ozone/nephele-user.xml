@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+#######################################################################################################################
+## 
+##  Copyright (C) 2010 by the Stratosphere project (http://stratosphere.eu)
+## 
+##  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+##  the License. You may obtain a copy of the License at
+## 
+##      http://www.apache.org/licenses/LICENSE-2.0
+## 
+##  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+##  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+##  specific language governing permissions and limitations under the License.
+## 
+#######################################################################################################################
+-->
+<configuration>
+
+    <!--  ========================================================================
+                                     Addresses and Ports 
+              ======================================================================== -->
+
+        <!-- the address of the job manager -->
+        <property>
+                <key>jobmanager.rpc.address</key>
+                <value>cloud-11.dima.tu-berlin.de</value>
+                <default>localhost</default>
+        </property>
+
+        <!-- the IPC port of the job manager -->
+        <property>
+                <key>jobmanager.rpc.port</key>
+                <value>6002</value>
+                <default>6123</default>
+        </property>
+
+        <!-- the IPC port of the task manager -->
+        <property>
+                <key>taskmanager.rpc.port</key>
+                <value>6122</value>
+                <default>6122</default>
+        </property>
+
+        <!-- disable job vertex execution retries -->
+        <!-- Used by Alexander. Still supported? -->
+        <!--
+        <property>
+                <key>job.execution.retries</key>
+                <value>0</value>
+        </property>
+        -->
+
+
+        <!--  ========================================================================
+                               Client Configuration   
+          ======================================================================== -->
+
+    <!-- The interval, in seconds, in which the job client polls the job manager for status updates -->
+        <property>
+                <key>jobclient.polling.internval</key>
+                <value>2</value>
+                <default>2</default>
+        </property>
+
+    <!-- Configuration used when writing into the hadoop distributed file system. unless specified, hdfs file creation will use
+             HDFS default settings with respect to block-size, replication factor, etc. -->
+        <property>
+                <key>fs.hdfs.hdfsdefault</key>
+                <value>/share/hadoop/ahacker/suts/hadoop-2.1.0-beta/conf/hdfs-site.xml</value>
+                <default>/share/nephele/hadoop/conf/hdfs-site.xml</default>
+        </property>
+
+
+        <!--  ========================================================================
+	                               Memory, Buffers and Directories
+	      ======================================================================== -->
+
+        <!--  The directories for temporary files. Add a delimited list for multiple directories, using the system directory delimiter
+               (colon ':' on unix). An example would be "<value>/data1/tmp:/data2/tmp:/data3/tmp</value>".
+               Note: Each directory entry is read from and written to by a different I/O thread. You can include the same directory
+               multiple times in that list to create multiple I/O threads against that directory. This is for example relevant for
+               high-throughput RAIDs.-->
+        <!-- Uncomment if you want to change the default value -->
+        <!-- Problem: Temp dir needs to be created manually before starting -->
+        <!--
+        <property>
+                <key>taskmanager.tmp.dirs</key>
+                <value>/data/users/ahacker/stratosphere_experiments/taskmanager-temp-dir</value>
+                <alexander>/data/1/journalpaper/tm-local:/data/2/stratosphere/tm-local:/data/3/stratosphere/tm-local:/data/4/stratosphere/tm-local</alexander>
+        </property>
+        -->
+
+        <!-- The number of network buffers used by the TaskManager -->
+        <property>
+                <key>channel.network.numberOfBuffers</key>
+                <value>10240</value>
+                <alexander>32768</alexander>
+                <default>2048</default>
+        </property>
+
+        <!-- The size of the network buffers. -->
+        <property>
+                <key>channel.network.bufferSizeInBytes</key>
+                <value>32768</value>
+                <default>32768</default>
+        </property>
+
+        <property>
+                <key>jobmanager.rpc.numhandler</key>
+                <value>12</value>
+                <default>8</default>
+                <alexander>25</alexander>
+        </property>
+
+        <property>
+                <key>multicast.enable</key>
+                <value>false</value>
+        </property>
+
+        <!-- Used by Alexander. Still supported? -->
+        <!--
+        <property>
+                <key>taskmanager.memory.size</key>
+                <value>22528</value>
+        </property>
+        -->
+
+        <!-- Used by Alexander. Still supported? -->
+        <!--
+        <property>
+                <key>channel.network.mergeSpilledBuffers</key>
+                <value>false</value>
+        </property>
+        -->
+
+        <!--  ========================================================================
+	                                        Multicast
+	      ======================================================================== -->
+
+        <!-- Used by Alexander. Still supported? -->
+        <!--
+        <property>
+                <key>multicast.branching</key>
+                <value>1</value>
+        </property>
+
+        <property>
+                <key>multicast.randomize</key>
+                <value>true</value>
+        </property>
+        -->
+
+        <!--  ========================================================================
+	                                   Instances
+	      ======================================================================== -->
+
+    <!-- Definition of the standard instance type. This definition describes the instances in 
+         a local and cluster setup. Each node (or more precisely each TaskManager running on a node) 
+         will be considered to have the here defined resources available.
+         The available resources are defined as follows:
+         <name>,<compute-units>,<CPU-cores>,<memory in MB>,<disk-space in GB>,<price-per-hour>  -->
+
+        <property>
+                <key>instancemanager.local.type</key>
+                <value>local,2,2,300,10,10</value>
+        </property>
+
+        <property>
+                <key>instancemanager.cluster.type.1</key>
+                <value>standard,8,16,30720,40,0</value>
+        </property>
+
+        <property>
+                <key>instancemanager.cluster.defaulttype</key>
+                <value>1</value>
+        </property>
+
+        <!--  ========================================================================
+	                   Scheduler and Instance Manager Classes 
+	      ======================================================================== -->
+
+          <!-- Used by Alexander. Still supported? -->
+
+        <!--the default scheduler for local execution mode -->
+        <!--
+        <property>
+                <key>jobmanager.scheduler.local.classname</key>
+                <value>eu.stratosphere.nephele.jobmanager.scheduler.local.LocalScheduler</value>
+        </property>
+        -->
+
+        <!-- the default instance manager for local execution mode -->
+        <!--
+        <property>
+                <key>>jobmanager.instancemanager.local.classname</key>
+                <value>eu.stratosphere.nephele.instance.local.LocalInstanceManager</value>
+        </property>
+        -->
+
+        <!--the default scheduler for cluster execution mode -->
+        <!--
+        <property>
+                <key>jobmanager.scheduler.cluster.classname</key>
+                <value>eu.stratosphere.nephele.jobmanager.scheduler.queue.QueueScheduler</value>
+        </property>
+        -->
+
+        <!-- the default instance manager for cluster execution mode -->
+        <!--
+        <property>
+                <key>jobmanager.instancemanager.cluster.classname</key>
+                <value>eu.stratosphere.nephele.instance.cluster.ClusterManager</value>
+        </property>
+        -->
+
+        <!--the default scheduler for cloud execution mode -->
+        <!--
+        <property>
+                <key>jobmanager.scheduler.cloud.classname</key>
+                <value>eu.stratosphere.nephele.jobmanager.scheduler.queue.QueueScheduler</value>
+        </property>
+        -->
+
+        <!-- the default instance manager for cloud execution mode -->
+        <!--
+        <property>
+                <key>jobmanager.instancemanager.cloud.classname</key>
+                <value>eu.stratosphere.nephele.instance.ec2.EC2CloudManager</value>
+        </property>
+
+        <property>
+                <key>jobmanager.instancemanager.cluster.cleanupinterval</key>
+                <value>120</value>
+        </property>
+    -->
+
+
+        <!--  ========================================================================
+	                       Job / Instance Profiling 
+	      ======================================================================== -->
+
+        <property>
+                <key>jobmanager.profiling.enable</key>
+                <value>false</value>
+        </property>
+
+        <property>
+                <key>jobmanager.profiling.classname</key>
+                <value>eu.stratosphere.nephele.profiling.impl.JobManagerProfilerImpl</value>
+        </property>
+
+        <property>
+                <key>taskmanager.profiling.classname</key>
+                <value>eu.stratosphere.nephele.profiling.impl.TaskManagerProfilerImpl</value>
+	    </property>
+
+	    <!--  ========================================================================
+	                                  Compression
+	      ======================================================================== -->
+          <!-- Used by Alexander. Still supported? -->
+          <!--
+        <property>
+                <key>channel.compression.lightClass</key> 
+                <value>eu.stratosphere.nephele.io.compression.library.quicklz.QuicklzLibrary</value> 
+        </property>
+        <property>
+                <key>channel.compression.mediumClass</key> 
+                <value>eu.stratosphere.nephele.io.compression.library.zlib.ZlibLibrary</value> 
+        </property>
+        <property>
+                <key>channel.compression.heavyClass</key> 
+                <value>eu.stratosphere.nephele.io.compression.library.lzma.LzmaLibrary</value> 
+        </property>
+        <property>
+                <key>channel.compression.dynamicClass</key> 
+                <value>eu.stratosphere.nephele.io.compression.library.dynamic.DynamicLibrary</value> 
+        </property>
+        -->
+</configuration>
