@@ -121,8 +121,6 @@ object SFOExperiment extends Experiment {
         hadoopConfDir,
         jarPathHadoop)
       
-      val jobManagerAddress = getSysProperty("job_manager_address")
-      val jobManagerPort = getSysProperty("job_manager_port")
       val ozoneConfPath = getSysProperty("ozone_conf")
   
       //  Here we use the conf-path currently
@@ -134,9 +132,7 @@ object SFOExperiment extends Experiment {
         dataset.getNumFeatures().toInt,
         false,
         ozoneConfPath,
-        jarPathOzone,
-        jobManagerAddress,
-        jobManagerPort.toString)
+        jarPathOzone)
       
       // --------------- EXPERIMENT ---------------
       

@@ -1,10 +1,16 @@
 package de.tuberlin.dima.ml.pact.logreg.sfo;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -15,6 +21,7 @@ import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.logreg.sfo.SFODriver;
 import de.tuberlin.dima.ml.pact.JobRunner;
 import eu.stratosphere.pact.common.plan.Plan;
+import eu.stratosphere.pact.common.type.Value;
 
 public class SFODriverPact implements SFODriver {
 
@@ -26,8 +33,6 @@ public class SFODriverPact implements SFODriver {
   private boolean runLocal;
   private String confPath;
   private String jarPath;
-  private String jobManagerAddress;
-  private String jobManagerPort;
 
   private IncrementalModel baseModel;
   private List<FeatureGain> gains = Lists.newArrayList();
@@ -44,9 +49,7 @@ public class SFODriverPact implements SFODriver {
       int numFeatures,
       boolean runLocal,
       String confPath,
-      String jarPath,
-      String jobManagerAddress,
-      String jobManagerPort) {
+      String jarPath) {
     this.inputPathTrain = inputPathTrain;
     this.inputPathTest = inputPathTest;
     this.labelIndex = labelIndex;
@@ -55,8 +58,6 @@ public class SFODriverPact implements SFODriver {
     this.runLocal = runLocal;
     this.confPath = confPath;
     this.jarPath = jarPath;
-    this.jobManagerAddress = jobManagerAddress;
-    this.jobManagerPort = jobManagerPort;
 
     // Create empty model
     this.baseModel = new IncrementalModel(numFeatures);
@@ -80,7 +81,6 @@ public class SFODriverPact implements SFODriver {
     } else {
       // TODO _SFO Major: Basemodel does not get transmitted
       String[] jobArgs = SFOPlanAssembler.buildArgs(numSubTasks, inputPathTrain, inputPathTest, outputPath, numFeatures, labelIndex, applyBest);
-      //runner.run(jarPath, SFOPlanAssembler.class.getName(), jobArgs, "", jobManagerAddress, jobManagerPort, true);
       runner.run(jarPath, SFOPlanAssembler.class.getName(), jobArgs, confPath, "", "", true);
     }
     counters.put(COUNTER_KEY_TOTAL_WALLCLOCK, runner.getLastWallClockRuntime());
@@ -136,6 +136,55 @@ public class SFODriverPact implements SFODriver {
   @Override
   public Map<String, Long> getAllCounters() {
     return counters;
+  }
+  
+  public static void main(String[] args) {
+    IncrementalModel model = new IncrementalModel(20);
+    model.addDimensionToModel(1, 1.1);
+    
+    PactIncrementalModel pactModel = new PactIncrementalModel(model);
+    String encoded = encodeValueAsBase64(pactModel);
+    
+    PactIncrementalModel pactModel2 = decodeValueFromBase64(encoded, PactIncrementalModel.class);
+    
+    System.out.println(encoded.length());
+    System.out.println(pactModel.getValue().getUsedDimensions().size());
+    System.out.println(pactModel2.getValue().getUsedDimensions().size());
+    
+  }
+  
+  private static String encodeValueAsBase64(Value object) {
+
+    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+    DataOutputStream outStream = new DataOutputStream(byteStream);
+    try {
+      object.write(outStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return Base64.encodeBase64String(byteStream.toByteArray());
+  }
+  
+  private static <T extends Value> T decodeValueFromBase64(String encoded, Class<T> type) {
+    
+    byte[] bytes = Base64.decodeBase64(encoded);
+    ByteArrayInputStream byteInStream = new ByteArrayInputStream(bytes);
+    DataInputStream inStream = new DataInputStream(byteInStream);
+
+    Value object = null;
+    try {
+      object = type.newInstance();
+    } catch (InstantiationException e1) {
+      e1.printStackTrace();
+    } catch (IllegalAccessException e1) {
+      e1.printStackTrace();
+    }
+    try {
+      object.read(inStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return (T)object;
   }
 
 }
