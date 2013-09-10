@@ -25,7 +25,7 @@ public class EvalComputeLikelihoods extends CrossStub {
   public static final int IDX_OUT_LL_BASE = EvalSumLikelihoods.IDX_LL_BASE;
   public static final int IDX_OUT_LL_NEW = EvalSumLikelihoods.IDX_LL_NEW;
   
-  private final PactRecord recordOut = new PactRecord(2);
+  private final PactRecord recordOut = new PactRecord(3);
 
   @Override
   public void cross(PactRecord testRecord, PactRecord baseModelAndCoefficients,

@@ -2,7 +2,6 @@ package de.tuberlin.dima.ml.pact.logreg.sfo.udfs;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.collect.Lists;
 
@@ -11,10 +10,12 @@ import de.tuberlin.dima.ml.pact.udfs.ReduceFlattenToVector;
 import de.tuberlin.dima.ml.pact.util.PactUtils;
 import eu.stratosphere.pact.common.stubs.Collector;
 import eu.stratosphere.pact.common.stubs.ReduceStub;
+import eu.stratosphere.pact.common.stubs.StubAnnotation.ConstantFields;
 import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 
+@ConstantFields({0})
 public class TrainDimensions extends ReduceStub {
   
   public static final int IDX_DIMENSION = 0;
@@ -32,7 +33,7 @@ public class TrainDimensions extends ReduceStub {
   private static final double LAMBDA = 0;
   private static final double TOLERANCE = 10E-6;
   
-  private final PactRecord recordOut = new PactRecord(2);
+  private final PactRecord recordOut = new PactRecord(3);
 
   @Override
   public void reduce(Iterator<PactRecord> records, Collector<PactRecord> out)
@@ -49,16 +50,12 @@ public class TrainDimensions extends ReduceStub {
           record.getField(IDX_LABEL, PactInteger.class).getValue(), 
           record.getField(IDX_PI, PactDouble.class).getValue()));
     }
-    int d = record.getField(IDX_DIMENSION, PactInteger.class).getValue();
     
     // Train single dimension using Newton Raphson
     double betad = NewtonSingleFeatureOptimizer.train(cache, MAX_ITERATIONS, LAMBDA, TOLERANCE);
     
-//    System.out.println("TRAIN Reducer for dimension " + d);
-//    System.out.println("- betad=" + betad);
-    
+    recordOut.copyFrom(record, new int[] {IDX_DIMENSION}, new int[] {IDX_OUT_DIMENSION});
     recordOut.setField(IDX_OUT_KEY_CONST_ONE, PactUtils.pactOne);
-    recordOut.setField(IDX_OUT_DIMENSION, new PactInteger(d));
     recordOut.setField(IDX_OUT_COEFICCIENT, new PactDouble(betad));
     out.collect(recordOut);
   }

@@ -16,6 +16,7 @@ import de.tuberlin.dima.ml.logreg.sfo.SFODriver
 import de.tuberlin.dima.ml.mapred.logreg.sfo.SFODriverHadoop
 import de.tuberlin.dima.ml.pact.logreg.sfo.SFODriverPact
 import com.google.common.base.Throwables
+import scala.collection.JavaConversions
 
 object SFOExperiment extends Experiment {
   
@@ -73,6 +74,9 @@ object SFOExperiment extends Experiment {
           else "/home/andre/dev/logreg-repo/logreg-experiments/sfo-experiment-andre-sam-ubuntu.properties";
       
       init(sysConfPath, experimentConfPath)
+      
+  
+      // --------------- EXPERIMENT PARAMETERS ----------
       
       val experimentName = getProperty("experiment_name")
       
@@ -176,40 +180,50 @@ object SFOExperiment extends Experiment {
       jobDriver: SFODriver,
       experimentPrefix: String) = {
     
-    sut.deploy()
+    val deploySut = getProperty("deploy_sut").toBoolean
+    val startSut = getProperty("start_sut").toBoolean
+    val stopSut = getProperty("stop_sut").toBoolean
+    val runExperiments = getProperty("run_experiments").toBoolean   // only makes sense if a single dop is defined
+    
+    if (deploySut) sut.deploy()
     
     for (dop <- dops) {
       
-      sut.adaptSlaves(dop)
+      if (startSut) {
+        sut.adaptSlaves(dop)
+        sut.fsFormatStartWait(dop)
+        sut.startWait(dop)
+      }
+      
+      if (runExperiments) {
+        for ((src, target) <- dataToLoad) {
+          sut.fsLoadData(src, target)
+        }
+        
+        for (rep <- 1 to numRepetitions) {
+          
+          val experimentID = experimentPrefix + "-dop%04d-run%02d".format(dop, rep)
+          
+          for (outputFolder <- outputToRemove) {
+            sut.removeOutputFolder(outputFolder)
+          }
   
-      sut.fsFormatStartWait(dop)
-      
-      for ((src, target) <- dataToLoad) {
-        sut.fsLoadData(src, target)
-      }
-      
-      sut.startWait(dop)
-      
-      for (rep <- 1 to numRepetitions) {
-        
-        val experimentID = experimentPrefix + "-dop%04d-run%02d".format(dop, rep)
-        
-        for (outputFolder <- outputToRemove) {
-          sut.removeOutputFolder(outputFolder)
-        }
-
-        logger.info("-------------------- RUN EXPERIMENT --------------------\n")
-        jobDriver.computeGainsSFO(dop)
-        logTimers(jobDriver, experimentID)
-
-        for ((outputFolder, logName) <- logFilesToBackup) {
-          sut.backupJobLogs(outputFolder, experimentID, "job-logs-" + logName)
+          logger.info("-------------------- RUN EXPERIMENT --------------------\n")
+          jobDriver.computeGainsSFO(dop)
+          printTopGains(JavaConversions.asScalaBuffer(jobDriver.getGains()))
+          logTimers(jobDriver, experimentID)
+  
+          for ((outputFolder, logName) <- logFilesToBackup) {
+            sut.backupJobLogs(outputFolder, experimentID, "job-logs-" + logName)
+          }
         }
       }
       
-      sut.stop()
+      if (stopSut) {
+        sut.stop()
+        sut.fsCleanStop()
+      }
       
-      sut.fsCleanStop()
     }
   }
   
@@ -230,11 +244,12 @@ object SFOExperiment extends Experiment {
     df.format(today)
   }
   
-  def printTopGains(gains: List[FeatureGain], datasetInfo: DatasetInfo) = {
+  // , datasetInfo: DatasetInfo
+  def printTopGains(gains: scala.collection.mutable.Buffer[FeatureGain]) = {
     for (i <- 0 until 10) {
-      logger.info("d " + gains.get(i).getDimension() + 
-          " (" + datasetInfo.getFeatureName(gains.get(i).getDimension()) 
-          + ") gain: " + gains.get(i).getGain() + " coefficient(pact-only): " + gains.get(i).getCoefficient())
+      logger.info("d " + gains.get(i).getDimension() 
+          + " gain: " + gains.get(i).getGain() + " coefficient(pact-only): " + gains.get(i).getCoefficient())
+      // + " (" + datasetInfo.getFeatureName(gains.get(i).getDimension())+ ")"
     }
   }
 
