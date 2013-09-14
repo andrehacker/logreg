@@ -127,6 +127,7 @@
           </execution>
 
           <!-- SFO -->
+          <!-- 
           <execution>
             <id>SFO</id>
             <phase>package</phase>
@@ -145,9 +146,9 @@
               </includes>
             </configuration>
           </execution>
+          -->
         </executions>
       </plugin>
-		
 		
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -165,7 +166,7 @@
               </descriptors>
 			         <archive>
 			           <manifestEntries>
-			             <Pact-Assembler-Class>de.tuberlin.dima.ml.pact.logreg.ensemble.EnsembleJob</Pact-Assembler-Class>
+			             <Pact-Assembler-Class>de.tuberlin.dima.ml.pact.logreg.sfo.SFOPlanAssembler</Pact-Assembler-Class>
 			           </manifestEntries>
 			         </archive>
             </configuration>

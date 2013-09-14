@@ -21,7 +21,7 @@ public class EvalSumLikelihoods extends ReduceStub {
   // Attention: IDX_INPUT1_DIMENSION has to be 0, because we defined this field to be constant 
   public static final int IDX_OUT_DIMENSION = IDX_DIMENSION;
   public static final int IDX_OUT_GAIN = ApplyBest.IDX_INPUT1_GAIN;
-  public static final int IDX_OUT_KEY_CONST_ONE = ApplyBest.IDX_INPUT1_KEY_CONST_ONE;
+  public static final int IDX_OUT_KEY_CONST_ONE = 2;
 
   PactRecord recordOut = new PactRecord(2);
   

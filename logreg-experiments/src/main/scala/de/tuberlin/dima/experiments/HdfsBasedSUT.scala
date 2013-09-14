@@ -185,7 +185,6 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     }
   }
   
-  
   protected def adaptSlavesFile(sourceFile: String, targetFile: String, numSlaves: Int) = {
     requirePathExists(sourceFile)
     val allSlaves = Source.fromFile(new File(sourceFile)).getLines;
@@ -199,6 +198,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
       writer.println(slave)
       logger.info("- " + slave)
     }
+    writer.println("");
     writer.close()
   }
   

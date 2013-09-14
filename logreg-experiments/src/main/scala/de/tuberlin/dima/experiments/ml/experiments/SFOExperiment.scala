@@ -85,8 +85,8 @@ object SFOExperiment extends Experiment {
       // --------------- JOB PARAMETERS ----------
       
       val dataset = RCV1DatasetInfo.get()
-  //    val predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt"
-  //    RCV1DatasetInfo.readPredictorNames(predictorNamePath)
+//      val predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt"
+//      RCV1DatasetInfo.readPredictorNames(predictorNamePath)
   
       // --------------- JOB PARAMETERS HADOOP ----------
   
@@ -101,6 +101,8 @@ object SFOExperiment extends Experiment {
       val jarPathOzone = getProperty("jar_ozone")
       val inputTrainLocalOzone = getProperty("input_local_ozone")
       val inputTrainOzone = getProperty("input_ozone")
+      val inputTestLocalOzone = getProperty("input_test_local_ozone")
+      val inputTestOzone = getProperty("input_test_ozone")
       val labelIndex = getProperty("label_index_ozone").toInt
       val outputOzone = getProperty("output_ozone")
       
@@ -126,7 +128,7 @@ object SFOExperiment extends Experiment {
       //  Here we use the conf-path currently
       val sfoDriverPact = new SFODriverPact(
         inputTrainOzone,
-        inputTrainOzone,
+        inputTestOzone,
         labelIndex,
         outputOzone,
         dataset.getNumFeatures().toInt,
@@ -138,6 +140,8 @@ object SFOExperiment extends Experiment {
       
       val dops = getPropertyArrayAsInt("dops")
       val numRepetitions = getProperty("repetitions").toInt
+      val driverIterations = getProperty("driver_iterations").toInt
+      val iterations = getProperty("iterations").toInt
       val addPerIteration = getProperty("add_per_iteration").toInt
       val datasetName = getProperty("dataset_name")
       val experimentPrefix = "%s-%s-%s-%s".format(experimentName, currentSut, datasetName, getDate("yyyy-MM-dd-HHmmss"))
@@ -148,16 +152,16 @@ object SFOExperiment extends Experiment {
         val dataToLoadHadoop = Array((inputTrainLocalHadoop, inputTrainHadoop))
         val logFilesToBackupHadoop = Array((outputTrainHadoop, "sfo-train"), (outputTestHadoop, "sfo-test"))
         val outputToRemoveHadoop = Array(outputTrainHadoop, outputTestHadoop)
-        runExperimentSingleSUT(hadoop, dops, numRepetitions, dataToLoadHadoop, outputToRemoveHadoop, logFilesToBackupHadoop, sfoDriverHadoop, experimentPrefix)
+        runExperimentSingleSUT(hadoop, dops, driverIterations, iterations, addPerIteration, numRepetitions, dataToLoadHadoop, outputToRemoveHadoop, logFilesToBackupHadoop, sfoDriverHadoop, experimentPrefix)
       }
       
       if (currentSut == "ozone") {
         val ozone = new OzoneSUT(sysConfPath)
         
-        val dataToLoadPact = Array((inputTrainLocalOzone, inputTrainOzone))
+        val dataToLoadPact = Array((inputTrainLocalOzone, inputTrainOzone),(inputTestLocalOzone, inputTestOzone))
         val logFilesToBackupPact = Array((outputOzone, "sfo"))
         val outputToRemovePact = Array(outputOzone)
-        runExperimentSingleSUT(ozone, dops, numRepetitions, dataToLoadPact, outputToRemovePact, logFilesToBackupPact, sfoDriverPact, experimentPrefix)
+        runExperimentSingleSUT(ozone, dops, driverIterations, iterations, addPerIteration, numRepetitions, dataToLoadPact, outputToRemovePact, logFilesToBackupPact, sfoDriverPact, experimentPrefix)
       }
       
     } catch {
@@ -168,7 +172,10 @@ object SFOExperiment extends Experiment {
   
   def runExperimentSingleSUT(
       sut: SUT, 
-      dops: Array[Int], 
+      dops: Array[Int],
+      driverIterations: Int,
+      iterations: Int,
+      addPerIteration: Int,
       numRepetitions: Int, 
       dataToLoad: Array[(String, String)], 
       outputToRemove: Array[String],
@@ -203,11 +210,19 @@ object SFOExperiment extends Experiment {
           for (outputFolder <- outputToRemove) {
             sut.removeOutputFolder(outputFolder)
           }
-  
+          
           logger.info("-------------------- RUN EXPERIMENT --------------------\n")
-          jobDriver.computeGainsSFO(dop)
-          printTopGains(JavaConversions.asScalaBuffer(jobDriver.getGains()))
-          logTimers(jobDriver, experimentID)
+          if (iterations <= 1) {
+            for (i <- 1 to driverIterations) {
+              jobDriver.computeGains(dop)
+              printTopGains(JavaConversions.asScalaBuffer(jobDriver.getGains()))
+              jobDriver.addBestFeatures(addPerIteration)
+              logTimers(jobDriver, experimentID)
+            }
+          } else {
+            jobDriver.forwardFeatureSelection(dop, iterations, addPerIteration)
+            logTimers(jobDriver, experimentID)
+          }
   
           for ((outputFolder, logName) <- logFilesToBackup) {
             sut.backupJobLogs(outputFolder, experimentID, "job-logs-" + logName)

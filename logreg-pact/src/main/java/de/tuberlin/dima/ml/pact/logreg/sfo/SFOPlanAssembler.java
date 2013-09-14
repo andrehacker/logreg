@@ -13,6 +13,7 @@ import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.TrainComputeProbabilities;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.TrainDimensions;
 import de.tuberlin.dima.ml.pact.udfs.CrossTwoToOne;
 import de.tuberlin.dima.ml.pact.udfs.ReduceFlattenToVector;
+import de.tuberlin.dima.ml.pact.util.PactUtils;
 import eu.stratosphere.pact.common.contract.CoGroupContract;
 import eu.stratosphere.pact.common.contract.CrossContract;
 import eu.stratosphere.pact.common.contract.FileDataSink;
@@ -26,39 +27,15 @@ import eu.stratosphere.pact.common.plan.PlanAssembler;
 import eu.stratosphere.pact.common.plan.PlanAssemblerDescription;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
+import eu.stratosphere.pact.compiler.PactCompiler;
+import eu.stratosphere.pact.generic.contract.BulkIteration;
 import eu.stratosphere.pact.generic.contract.Contract;
 
 public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription {
 
   @Override
   public String getDescription() {
-    return "Parameters: <numSubStasks> <inputPathTrain> <inputPathTest> <outputPath> <numFeatures> <labelIndex> <applyBest>";
-  }
-
-  /**
-   * TODO _SFO Major: This method currently only supports empty base models - no idea how to resolve this!?
-   */
-  @Override
-  public Plan getPlan(String... args) {
-    int numArgs = 7;
-    if (args.length < numArgs) throw new RuntimeException("You didn't pass all required arguments");
-    Plan plan = null;
-    try {
-      plan = createPlan(
-          Integer.parseInt(args[0]),
-          args[1],
-          args[2],
-          args[3],
-          Integer.parseInt(args[4]),
-          Integer.parseInt(args[5]),
-          Boolean.parseBoolean(args[6]),
-          new IncrementalModel(Integer.parseInt(args[4])));
-    } catch (NumberFormatException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return plan;
+    return "Parameters: <numSubStasks> <inputPathTrain> <inputPathTest> <outputPath> <numFeatures> <labelIndex> <iterations> <addPerIteration> <Optional: baseModel (base64 encoded)>";
   }
   
   public static String[] buildArgs(
@@ -68,7 +45,9 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
       String outputPath, 
       int numFeatures, 
       int labelIndex,
-      boolean applyBest) {
+      int iterations,
+      int addPerIteration,
+      IncrementalModel baseModel) {
     return new String[] {
         Integer.toString(numSubTasks),
         inputPathTrain,
@@ -76,24 +55,29 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         outputPath,
         Integer.toString(numFeatures),
         Integer.toString(labelIndex),
-        Boolean.toString(applyBest)
+        Integer.toString(iterations),
+        Integer.toString(addPerIteration),
+        PactUtils.encodeValueAsBase64(new PactIncrementalModel(baseModel))
     };
   }
-  
+
   /**
-   * Delete this as soon as a solution is found to transfer the basemodel
-   * (currently only supported by this version) 
+   * TODO _SFO Major: This method currently only supports empty base models.
+   * TODO Optional: Transfer basemodel via config (does not work for iterations)
    */
-  public Plan createPlan(
-      int numSubTasks, 
-      String inputPathTrain, 
-      String inputPathTest, 
-      String outputPath, 
-      int numFeatures, 
-      int labelIndex,
-      boolean applyBest,
-      IncrementalModel baseModel) throws IOException {
-    
+  @Override
+  public Plan getPlan(String... args) {
+    // The default values just exist to be able to view this job in pact-web
+    int numSubTasks = (args.length > 0 ? Integer.parseInt(args[0]) : 1);
+    String inputPathTrain = (args.length > 1 ? args[1] : "");
+    String inputPathTest = (args.length > 2 ? args[2] : "");
+    String outputPath = (args.length > 3 ? args[3] : "");
+    int numFeatures = (args.length > 4 ? Integer.parseInt(args[4]) : 0);
+    int labelIndex = (args.length > 5 ? Integer.parseInt(args[5]) : 0);
+    int iterations = (args.length > 6 ? Integer.parseInt(args[6]) : 1);
+    int addPerIteration = (args.length > 7 ? Integer.parseInt(args[7]) : 1);
+    IncrementalModel baseModel = (args.length > 8 ? PactUtils.decodeValueFromBase64(args[8], PactIncrementalModel.class).getValue() : new IncrementalModel(numFeatures));
+
     // ----- Data Sources -----
     
     FileDataSource trainingVectors = new FileDataSource(
@@ -108,24 +92,46 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     testVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_NUM_FEATURES,
         numFeatures);
 
-    // ----- Base Model -----
-    String baseModelTmpPath = "file:///tmp/tmp-base-model";
-
-    Contract baseModelSource = null;
+    // ----- Initial Base Model -----
+    
+    Contract initialBaseModelContract = null;
     if (baseModel != null && baseModel.getUsedDimensions().size() > 0) {
-      baseModelSource = new SingleValueDataSource(new PactIncrementalModel(baseModel), baseModelTmpPath);
+      try {
+        String baseModelTmpPath = "file:///tmp/tmp-base-model";
+        initialBaseModelContract = new SingleValueDataSource(new PactIncrementalModel(baseModel), baseModelTmpPath);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     } else {
-      baseModelSource = new GenericDataSource<EmptyBaseModelInputFormat>(EmptyBaseModelInputFormat.class);
-      baseModelSource.setParameter(EmptyBaseModelInputFormat.CONF_KEY_NUM_FEATURES, numFeatures);
+      initialBaseModelContract = new GenericDataSource<EmptyBaseModelInputFormat>(EmptyBaseModelInputFormat.class);
+      initialBaseModelContract.setParameter(EmptyBaseModelInputFormat.CONF_KEY_NUM_FEATURES, numFeatures);
     }
+    initialBaseModelContract.setName("BaseModel");
 
+    // ----- Iterations -----
+    
+    Contract baseModelContract = null;
+    BulkIteration iteration = null;
+    if (iterations > 1) {
+      iteration = new BulkIteration("Forward Feature Selection");
+      iteration.setInput(initialBaseModelContract);
+      iteration.setMaximumNumberOfIterations(iterations);
+      baseModelContract = iteration.getPartialSolution();
+    } else {
+      baseModelContract = initialBaseModelContract;
+    }
+    
     // ----- Cross: Train over x -----
     
     CrossContract trainComputeProbabilities = CrossContract.builder(TrainComputeProbabilities.class)
         .input1(trainingVectors)
-        .input2(baseModelSource)
+        .input2(baseModelContract)
         .name("Train: Compute probabilities (Cross)")
         .build();
+    trainComputeProbabilities.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_FIRST_INPUT,
+        PactCompiler.HINT_SHIP_STRATEGY_FORWARD);
+    trainComputeProbabilities.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_SECOND_INPUT,
+        PactCompiler.HINT_SHIP_STRATEGY_BROADCAST);
     
     // ----- Reduce: Train over d -----
     
@@ -138,16 +144,16 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     
     ReduceContract flattenCoefficients = ReduceContract.builder(ReduceFlattenToVector.class, PactInteger.class, ReduceFlattenToVector.IDX_KEY_CONST_ONE)
         .input(trainDimensions)
-        .name("Flatten trained coefficients (Reduce)")
+        .name("Workaround: Flatten trained coefficients (Reduce)")
         .build();
     flattenCoefficients.setParameter(ReduceFlattenToVector.CONF_KEY_NUM_FEATURES, numFeatures);
     
     // ----- Workaround 2: Make 1 out of 2 records -----
 
     CrossContract basemodelAndCoefficients = CrossContract.builder(CrossTwoToOne.class)
-        .input1(baseModelSource)
+        .input1(baseModelContract)
         .input2(flattenCoefficients)
-        .name("Flatten two to one (Cross)")
+        .name("Workaround: Flatten two to one (Cross)")
         .build();
     basemodelAndCoefficients.setParameter(CrossTwoToOne.CONF_KEY_IDX_OUT_VALUE1, EmptyBaseModelInputFormat.IDX_OUT_BASEMODEL);
     basemodelAndCoefficients.setParameter(CrossTwoToOne.CONF_KEY_IDX_OUT_VALUE2, ReduceFlattenToVector.IDX_OUT_VECTOR);
@@ -159,6 +165,10 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         .input2(basemodelAndCoefficients)
         .name("Eval: Compute likelihoods (Cross)")
         .build();
+    evalComputeLikelihoods.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_FIRST_INPUT,
+        PactCompiler.HINT_SHIP_STRATEGY_FORWARD);
+    evalComputeLikelihoods.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_SECOND_INPUT,
+        PactCompiler.HINT_SHIP_STRATEGY_BROADCAST);
     
     // ----- Reduce: Sum up likelihoods -----
 
@@ -168,45 +178,48 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         .name("Eval: Sum up likelihoods (Reduce)")
         .build();
     
+    // ----- Match Gains & Coefficients -----
+
+    MatchContract matchGainsCoefficients = MatchContract
+        .builder(MatchGainsAndCoefficients.class, PactInteger.class,
+            EvalSumLikelihoods.IDX_OUT_DIMENSION,
+            TrainDimensions.IDX_OUT_DIMENSION)
+            .input1(evalSumUpLikelihoods)
+            .input2(trainDimensions)
+            .name("Match Gains and Coefficients")
+            .build();
+    matchGainsCoefficients.getCompilerHints().setAvgRecordsEmittedPerStubCall(1);
+    
     FileDataSink dataSink = null;
-    if (applyBest) {
+    if (iterations > 1) {
     
       // ----- CoGroup: Sort & Apply best to base model -----
       
-      CoGroupContract sortAndApplyBest = CoGroupContract
+      CoGroupContract applyBest = CoGroupContract
           .builder(ApplyBest.class, PactInteger.class,
-              EvalSumLikelihoods.IDX_OUT_KEY_CONST_ONE,
+              MatchGainsAndCoefficients.IDX_OUT_KEY_CONST_ONE,
               EmptyBaseModelInputFormat.IDX_OUT_KEY_CONST_ONE)
-          .input1(evalSumUpLikelihoods)
-          .input2(baseModelSource)
+          .input1(matchGainsCoefficients)
+          .input2(baseModelContract)
           .name("ApplyBest")
           .build();
+      applyBest.setParameter(ApplyBest.CONF_KEY_ADD_PER_ITERATION, addPerIteration);
       // TODO _SFO: Sorting does not work!
   //    sortAndApplyBest.setGroupOrderForInputOne(new Ordering(EvalSumLikelihoods.IDX_OUT_GAIN,
   //                PactDouble.class, Order.ASCENDING));
       
+      iteration.setNextPartialSolution(applyBest);
+      
       // ----- Data Sink & Output Format -----
       
       dataSink = new FileDataSink(RecordOutputFormat.class,
-          outputPath, sortAndApplyBest, "Output");
+          outputPath, iteration, "Output");
 
       RecordOutputFormat.configureRecordFormat(dataSink).recordDelimiter('\n')
           .fieldDelimiter(' ')
-          .field(PactInteger.class, 0)
-          .field(PactDouble.class, 1);
+          .field(PactIncrementalModel.class, ApplyBest.IDX_OUT_BASEMODEL);
 
     } else {
-      
-      // ----- Match Gains & Coefficients -----
-
-      MatchContract matchGainsCoefficients = MatchContract
-          .builder(MatchGainsAndCoefficients.class, PactInteger.class,
-              EvalSumLikelihoods.IDX_OUT_DIMENSION,
-              TrainDimensions.IDX_OUT_DIMENSION)
-              .input1(evalSumUpLikelihoods)
-              .input2(trainDimensions)
-              .name("Match Gains and Coefficients")
-              .build();
       
       // ----- Data Sink & Output Format -----
       

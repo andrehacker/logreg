@@ -23,12 +23,19 @@
         <!-- YARN -->
         <dependency>
           <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-client</artifactId>
+        </dependency>
+        
+        <!-- 
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-common</artifactId>
         </dependency>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-hdfs</artifactId>
         </dependency>
+        -->
       </dependencies>
     </profile>
     <profile>

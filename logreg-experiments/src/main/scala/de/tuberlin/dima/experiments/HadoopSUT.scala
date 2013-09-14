@@ -28,9 +28,12 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     
     // Start Hadoop MapRed
     if (isYarn) {
+      // start-yarn.sh would do the same
       bash(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " start resourcemanager")
       bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " start nodemanager")
-      bash(hadoopSystemHome + "/bin/yarn start proxyserver --config " + hadoopConfPath)
+      bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " start proxyserver")
+      // This does not work - yarn documentation is wrong!
+      //bash(hadoopSystemHome + "/bin/yarn start proxyserver --config " + hadoopConfPath)
       bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh start historyserver --config " + hadoopConfPath)
     } else{
       bash(hadoopSystemHome + "/bin/start-mapred.sh")
@@ -50,9 +53,12 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     logger.info("-------------------- STOP MAPRED --------------------\n")
     
     if (isYarn) {
+      // stop-yarn.sh would do the same
       bash(hadoopSystemHome + "/sbin/yarn-daemon.sh --config " + hadoopConfPath + " stop resourcemanager")
       bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " stop nodemanager")
-      bash(hadoopSystemHome + "/bin/yarn stop proxyserver --config " + hadoopConfPath)
+      bash(hadoopSystemHome + "/sbin/yarn-daemons.sh --config " + hadoopConfPath + " stop proxyserver")
+      // This does not work, yarn documentation is wrong
+//      bash(hadoopSystemHome + "/bin/yarn stop proxyserver --config " + hadoopConfPath)
       bash(hadoopSystemHome + "/sbin/mr-jobhistory-daemon.sh stop historyserver --config " + hadoopConfPath)
     } else{
       bash(hadoopSystemHome + "/bin/stop-mapred.sh")

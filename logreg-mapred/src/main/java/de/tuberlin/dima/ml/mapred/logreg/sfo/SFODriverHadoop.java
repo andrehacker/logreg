@@ -80,6 +80,15 @@ public class SFODriverHadoop implements SFODriver {
     baseModel = new IncrementalModel(numFeatures);
   }
 
+  @Override
+  public List<FeatureGain> forwardFeatureSelection(int dop, int iterations, int addPerIteration) throws Exception {
+    if (iterations > 1) {
+      throw new UnsupportedOperationException("Hadoop does not have support for iterations. Currently not supported");
+    } else {
+      return computeGains(dop);
+    }
+  }
+
   /**
    * Runs a single SFO-Iteration. Computes the gain in metric (e.g.
    * log-likelihood) for all possible models with one more feature added to the
@@ -89,7 +98,7 @@ public class SFODriverHadoop implements SFODriver {
    * decide whether to add it or not.
    */
   @Override
-  public List<FeatureGain> computeGainsSFO(int dop) throws Exception {
+  public List<FeatureGain> computeGains(int dop) throws Exception {
 
     final Stopwatch stopTotal = new Stopwatch();
     final Stopwatch stopTrain = new Stopwatch();
@@ -130,18 +139,13 @@ public class SFODriverHadoop implements SFODriver {
     return getGains();
   }
   
-  @Override
-  public void addBestFeature() throws IOException {
-    addNBestFeatures(1);
-  }
-
   /**
    * In Forward feature selection we can add multiple features in each
    * iteration.
    * @throws IOException 
    */
   @Override
-  public void addNBestFeatures(int n) throws IOException {
+  public void addBestFeatures(int n) throws IOException {
     // Read coefficients
     Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress);
     List<Double> coefficients = SFOToolsHadoop.readTrainedCoefficients(conf,

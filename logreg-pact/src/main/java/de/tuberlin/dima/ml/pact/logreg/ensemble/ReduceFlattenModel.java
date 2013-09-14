@@ -14,11 +14,12 @@ public class ReduceFlattenModel extends ReduceStub {
   public static final int IDX_MODEL_ID = 0;
   public static final int IDX_PARTITION = 1;
   public static final int IDX_MODEL = 2;
+  
+  PactRecord recordOut = new PactRecord();
 
   @Override
   public void reduce(Iterator<PactRecord> records, Collector<PactRecord> out)
       throws Exception {
-    PactRecord recordOut = new PactRecord();
     
     PactRecord record = null;
     int numModels=0;
