@@ -27,30 +27,14 @@ object SFOExperiment extends Experiment {
   }
   
   /**
-   * Prerequisites:
-   * - passwordless ssh access from executing computer to slaves (or other way round?)
-   * - Download archives
-   * - Create config file templates and all-slaves file.
-   *   - See http://archive.cloudera.com/cdh4/cdh/4/hadoop/hadoop-project-dist/hadoop-common/DeprecatedProperties.html for new properties
-   * - Relies of a nfs share for cluster deployment
-   * - Build jar file for experiments
-   * - Compile ozone with the hdfs dependencies you use (central ozone pom contains cloudera repository)
-   *   - See http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH4/latest/CDH4-Release-Notes/cdh4rn_topic_2.html for CDH4
-   * - Make sure that HADOOP_PREFIX and HADOOP_YARN_HOME does either not exist or point to correct directory (otherwise startup scripts call wrong scripts) 
-   * 
-   * ATTENTION
+   * DON'T FORGET:
    * - Compile job jar first!
    * - Create new SUT deployment package if SUT changed (e.g. changed hadoop-dependencies for ozone)
-   * 
-   * Ozone uses
-   * - repo url: https://repository.cloudera.com/artifactory/cloudera-repos
-   * - repo id: cloudera-releases
-   * - hadoop-common 2.0.0-cdh4.2.1
-   * - hadoop-hdfs 2.0.0-cdh4.2.1
-   * - CDH4.2.1 is based on 2.0.0-alpha, but contains a ton of patches from later releases on top of it;-)
+   * - Make sure that ozone files in local repository are pointing to your hadoop version
+   *   - Compile ozone with the hdfs dependencies you use (central ozone pom contains cloudera repository)
+   * -Make sure that HADOOP_PREFIX and HADOOP_YARN_HOME does either not exist or point to correct directory (otherwise startup scripts call wrong scripts) 
    * 
    * Measure time
-   * - TODO Measure time
    * - https://database.cs.brown.edu/svn/mr-benchmarks/ how they measure the time
    *   - time -f %e hadoop jar ... 
    * - jp-scripts
@@ -58,8 +42,6 @@ object SFOExperiment extends Experiment {
    *   - hadoop jar ...
    *   - endTS=`date +%s`
    *   - (( jobDuration=$endTS - $startTS ))
-   * 
-   * TODO Drop cache? This is what stonebraker does in flushCache
    */
   def runExperiment(args: Array[String]) = {
     
@@ -93,6 +75,7 @@ object SFOExperiment extends Experiment {
       val jarPathHadoop = getProperty("jar_hadoop")
       val inputTrainLocalHadoop = getProperty("input_local_hadoop")
       val inputTrainHadoop = getProperty("input_hadoop")
+      val labelIndexHadoop = getProperty("label_index_hadoop").toInt
       val outputTrainHadoop = getProperty("output_train_hadoop")
       val outputTestHadoop = getProperty("output_test_hadoop")
   
@@ -103,7 +86,7 @@ object SFOExperiment extends Experiment {
       val inputTrainOzone = getProperty("input_ozone")
       val inputTestLocalOzone = getProperty("input_test_local_ozone")
       val inputTestOzone = getProperty("input_test_ozone")
-      val labelIndex = getProperty("label_index_ozone").toInt
+      val labelIndexOzone = getProperty("label_index_ozone").toInt
       val outputOzone = getProperty("output_ozone")
       
       // --------------- JOB DRIVER ----------
@@ -111,13 +94,14 @@ object SFOExperiment extends Experiment {
       val jobTrackerAddress = getSysProperty("hadoop_jobtracker_address")
       val hdfsAddress = getSysProperty("hdfs_address")
       val hadoopConfDir = getSysProperty("hadoop_conf")
-  
+      
       val sfoDriverHadoop = new SFODriverHadoop(
         inputTrainHadoop,
         inputTrainHadoop,
         outputTrainHadoop,
         outputTestHadoop,
         dataset.getNumFeatures().toInt,
+        labelIndexHadoop,
         jobTrackerAddress,
         hdfsAddress,
         hadoopConfDir,
@@ -129,7 +113,7 @@ object SFOExperiment extends Experiment {
       val sfoDriverPact = new SFODriverPact(
         inputTrainOzone,
         inputTestOzone,
-        labelIndex,
+        labelIndexOzone,
         outputOzone,
         dataset.getNumFeatures().toInt,
         false,

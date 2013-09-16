@@ -49,13 +49,13 @@ public class MapRandomPartitioning extends MapStub {
     PactString line = record.getField(IDX_INPUT_LINE, PactString.class);
     
     Vector v = new RandomAccessSparseVector(numFeatures);
-    short label = LibSvmVectorReader.readVector(v, line.getValue());
+    int label = LibSvmVectorReader.readVectorSingleLabel(v, line.getValue());
     
 //    System.out.println(v.getNumNonZeroElements());
 //    for (int i=1; i<=3; ++i) {
     outputPartition.setValue(random.nextInt(numPartitions));
     outputVector.setValue(v);
-    outputLabel.setValue(label);
+    outputLabel.setValue((short)label);
     outputRecord.setField(ReduceTrainPartition.IDX_PARTITION, outputPartition);
     outputRecord.setField(ReduceTrainPartition.IDX_VECTOR, outputVector);
     outputRecord.setField(ReduceTrainPartition.IDX_LABEL, outputLabel);

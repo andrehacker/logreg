@@ -3,7 +3,7 @@ package de.tuberlin.dima.ml.pact.logreg.sfo;
 import java.io.IOException;
 
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
-import de.tuberlin.dima.ml.pact.io.LibsvmBinaryInputFormat;
+import de.tuberlin.dima.ml.pact.io.LibsvmInputFormat;
 import de.tuberlin.dima.ml.pact.io.SingleValueDataSource;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.ApplyBest;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.EvalComputeLikelihoods;
@@ -77,20 +77,27 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     int iterations = (args.length > 6 ? Integer.parseInt(args[6]) : 1);
     int addPerIteration = (args.length > 7 ? Integer.parseInt(args[7]) : 1);
     IncrementalModel baseModel = (args.length > 8 ? PactUtils.decodeValueFromBase64(args[8], PactIncrementalModel.class).getValue() : new IncrementalModel(numFeatures));
+    
+    // ----- HINTS / OPTIMIZATION -----
+
+    boolean giveBroadcastHints = true;
+    boolean giveFineGradeDopHints = true;
 
     // ----- Data Sources -----
     
     FileDataSource trainingVectors = new FileDataSource(
-        LibsvmBinaryInputFormat.class, inputPathTrain, "Training Input Vectors");
-    trainingVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_POSITIVE_CLASS, labelIndex);
-    trainingVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_NUM_FEATURES,
+        LibsvmInputFormat.class, inputPathTrain, "Training Input Vectors");
+    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_POSITIVE_CLASS, labelIndex);
+    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_NUM_FEATURES,
         numFeatures);
+    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, true);
     
     FileDataSource testVectors = new FileDataSource(
-        LibsvmBinaryInputFormat.class, inputPathTest, "Test Input Vectors");
-    testVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_POSITIVE_CLASS, labelIndex);
-    testVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_NUM_FEATURES,
+        LibsvmInputFormat.class, inputPathTest, "Test Input Vectors");
+    testVectors.setParameter(LibsvmInputFormat.CONF_KEY_POSITIVE_CLASS, labelIndex);
+    testVectors.setParameter(LibsvmInputFormat.CONF_KEY_NUM_FEATURES,
         numFeatures);
+    testVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, true);
 
     // ----- Initial Base Model -----
     
@@ -107,6 +114,9 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
       initialBaseModelContract.setParameter(EmptyBaseModelInputFormat.CONF_KEY_NUM_FEATURES, numFeatures);
     }
     initialBaseModelContract.setName("BaseModel");
+    if (giveFineGradeDopHints) {
+      initialBaseModelContract.setDegreeOfParallelism(1);
+    }
 
     // ----- Iterations -----
     
@@ -128,10 +138,12 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         .input2(baseModelContract)
         .name("Train: Compute probabilities (Cross)")
         .build();
-    trainComputeProbabilities.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_FIRST_INPUT,
-        PactCompiler.HINT_SHIP_STRATEGY_FORWARD);
-    trainComputeProbabilities.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_SECOND_INPUT,
-        PactCompiler.HINT_SHIP_STRATEGY_BROADCAST);
+    if (giveBroadcastHints) {
+      trainComputeProbabilities.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_FIRST_INPUT,
+          PactCompiler.HINT_SHIP_STRATEGY_FORWARD);
+      trainComputeProbabilities.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_SECOND_INPUT,
+          PactCompiler.HINT_SHIP_STRATEGY_BROADCAST);
+    }
     
     // ----- Reduce: Train over d -----
     
@@ -142,11 +154,16 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     
     // ----- Workaround 1: Flatten Coefficients -----
     
+    // Keyless-Reducer now works, but pact-web visualization fails to visualize jobs using the feature:(
+//    ReduceContract flattenCoefficients = ReduceContract.builder(ReduceFlattenToVector.class)
     ReduceContract flattenCoefficients = ReduceContract.builder(ReduceFlattenToVector.class, PactInteger.class, ReduceFlattenToVector.IDX_KEY_CONST_ONE)
         .input(trainDimensions)
         .name("Workaround: Flatten trained coefficients (Reduce)")
         .build();
     flattenCoefficients.setParameter(ReduceFlattenToVector.CONF_KEY_NUM_FEATURES, numFeatures);
+    if (giveFineGradeDopHints) {
+      flattenCoefficients.setDegreeOfParallelism(1);
+    }
     
     // ----- Workaround 2: Make 1 out of 2 records -----
 
@@ -157,6 +174,9 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         .build();
     basemodelAndCoefficients.setParameter(CrossTwoToOne.CONF_KEY_IDX_OUT_VALUE1, EmptyBaseModelInputFormat.IDX_OUT_BASEMODEL);
     basemodelAndCoefficients.setParameter(CrossTwoToOne.CONF_KEY_IDX_OUT_VALUE2, ReduceFlattenToVector.IDX_OUT_VECTOR);
+    if (giveFineGradeDopHints) {
+      basemodelAndCoefficients.setDegreeOfParallelism(1);
+    }
     
     // ----- Cross: Eval Compute Likelihoods over records -----
 
@@ -165,10 +185,12 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         .input2(basemodelAndCoefficients)
         .name("Eval: Compute likelihoods (Cross)")
         .build();
-    evalComputeLikelihoods.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_FIRST_INPUT,
-        PactCompiler.HINT_SHIP_STRATEGY_FORWARD);
-    evalComputeLikelihoods.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_SECOND_INPUT,
-        PactCompiler.HINT_SHIP_STRATEGY_BROADCAST);
+    if (giveBroadcastHints) {
+      evalComputeLikelihoods.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_FIRST_INPUT,
+          PactCompiler.HINT_SHIP_STRATEGY_FORWARD);
+      evalComputeLikelihoods.getParameters().setString(PactCompiler.HINT_SHIP_STRATEGY_SECOND_INPUT,
+          PactCompiler.HINT_SHIP_STRATEGY_BROADCAST);
+    }
     
     // ----- Reduce: Sum up likelihoods -----
 
@@ -204,6 +226,9 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
           .name("ApplyBest")
           .build();
       applyBest.setParameter(ApplyBest.CONF_KEY_ADD_PER_ITERATION, addPerIteration);
+      if (giveFineGradeDopHints) {
+        applyBest.setDegreeOfParallelism(1);
+      }
       // TODO _SFO: Sorting does not work!
   //    sortAndApplyBest.setGroupOrderForInputOne(new Ordering(EvalSumLikelihoods.IDX_OUT_GAIN,
   //                PactDouble.class, Order.ASCENDING));

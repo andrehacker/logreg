@@ -6,6 +6,14 @@ import org.apache.hadoop.fs.Path
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 
+/**
+ * Ozone uses
+ * - repo url: https://repository.cloudera.com/artifactory/cloudera-repos
+ * - repo id: cloudera-releases
+ * - hadoop-common 2.0.0-cdh4.2.1
+ * - hadoop-hdfs 2.0.0-cdh4.2.1
+ * - CDH4.2.1 is based on 2.0.0-alpha, but contains a ton of patches from later releases on top of it;-)
+ */
 class OzoneSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   private val logger = LoggerFactory.getLogger(this.getClass())

@@ -58,7 +58,7 @@ public class CrossEval extends CrossStub {
     // Read test item
     PactString line = dataRecord.getField(IDX_INPUT2_INPUT_RECORD, PactString.class);
     Vector x = new RandomAccessSparseVector(numFeatures);
-    short label = LibSvmVectorReader.readVector(x, line.getValue());
+    int label = LibSvmVectorReader.readVectorSingleLabel(x, line.getValue());
 
     if (! modelCached) {
       // Read ensemble model

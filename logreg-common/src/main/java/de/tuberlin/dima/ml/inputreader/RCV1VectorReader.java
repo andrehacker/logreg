@@ -27,8 +27,8 @@ public class RCV1VectorReader {
   
   /**
    * Converts single line from RCV1 vector file to sparse vector
-   * Line format: document-id  feature-id-1:val feature-id-2:val ...
-   * @return document-id
+   * Line format: document-id/label  feature-id-1:val feature-id-2:val ...
+   * @return document-id or label
    */
   public static int readVector(Vector v, String line) {
     Iterator<String> iter = TRAC_SPLITTER.split(line).iterator();

@@ -42,6 +42,7 @@ public class SFODriverHadoop implements SFODriver {
   private String jarPath;   // might be empty
 
   private int numFeatures;
+  private int labelIndex;
 
   private IncrementalModel baseModel;
   
@@ -62,6 +63,7 @@ public class SFODriverHadoop implements SFODriver {
       String outputPathTrain,
       String outputPathTest,
       int numFeatures,
+      int labelIndex,
       String jobTrackerAddress,
       String hdfsAddress,
       String hadoopConfDir,
@@ -71,6 +73,7 @@ public class SFODriverHadoop implements SFODriver {
     this.trainOutputPath = outputPathTrain;
     this.testOutputPath = outputPathTest;
     this.numFeatures = numFeatures;
+    this.labelIndex = labelIndex;
     this.jobTrackerAddress = jobTrackerAddress;
     this.hdfsAddress = hdfsAddress;
     this.hadoopConfDir = hadoopConfDir;
@@ -114,7 +117,7 @@ public class SFODriverHadoop implements SFODriver {
 //    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress, jarPath);
     Configuration conf = HadoopUtils.createConfigurationUsingConfDir(hadoopConfDir, jarPath);
     
-    ToolRunner.run(conf, new SFOTrainJob(trainInputFile, trainOutputPath, dop),
+    ToolRunner.run(conf, new SFOTrainJob(trainInputFile, trainOutputPath, dop, numFeatures, labelIndex),
         null);
     stopTrain.stop();
     counters.put(COUNTER_KEY_TRAIN_TIME, stopTrain.elapsed(TimeUnit.MILLISECONDS));
@@ -123,7 +126,7 @@ public class SFODriverHadoop implements SFODriver {
     // ----- TEST -----
     stopTest.start();
     ToolRunner.run(conf, new SFOEvalJob(testInputFile, testOutputPath, dop,
-        numFeatures, trainOutputPath), null);
+        numFeatures, labelIndex, trainOutputPath), null);
     stopTest.stop(); stopTotal.stop();
     counters.put(COUNTER_KEY_TEST_TIME, stopTest.elapsed(TimeUnit.MILLISECONDS));
     counters.put(COUNTER_KEY_TOTAL_WALLCLOCK, stopTotal.elapsed(TimeUnit.MILLISECONDS));

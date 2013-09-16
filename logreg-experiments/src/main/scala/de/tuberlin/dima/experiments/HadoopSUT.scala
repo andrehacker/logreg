@@ -5,6 +5,9 @@ import java.io.File
 import org.apache.hadoop.fs.Path
 import org.slf4j.LoggerFactory
 
+/**
+ * See http://archive.cloudera.com/cdh4/cdh/4/hadoop/hadoop-project-dist/hadoop-common/DeprecatedProperties.html for new properties
+ */
 class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
   
   private val logger = LoggerFactory.getLogger(this.getClass())

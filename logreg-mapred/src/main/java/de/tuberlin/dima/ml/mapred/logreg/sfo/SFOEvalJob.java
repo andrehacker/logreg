@@ -3,7 +3,7 @@ package de.tuberlin.dima.ml.mapred.logreg.sfo;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
@@ -28,12 +28,14 @@ public class SFOEvalJob extends AbstractHadoopJob {
   private static final String JOB_NAME = "sfo-eval";
   
   static final String CONF_KEY_NUM_FEATURES = "num-features";
+  static final String CONF_KEY_LABEL_INDEX = "label-index";
   static final String CONF_KEY_TRAIN_OUTPUT = "train-output-path";
   
   private String inputFile;
   private String outputPath;
   private int reducers;
   private int numFeatures;
+  private int labelIndex;
   private String trainOutputPath;
   
   public SFOEvalJob(
@@ -41,11 +43,13 @@ public class SFOEvalJob extends AbstractHadoopJob {
       String outputPath,
       int reducers,
       int numFeatures,
+      int labelIndex,
       String trainOutputPath) {
     this.inputFile = inputFile;
     this.outputPath = outputPath;
     this.reducers = reducers;
     this.numFeatures = numFeatures;
+    this.labelIndex = labelIndex;
     this.trainOutputPath = trainOutputPath;
   }
   
@@ -65,12 +69,13 @@ public class SFOEvalJob extends AbstractHadoopJob {
         DoublePairWritable.class,
         IntWritable.class,
         DoubleWritable.class,
-        SequenceFileInputFormat.class,
+        TextInputFormat.class,  // SequenceFileInputFormat.class,
         SequenceFileOutputFormat.class,
         inputFile,
         outputPath);
 
     job.getConfiguration().set(CONF_KEY_NUM_FEATURES, Integer.toString(numFeatures));
+    job.getConfiguration().set(CONF_KEY_LABEL_INDEX, Integer.toString(labelIndex));
     job.getConfiguration().set(CONF_KEY_TRAIN_OUTPUT, trainOutputPath);
     
 //    cleanupOutputDirectory(outputPath);

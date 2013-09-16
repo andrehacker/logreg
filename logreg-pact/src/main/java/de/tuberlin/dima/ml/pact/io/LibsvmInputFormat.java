@@ -14,17 +14,24 @@ import eu.stratosphere.pact.common.type.base.parser.DecimalTextIntParser;
 
 /**
  * Read file in libsvm format.
- * The first numbers are a comma-separated list of the labels. After two spaces follows a sparse encoding of the feature
- * vector, e.g. '9,33,62,60,70  268:0.059 440:0.031 577:0.064'
- * If the labels is equal to the positive class label, the label will be set to 1, otherwise it will be 0.
+ * The file may be have multiple labels per record or a single label (+1 or -1)
+ * The first numbers are a comma-separated list of the labels, or the single label. After one or two spaces follows a sparse encoding of the feature
+ * vector<br>
+ * In multilabel mode: If the labels is equal to the positive class label, the label will be set to 1, otherwise it will be 0.
+ * 
+ * Multilabel example: '9,33,62,60,70  268:0.059 440:0.031 577:0.064'
+ * Single label example: '+1 20:1.2 30:-2.1234'
+ * 
  */
-public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
+public class LibsvmInputFormat extends DelimitedInputFormat {
 
 	// ------------------------------------- Config Keys ------------------------------------------
 
 	public static final String CONF_KEY_POSITIVE_CLASS = "libsvm.positive_class";
 
 	public static final String CONF_KEY_NUM_FEATURES = "libsvm.num_features";
+	
+	public static final String CONF_KEY_MULTI_LABEL_INPUT = "libsvm.multi_label_input";
 
 	// --------------------------------------- Config ---------------------------------------------
 
@@ -37,6 +44,8 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 	private static final int POSITIVE_CLASS_UNDEFINED = -1;
 
 	private static final int NUM_FEATURES_UNDEFINED = -1;
+	
+	private static final boolean MULTI_LABEL_INPUT_UNDEFINED = true;
 
 	// --------------------------------------- Output ---------------------------------------------
 
@@ -53,7 +62,10 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 	private DecimalTextIntParser intParser = new DecimalTextIntParser();
 
 	private DecimalTextDoubleParser doubleParser = new DecimalTextDoubleParser();
+	
+	private boolean multiLabelInput;
 
+	// Only relevant for multi label input
 	private int positiveClass;
 	
 	private int numFeatures;
@@ -64,16 +76,21 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 	public void configure(Configuration parameters) {
 		super.configure(parameters);
 
-		// target class
-		this.positiveClass = parameters.getInteger(CONF_KEY_POSITIVE_CLASS, POSITIVE_CLASS_UNDEFINED);
-		if (this.positiveClass == POSITIVE_CLASS_UNDEFINED) {
-			throw new IllegalArgumentException("Please specify the positive class id");
-		}
-
 		// num features
 		this.numFeatures = parameters.getInteger(CONF_KEY_NUM_FEATURES, NUM_FEATURES_UNDEFINED);
 		if (this.numFeatures == NUM_FEATURES_UNDEFINED) {
 			throw new IllegalArgumentException("Please specify the number of features for the vector");
+		}
+		
+		// multi label input?
+		this.multiLabelInput = parameters.getBoolean(CONF_KEY_MULTI_LABEL_INPUT, MULTI_LABEL_INPUT_UNDEFINED);
+
+		if (this.multiLabelInput) {
+		  // target class
+		  this.positiveClass = parameters.getInteger(CONF_KEY_POSITIVE_CLASS, POSITIVE_CLASS_UNDEFINED);
+		  if (this.positiveClass == POSITIVE_CLASS_UNDEFINED) {
+		    throw new IllegalArgumentException("Please specify the positive class id");
+		  }
 		}
 	}
 
@@ -88,20 +105,30 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 		// ------------------------------------
 
 		// move behind labels
-		while (bytes[readPos++] != DELIMITER) {
-		}
+		while (bytes[readPos++] != DELIMITER) { }
 
 		boolean isPositive = false;
 
 		int currentOffset = offset;
 		while (currentOffset < readPos - 1) {
-			currentOffset = this.intParser.parseField(bytes, currentOffset, readPos - 1, DELIMITER_LABEL, this.label);
-
+		  if (!multiLabelInput) {
+		    // Positive class is encoded as '+'; skip over the '+'
+		    if (bytes[currentOffset] == '+') {
+		      ++currentOffset;
+		    }
+		  }
+          currentOffset = this.intParser.parseField(bytes, currentOffset, readPos - 1, DELIMITER_LABEL, this.label);
+          if (multiLabelInput) {
 			if (this.label.getValue() == this.positiveClass) {
-				isPositive = true;
-
-				break;
+			  isPositive = true;
+			  break;
 			}
+          } else {
+            if (this.label.getValue() == 1) {
+              isPositive = true;
+              break;
+            }
+          }
 		}
 
 		this.label.setValue(isPositive ? 1 : 0);
@@ -112,7 +139,11 @@ public class LibsvmBinaryInputFormat extends DelimitedInputFormat {
 		// ------------------------------------
 		Vector vector = new SequentialAccessSparseVector(this.numFeatures);
 
-		currentOffset = readPos + 1;
+		// Either a single or two spaces delimit the labels from the features
+		currentOffset = readPos;
+        if (bytes[readPos] == DELIMITER) {
+          ++currentOffset;
+        }
 
 		while (currentOffset < limit) {
 

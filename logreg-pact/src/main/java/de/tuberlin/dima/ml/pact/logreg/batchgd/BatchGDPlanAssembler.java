@@ -15,7 +15,7 @@
 package de.tuberlin.dima.ml.pact.logreg.batchgd;
 
 import de.tuberlin.dima.ml.pact.JobRunner;
-import de.tuberlin.dima.ml.pact.io.LibsvmBinaryInputFormat;
+import de.tuberlin.dima.ml.pact.io.LibsvmInputFormat;
 import de.tuberlin.dima.ml.pact.logreg.ensemble.EnsembleJob;
 import de.tuberlin.dima.ml.pact.types.PactVector;
 import de.tuberlin.dima.ml.util.IOUtils;
@@ -55,9 +55,9 @@ public class BatchGDPlanAssembler implements PlanAssemblerDescription {
 
     // input vectors (constant path)
     FileDataSource trainingVectors = new FileDataSource(
-        LibsvmBinaryInputFormat.class, inputPathTrain, "Input Vectors");
-    trainingVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_POSITIVE_CLASS, CCAT);
-    trainingVectors.setParameter(LibsvmBinaryInputFormat.CONF_KEY_NUM_FEATURES,
+        LibsvmInputFormat.class, inputPathTrain, "Input Vectors");
+    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_POSITIVE_CLASS, CCAT);
+    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_NUM_FEATURES,
         NUM_FEATURES);
 
     // initial weight
