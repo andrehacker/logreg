@@ -66,18 +66,28 @@ object SFOExperiment extends Experiment {
   
       // --------------- JOB PARAMETERS ----------
       
-      val dataset = RCV1DatasetInfo.get()
+//      val dataset = RCV1DatasetInfo.get()
 //      val predictorNamePath = "/home/andre/dev/datasets/RCV1-v2/stem.termid.idf.map.txt"
 //      RCV1DatasetInfo.readPredictorNames(predictorNamePath)
+  
+      // --------------- JOB PARAMETERS GLOBAL ----------
+      val newtonTolerance = getProperty("newton_tolerance").toDouble
+      val newtonMaxIterations = getProperty("newton_max_iterations").toInt
+      val regularization = getProperty("regularization").toDouble
   
       // --------------- JOB PARAMETERS HADOOP ----------
   
       val jarPathHadoop = getProperty("jar_hadoop")
       val inputTrainLocalHadoop = getProperty("input_local_hadoop")
       val inputTrainHadoop = getProperty("input_hadoop")
-      val labelIndexHadoop = getProperty("label_index_hadoop").toInt
+      val inputTestLocalHadoop = getProperty("input_test_local_hadoop")
+      val inputTestHadoop = getProperty("input_test_hadoop")
+      val isMultilabelInputHadoop = getProperty("input_hadoop_is_multilabel").toBoolean
+      val positiveClassHadoop = if (isMultilabelInputHadoop) getProperty("positive_class_hadoop").toInt else -1
+      val numFeaturesHadoop = getProperty("num_features_hadoop").toInt
       val outputTrainHadoop = getProperty("output_train_hadoop")
       val outputTestHadoop = getProperty("output_test_hadoop")
+      val intraNodeDopHadoop = getProperty("intra_node_dop_hadoop").toInt
   
       // --------------- JOB PARAMETERS OZONE ----------
       
@@ -86,8 +96,11 @@ object SFOExperiment extends Experiment {
       val inputTrainOzone = getProperty("input_ozone")
       val inputTestLocalOzone = getProperty("input_test_local_ozone")
       val inputTestOzone = getProperty("input_test_ozone")
-      val labelIndexOzone = getProperty("label_index_ozone").toInt
+      val isMultilabelInputOzone = getProperty("input_ozone_is_multilabel").toBoolean
+      val positiveClassOzone = if (isMultilabelInputOzone) getProperty("positive_class_ozone").toInt else -1
+      val numFeaturesOzone = getProperty("num_features_ozone").toInt
       val outputOzone = getProperty("output_ozone")
+      val intraNodeDopOzone = getProperty("intra_node_dop_ozone").toInt
       
       // --------------- JOB DRIVER ----------
   
@@ -97,11 +110,15 @@ object SFOExperiment extends Experiment {
       
       val sfoDriverHadoop = new SFODriverHadoop(
         inputTrainHadoop,
-        inputTrainHadoop,
+        inputTestHadoop,
+        isMultilabelInputHadoop,
+        positiveClassHadoop,
         outputTrainHadoop,
         outputTestHadoop,
-        dataset.getNumFeatures().toInt,
-        labelIndexHadoop,
+        numFeaturesHadoop,
+        newtonTolerance,
+        newtonMaxIterations,
+        regularization,
         jobTrackerAddress,
         hdfsAddress,
         hadoopConfDir,
@@ -110,13 +127,18 @@ object SFOExperiment extends Experiment {
       val ozoneConfPath = getSysProperty("ozone_conf")
   
       //  Here we use the conf-path currently
+      val runLocal = false
       val sfoDriverPact = new SFODriverPact(
         inputTrainOzone,
         inputTestOzone,
-        labelIndexOzone,
+        isMultilabelInputOzone,
+        positiveClassOzone,
         outputOzone,
-        dataset.getNumFeatures().toInt,
-        false,
+        numFeaturesOzone,
+        newtonTolerance,
+        newtonMaxIterations,
+        regularization,
+        runLocal,
         ozoneConfPath,
         jarPathOzone)
       
@@ -133,10 +155,10 @@ object SFOExperiment extends Experiment {
       if (currentSut == "hadoop") {
         val hadoop = new HadoopSUT(sysConfPath)
         
-        val dataToLoadHadoop = Array((inputTrainLocalHadoop, inputTrainHadoop))
+        val dataToLoadHadoop = Array((inputTrainLocalHadoop, inputTrainHadoop), (inputTestLocalHadoop, inputTestHadoop))
         val logFilesToBackupHadoop = Array((outputTrainHadoop, "sfo-train"), (outputTestHadoop, "sfo-test"))
         val outputToRemoveHadoop = Array(outputTrainHadoop, outputTestHadoop)
-        runExperimentSingleSUT(hadoop, dops, driverIterations, iterations, addPerIteration, numRepetitions, dataToLoadHadoop, outputToRemoveHadoop, logFilesToBackupHadoop, sfoDriverHadoop, experimentPrefix)
+        runExperimentSingleSUT(hadoop, dops, intraNodeDopHadoop, driverIterations, iterations, addPerIteration, numRepetitions, dataToLoadHadoop, outputToRemoveHadoop, logFilesToBackupHadoop, sfoDriverHadoop, experimentPrefix)
       }
       
       if (currentSut == "ozone") {
@@ -145,7 +167,7 @@ object SFOExperiment extends Experiment {
         val dataToLoadPact = Array((inputTrainLocalOzone, inputTrainOzone),(inputTestLocalOzone, inputTestOzone))
         val logFilesToBackupPact = Array((outputOzone, "sfo"))
         val outputToRemovePact = Array(outputOzone)
-        runExperimentSingleSUT(ozone, dops, driverIterations, iterations, addPerIteration, numRepetitions, dataToLoadPact, outputToRemovePact, logFilesToBackupPact, sfoDriverPact, experimentPrefix)
+        runExperimentSingleSUT(ozone, dops, intraNodeDopOzone, driverIterations, iterations, addPerIteration, numRepetitions, dataToLoadPact, outputToRemovePact, logFilesToBackupPact, sfoDriverPact, experimentPrefix)
       }
       
     } catch {
@@ -157,6 +179,7 @@ object SFOExperiment extends Experiment {
   def runExperimentSingleSUT(
       sut: SUT, 
       dops: Array[Int],
+      intraNodeDop: Int,
       driverIterations: Int,
       iterations: Int,
       addPerIteration: Int,
@@ -198,13 +221,13 @@ object SFOExperiment extends Experiment {
           logger.info("-------------------- RUN EXPERIMENT --------------------\n")
           if (iterations <= 1) {
             for (i <- 1 to driverIterations) {
-              jobDriver.computeGains(dop)
+              jobDriver.computeGains(dop * intraNodeDop)
               printTopGains(JavaConversions.asScalaBuffer(jobDriver.getGains()))
               jobDriver.addBestFeatures(addPerIteration)
               logTimers(jobDriver, experimentID)
             }
           } else {
-            jobDriver.forwardFeatureSelection(dop, iterations, addPerIteration)
+            jobDriver.forwardFeatureSelection(dop * intraNodeDop, iterations, addPerIteration)
             logTimers(jobDriver, experimentID)
           }
   

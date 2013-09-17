@@ -32,6 +32,8 @@ public class SFODriverHadoop implements SFODriver {
 
   private String trainInputFile;
   private String testInputFile;
+  private boolean isMultilabelInput;
+  private int positiveClass;
 
   private String trainOutputPath;
   private String testOutputPath;
@@ -42,7 +44,9 @@ public class SFODriverHadoop implements SFODriver {
   private String jarPath;   // might be empty
 
   private int numFeatures;
-  private int labelIndex;
+  private double newtonTolerance;
+  private int newtonMaxIterations;
+  private double regularization;
 
   private IncrementalModel baseModel;
   
@@ -60,10 +64,14 @@ public class SFODriverHadoop implements SFODriver {
   public SFODriverHadoop(
       String trainInputFile,
       String testInputFile,
+      boolean isMultilabelInput,
+      int positiveClass,
       String outputPathTrain,
       String outputPathTest,
       int numFeatures,
-      int labelIndex,
+      double newtonTolerance,
+      int newtonMaxIterations,
+      double regularization,
       String jobTrackerAddress,
       String hdfsAddress,
       String hadoopConfDir,
@@ -72,8 +80,12 @@ public class SFODriverHadoop implements SFODriver {
     this.testInputFile = testInputFile;
     this.trainOutputPath = outputPathTrain;
     this.testOutputPath = outputPathTest;
+    this.isMultilabelInput = isMultilabelInput;
+    this.positiveClass = positiveClass;
     this.numFeatures = numFeatures;
-    this.labelIndex = labelIndex;
+    this.newtonTolerance = newtonTolerance;
+    this.newtonMaxIterations = newtonMaxIterations;
+    this.regularization = regularization;
     this.jobTrackerAddress = jobTrackerAddress;
     this.hdfsAddress = hdfsAddress;
     this.hadoopConfDir = hadoopConfDir;
@@ -84,11 +96,11 @@ public class SFODriverHadoop implements SFODriver {
   }
 
   @Override
-  public List<FeatureGain> forwardFeatureSelection(int dop, int iterations, int addPerIteration) throws Exception {
+  public List<FeatureGain> forwardFeatureSelection(int numReduceTasks, int iterations, int addPerIteration) throws Exception {
     if (iterations > 1) {
       throw new UnsupportedOperationException("Hadoop does not have support for iterations. Currently not supported");
     } else {
-      return computeGains(dop);
+      return computeGains(numReduceTasks);
     }
   }
 
@@ -101,7 +113,7 @@ public class SFODriverHadoop implements SFODriver {
    * decide whether to add it or not.
    */
   @Override
-  public List<FeatureGain> computeGains(int dop) throws Exception {
+  public List<FeatureGain> computeGains(int numReduceTasks) throws Exception {
 
     final Stopwatch stopTotal = new Stopwatch();
     final Stopwatch stopTrain = new Stopwatch();
@@ -116,17 +128,29 @@ public class SFODriverHadoop implements SFODriver {
     stopTrain.start();
 //    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress, jarPath);
     Configuration conf = HadoopUtils.createConfigurationUsingConfDir(hadoopConfDir, jarPath);
-    
-    ToolRunner.run(conf, new SFOTrainJob(trainInputFile, trainOutputPath, dop, numFeatures, labelIndex),
-        null);
+
+//    private double newtonTolerance;
+//    private int newtonMaxIterations;
+//    private double regularization;
+    ToolRunner.run(conf, new SFOTrainJob(
+          trainInputFile,
+          isMultilabelInput,
+          positiveClass,
+          trainOutputPath,
+          numFeatures,
+          newtonTolerance,
+          newtonMaxIterations,
+          regularization,
+          numReduceTasks
+        ), null);
     stopTrain.stop();
     counters.put(COUNTER_KEY_TRAIN_TIME, stopTrain.elapsed(TimeUnit.MILLISECONDS));
     System.out.println("Done training");
 
     // ----- TEST -----
     stopTest.start();
-    ToolRunner.run(conf, new SFOEvalJob(testInputFile, testOutputPath, dop,
-        numFeatures, labelIndex, trainOutputPath), null);
+    ToolRunner.run(conf, new SFOEvalJob(testInputFile, isMultilabelInput, positiveClass, testOutputPath, numReduceTasks,
+        numFeatures, trainOutputPath), null);
     stopTest.stop(); stopTotal.stop();
     counters.put(COUNTER_KEY_TEST_TIME, stopTest.elapsed(TimeUnit.MILLISECONDS));
     counters.put(COUNTER_KEY_TOTAL_WALLCLOCK, stopTotal.elapsed(TimeUnit.MILLISECONDS));

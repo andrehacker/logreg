@@ -24,8 +24,9 @@ public class SFOTrainMapper extends Mapper<LongWritable, Text, IntWritable, SFOI
   
   private IncrementalModel baseModel;
 
+  private boolean isMultilabelInput;
+  private int positiveClass;
   private int numFeatures;
-  private int labelIndex;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
@@ -33,8 +34,9 @@ public class SFOTrainMapper extends Mapper<LongWritable, Text, IntWritable, SFOI
     
     baseModel = SFOToolsHadoop.readBaseModel(context.getConfiguration());
     
+    this.isMultilabelInput = Boolean.parseBoolean(context.getConfiguration().get(SFOTrainJob.CONF_KEY_IS_MULTILABEL_INPUT));
+    this.positiveClass =  Integer.parseInt(context.getConfiguration().get(SFOTrainJob.CONF_KEY_POSITIVE_CLASS));
     this.numFeatures = Integer.parseInt(context.getConfiguration().get(SFOTrainJob.CONF_KEY_NUM_FEATURES));
-    this.labelIndex =  Integer.parseInt(context.getConfiguration().get(SFOTrainJob.CONF_KEY_LABEL_INDEX));
     
     System.out.println("STDOUT: Setup Train Mapper");
     LOG.info("COMMONS_LOGGING: Setup Train Mapper");
@@ -46,7 +48,12 @@ public class SFOTrainMapper extends Mapper<LongWritable, Text, IntWritable, SFOI
     // public void map(IntWritable y, VectorWritable xi, Context context) throws IOException, InterruptedException {
     
     Vector xi = new RandomAccessSparseVector(numFeatures);
-    int y = LibSvmVectorReader.readVectorMultiLabel(xi, line.toString(), labelIndex);
+    int y;
+    if (isMultilabelInput) {
+      y = LibSvmVectorReader.readVectorMultiLabel(xi, line.toString(), positiveClass);
+    } else {
+      y = LibSvmVectorReader.readVectorSingleLabel(xi, line.toString());
+    }
 
     // Compute prediction for current x_i using the base model
     // TODO Improvement: Why not just compute and transmit beta * x_i ??

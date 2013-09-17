@@ -20,13 +20,35 @@ public class SFOTrainReducer extends
 
   private static final AdaptiveLogger log = new AdaptiveLogger(
       Logger.getLogger(SFOTrainReducer.class.getName()), GlobalSettings.LOG_LEVEL);
+  
+//  private double newtonTolerance;
+//  private int newtonMaxIterations;
+//  private double regularization;
 
-  private static final int MAX_ITERATIONS = 5;
-
-  private static final double LAMBDA = 0;
-  private static final double TOLERANCE = 10E-6;
+  private int newtonMaxIterations;
+  private double newtonTolerance;
+  private double regularization;
 
   private static final int DEBUG_DIMENSION = -1;
+  
+  @Override
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
+    super.setup(context);
+    this.newtonMaxIterations = context.getConfiguration().getInt(SFOTrainJob.CONF_KEY_NEWTON_MAX_ITERATIONS, -1);
+    if (this.newtonMaxIterations == -1) {
+      throw new RuntimeException("Value for the configuration parameter CONF_KEY_NEWTON_MAX_ITERATIONS is not defined, please set it in plan assembler");
+    }
+    // TODO: BUG: parameters.getDouble always returns default value
+    this.newtonTolerance = context.getConfiguration().getDouble(SFOTrainJob.CONF_KEY_NEWTON_TOLERANCE, -1);
+    if (this.newtonTolerance == -1) {
+      throw new RuntimeException("Value for the configuration parameter CONF_KEY_NEWTON_TOLERANCE is not defined, please set it in plan assembler");
+    }
+    this.regularization = context.getConfiguration().getDouble(SFOTrainJob.CONF_KEY_REGULARIZATION, -1);
+    if (this.regularization == -1) {
+      throw new RuntimeException("Value for the configuration parameter CONF_KEY_REGULARIZATION is not defined, please set it in plan assembler");
+    }
+  }
 
   /**
    * Notes: To iterate multiple times over data, we cache all data on heap. For
@@ -48,7 +70,7 @@ public class SFOTrainReducer extends
     int iteration = 0;
     double lastUpdate = 0;
     boolean converged = false;
-    while ((++iteration <= MAX_ITERATIONS) && !converged) {
+    while ((++iteration <= newtonMaxIterations) && !converged) {
 
       double batchGradient = 0;
       double batchGradientSecond = 0;
@@ -79,9 +101,9 @@ public class SFOTrainReducer extends
             xDotw + (element.getXid() * betad));
 
         batchGradient += LogRegSFOTraining.derivateL2SFO(element.getXid(),
-            piNew, element.getLabel(), LAMBDA, betad);
+            piNew, element.getLabel(), regularization, betad);
         batchGradientSecond += LogRegSFOTraining.derivateSecondL2SFO(
-            element.getXid(), piNew, LAMBDA);
+            element.getXid(), piNew, regularization);
       }
 
       /*
@@ -104,7 +126,7 @@ public class SFOTrainReducer extends
       /*
        * Check for conversion
        */
-      if (Math.abs(lastUpdate) < TOLERANCE) {
+      if (Math.abs(lastUpdate) < newtonTolerance) {
         converged = true;
       }
 

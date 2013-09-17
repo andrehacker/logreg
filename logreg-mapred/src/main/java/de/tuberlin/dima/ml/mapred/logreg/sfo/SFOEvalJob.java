@@ -27,29 +27,33 @@ public class SFOEvalJob extends AbstractHadoopJob {
 
   private static final String JOB_NAME = "sfo-eval";
   
-  static final String CONF_KEY_NUM_FEATURES = "num-features";
-  static final String CONF_KEY_LABEL_INDEX = "label-index";
-  static final String CONF_KEY_TRAIN_OUTPUT = "train-output-path";
+  public static final String CONF_KEY_IS_MULTILABEL_INPUT = "multilabel-input";
+  public static final String CONF_KEY_NUM_FEATURES = "num-features";
+  public static final String CONF_KEY_POSITIVE_CLASS = "positive-class";
+  public static final String CONF_KEY_TRAIN_OUTPUT = "train-output-path";
   
   private String inputFile;
+  private boolean isMultilabelInput;
   private String outputPath;
-  private int reducers;
+  private int numReduceTasks;
   private int numFeatures;
-  private int labelIndex;
+  private int positiveClass;
   private String trainOutputPath;
   
   public SFOEvalJob(
       String inputFile,
+      boolean isMultilabelInput,
+      int positiveClass,
       String outputPath,
-      int reducers,
+      int numReduceTasks,
       int numFeatures,
-      int labelIndex,
       String trainOutputPath) {
     this.inputFile = inputFile;
+    this.isMultilabelInput = isMultilabelInput;
+    this.positiveClass = positiveClass;
     this.outputPath = outputPath;
-    this.reducers = reducers;
+    this.numReduceTasks = numReduceTasks;
     this.numFeatures = numFeatures;
-    this.labelIndex = labelIndex;
     this.trainOutputPath = trainOutputPath;
   }
   
@@ -62,7 +66,7 @@ public class SFOEvalJob extends AbstractHadoopJob {
     
     Job job = prepareJob(
         JOB_NAME, 
-        reducers, 
+        numReduceTasks,
         SFOEvalMapper.class, 
         SFOEvalReducer.class, 
         IntWritable.class,
@@ -74,8 +78,9 @@ public class SFOEvalJob extends AbstractHadoopJob {
         inputFile,
         outputPath);
 
+    job.getConfiguration().set(CONF_KEY_IS_MULTILABEL_INPUT, Boolean.toString(isMultilabelInput));
     job.getConfiguration().set(CONF_KEY_NUM_FEATURES, Integer.toString(numFeatures));
-    job.getConfiguration().set(CONF_KEY_LABEL_INDEX, Integer.toString(labelIndex));
+    job.getConfiguration().set(CONF_KEY_POSITIVE_CLASS, Integer.toString(positiveClass));
     job.getConfiguration().set(CONF_KEY_TRAIN_OUTPUT, trainOutputPath);
     
 //    cleanupOutputDirectory(outputPath);

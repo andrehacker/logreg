@@ -3,11 +3,15 @@ package de.tuberlin.dima.ml.pact.logreg.sfo.udfs;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.common.collect.Lists;
 
 import de.tuberlin.dima.ml.logreg.sfo.NewtonSingleFeatureOptimizer;
 import de.tuberlin.dima.ml.pact.udfs.ReduceFlattenToVector;
 import de.tuberlin.dima.ml.pact.util.PactUtils;
+import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.pact.common.stubs.Collector;
 import eu.stratosphere.pact.common.stubs.ReduceStub;
 import eu.stratosphere.pact.common.stubs.StubAnnotation.ConstantFields;
@@ -28,12 +32,36 @@ public class TrainDimensions extends ReduceStub {
   public static final int IDX_OUT_DIMENSION = ReduceFlattenToVector.IDX_DIMENSION;
   public static final int IDX_OUT_COEFICCIENT = ReduceFlattenToVector.IDX_DOUBLE_VALUE;
   public static final int IDX_OUT_KEY_CONST_ONE = ReduceFlattenToVector.IDX_KEY_CONST_ONE;
+
+  public static final String CONF_KEY_NEWTON_MAX_ITERATIONS = "train.newton-max-iterations";
+  public static final String CONF_KEY_NEWTON_TOLERANCE = "train.newton-tolerance";
+  public static final String CONF_KEY_REGULARIZATION = "train.regularization";
   
-  private static final int MAX_ITERATIONS = 5;
-  private static final double LAMBDA = 0;
-  private static final double TOLERANCE = 10E-6;
+  private int maxIterations;
+  private double lambda;
+  private double tolerance;
+  
+  private static final Log logger = LogFactory.getLog(TrainDimensions.class);
   
   private final PactRecord recordOut = new PactRecord(3);
+  
+  @Override
+  public void open(Configuration parameters) throws Exception {
+    super.open(parameters);
+    this.maxIterations = parameters.getInteger(CONF_KEY_NEWTON_MAX_ITERATIONS, -1);
+    if (this.maxIterations == -1) {
+      throw new RuntimeException("Value for the configuration parameter CONF_KEY_NEWTON_MAX_ITERATIONS is not defined, please set it in plan assembler");
+    }
+    // TODO: BUG: parameters.getDouble always returns default value
+    this.tolerance = Double.parseDouble(parameters.getString(CONF_KEY_NEWTON_TOLERANCE, "-1"));
+    if (this.tolerance == -1) {
+      throw new RuntimeException("Value for the configuration parameter CONF_KEY_NEWTON_TOLERANCE is not defined, please set it in plan assembler");
+    }
+    this.lambda = Double.parseDouble(parameters.getString(CONF_KEY_REGULARIZATION, "-1"));
+    if (this.lambda == -1) {
+      throw new RuntimeException("Value for the configuration parameter CONF_KEY_REGULARIZATION is not defined, please set it in plan assembler");
+    }
+  }
 
   @Override
   public void reduce(Iterator<PactRecord> records, Collector<PactRecord> out)
@@ -52,7 +80,7 @@ public class TrainDimensions extends ReduceStub {
     }
     
     // Train single dimension using Newton Raphson
-    double betad = NewtonSingleFeatureOptimizer.train(cache, MAX_ITERATIONS, LAMBDA, TOLERANCE);
+    double betad = NewtonSingleFeatureOptimizer.train(cache, maxIterations, lambda, tolerance);
     
     recordOut.copyFrom(record, new int[] {IDX_DIMENSION}, new int[] {IDX_OUT_DIMENSION});
     recordOut.setField(IDX_OUT_KEY_CONST_ONE, PactUtils.pactOne);

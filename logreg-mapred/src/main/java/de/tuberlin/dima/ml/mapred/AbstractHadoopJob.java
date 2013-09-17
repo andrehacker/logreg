@@ -20,7 +20,7 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
   
   protected Job prepareJob(
       String jobName,
-      int numReducers,
+      int numReduceTasks,
       @SuppressWarnings("rawtypes") Class<? extends Mapper> mapper,
       @SuppressWarnings("rawtypes") Class<? extends Reducer> reducer,
       Class<? extends Writable> mapOutputKey,
@@ -59,7 +59,9 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     }
     System.out.println("Jar path: " + job.getJar());
     
-    job.setNumReduceTasks(numReducers);
+    if (numReduceTasks != -1) {
+      job.setNumReduceTasks(numReduceTasks);
+    }
     
     // ----- Set classes -----
 

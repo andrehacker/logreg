@@ -6,12 +6,12 @@ import java.util.Map;
 
 public interface SFODriver {
 
-  public List<FeatureGain> computeGains(int dop) throws Exception;
+  public List<FeatureGain> computeGains(int fullDop) throws Exception;
 
   /**
    * This is equal to computeGains(dop) if iterations = 1
    */
-  public List<FeatureGain> forwardFeatureSelection(int dop, int iterations, int addPerIteration) throws Exception;
+  public List<FeatureGain> forwardFeatureSelection(int fullDop, int iterations, int addPerIteration) throws Exception;
 
   public void addBestFeatures(int numFeatures) throws IOException;
   

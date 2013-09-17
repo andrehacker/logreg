@@ -21,9 +21,10 @@ public class SFOEvalMapper extends Mapper<LongWritable, Text, IntWritable, Doubl
   
   private static IntWritable outputKey = new IntWritable();
   private static DoublePairWritable outputValue = new DoublePairWritable();
-  
+
+  private boolean isMultilabelInput;
+  private int positiveClass;
   private int numFeatures;
-  private int labelIndex;
   private String trainOutputPath;
   
   private IncrementalModel baseModel;
@@ -34,8 +35,9 @@ public class SFOEvalMapper extends Mapper<LongWritable, Text, IntWritable, Doubl
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
 
+    this.isMultilabelInput = Boolean.parseBoolean(context.getConfiguration().get(SFOEvalJob.CONF_KEY_IS_MULTILABEL_INPUT));
+    this.positiveClass = Integer.parseInt(context.getConfiguration().get(SFOEvalJob.CONF_KEY_POSITIVE_CLASS));
     this.numFeatures = Integer.parseInt(context.getConfiguration().get(SFOEvalJob.CONF_KEY_NUM_FEATURES));
-    this.labelIndex = Integer.parseInt(context.getConfiguration().get(SFOEvalJob.CONF_KEY_LABEL_INDEX));
     this.trainOutputPath = context.getConfiguration().get(SFOEvalJob.CONF_KEY_TRAIN_OUTPUT);
     
     baseModel = SFOToolsHadoop.readBaseModel(context.getConfiguration());
@@ -47,7 +49,12 @@ public class SFOEvalMapper extends Mapper<LongWritable, Text, IntWritable, Doubl
   public void map(LongWritable ignore, Text line, Context context) throws IOException, InterruptedException {
 
     Vector xi = new RandomAccessSparseVector(numFeatures);
-    int y = LibSvmVectorReader.readVectorMultiLabel(xi, line.toString(), labelIndex);
+    int y;
+    if (isMultilabelInput) {
+      y = LibSvmVectorReader.readVectorMultiLabel(xi, line.toString(), positiveClass);
+    } else {
+      y = LibSvmVectorReader.readVectorSingleLabel(xi, line.toString());
+    }
 
     // Emit log-likelihood for new and old model (not prediction as in singh's paper)
     // See SFOJob comments for description

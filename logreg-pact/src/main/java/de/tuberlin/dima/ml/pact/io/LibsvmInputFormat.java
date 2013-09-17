@@ -27,11 +27,11 @@ public class LibsvmInputFormat extends DelimitedInputFormat {
 
 	// ------------------------------------- Config Keys ------------------------------------------
 
-	public static final String CONF_KEY_POSITIVE_CLASS = "libsvm.positive_class";
-
 	public static final String CONF_KEY_NUM_FEATURES = "libsvm.num_features";
 	
 	public static final String CONF_KEY_MULTI_LABEL_INPUT = "libsvm.multi_label_input";
+
+    public static final String CONF_KEY_POSITIVE_CLASS = "libsvm.positive_class";
 
 	// --------------------------------------- Config ---------------------------------------------
 

@@ -17,31 +17,49 @@ public class SFOTrainJob extends AbstractHadoopJob {
   
   private static final String JOB_NAME = "sfo-train";
 
-  static final String CONF_KEY_NUM_FEATURES = "num-features";
-  static final String CONF_KEY_LABEL_INDEX = "label-index";
+  public static final String CONF_KEY_IS_MULTILABEL_INPUT = "multilabel-input";
+  public static final String CONF_KEY_POSITIVE_CLASS = "positive-class";
+  public static final String CONF_KEY_NUM_FEATURES = "num-features";
+  public static final String CONF_KEY_NEWTON_MAX_ITERATIONS = "newton-max-iterations";
+  public static final String CONF_KEY_NEWTON_TOLERANCE = "newton-tolerance";
+  public static final String CONF_KEY_REGULARIZATION = "regularization";
   
   public static enum SFO_COUNTER { 
     TRAIN_OVERFLOWS
   }
   
   private String inputFile;
+  private boolean isMultilabelInput;
+  private int positiveClass;
   private String outputPath;
   
-  private int reducers;
+  private int numReduceTasks;
   
   private int numFeatures;
-  private int labelIndex;
+  private double newtonTolerance;
+  private int newtonMaxIterations;
+  private double regularization;
   
-  public SFOTrainJob(String inputFile,
+  public SFOTrainJob(
+      String inputFile,
+      boolean isMultilabelInput,
+      int positiveClass,
       String outputPath,
-      int reducers,
       int numFeatures,
-      int labelIndex) {
+      double newtonTolerance,
+      int newtonMaxIterations,
+      double regularization,
+      int numReduceTasks
+      ) {
     this.inputFile = inputFile;
+    this.isMultilabelInput = isMultilabelInput;
+    this.positiveClass = positiveClass;
     this.outputPath = outputPath;
-    this.reducers = reducers;
     this.numFeatures = numFeatures;
-    this.labelIndex = labelIndex;
+    this.newtonTolerance = newtonTolerance;
+    this.newtonMaxIterations = newtonMaxIterations;
+    this.regularization = regularization;
+    this.numReduceTasks = numReduceTasks;
   }
   
   @Override
@@ -52,7 +70,7 @@ public class SFOTrainJob extends AbstractHadoopJob {
     
     Job job = prepareJob(
         JOB_NAME, 
-        reducers, 
+        numReduceTasks, 
         SFOTrainMapper.class, 
         SFOTrainReducer.class, 
         IntWritable.class,
@@ -63,9 +81,12 @@ public class SFOTrainJob extends AbstractHadoopJob {
         SequenceFileOutputFormat.class,
         inputFile,
         outputPath);
-    
+    job.getConfiguration().set(CONF_KEY_IS_MULTILABEL_INPUT, Boolean.toString(isMultilabelInput));
+    job.getConfiguration().set(CONF_KEY_POSITIVE_CLASS, Integer.toString(positiveClass));
     job.getConfiguration().set(CONF_KEY_NUM_FEATURES, Integer.toString(numFeatures));
-    job.getConfiguration().set(CONF_KEY_LABEL_INDEX, Integer.toString(labelIndex));
+    job.getConfiguration().set(CONF_KEY_NEWTON_TOLERANCE, Double.toString(newtonTolerance));
+    job.getConfiguration().set(CONF_KEY_NEWTON_MAX_ITERATIONS, Integer.toString(newtonMaxIterations));
+    job.getConfiguration().set(CONF_KEY_REGULARIZATION, Double.toString(regularization));
 
     //    cleanupOutputDirectory(outputPath);
     

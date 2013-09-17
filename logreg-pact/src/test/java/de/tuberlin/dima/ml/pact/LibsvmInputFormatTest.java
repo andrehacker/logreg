@@ -74,14 +74,14 @@ public class LibsvmInputFormatTest {
       v2.set(10, 1.12345);
       v2.set(20, -2.12345);
       List<Vector> trueVectors = Lists.newArrayList(v1, v2);
-      testScenario(input, isMultiLabel, positiveClass, numFeatures, trueLabels, trueVectors);
+      testSingleScenario(input, isMultiLabel, positiveClass, numFeatures, trueLabels, trueVectors);
       
       input = "4,5,2  10:1.12345 20:-2.12345\n1 10:1.12345 20:-2.12345";
       isMultiLabel = true;
-      testScenario(input, isMultiLabel, positiveClass, numFeatures, trueLabels, trueVectors);
+      testSingleScenario(input, isMultiLabel, positiveClass, numFeatures, trueLabels, trueVectors);
     }
     
-    private void testScenario(String inputString, boolean isMultiLabel, int positiveClass, int numFeatures, int[] trueLabels, List<Vector> trueVectors) throws IOException {
+    private void testSingleScenario(String inputString, boolean isMultiLabel, int positiveClass, int numFeatures, int[] trueLabels, List<Vector> trueVectors) throws IOException {
     
       // Config
       final Configuration parameters = new Configuration();

@@ -2,6 +2,8 @@ package de.tuberlin.dima.ml.pact.logreg.sfo;
 
 import java.io.IOException;
 
+import com.google.common.base.Joiner;
+
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.pact.io.LibsvmInputFormat;
 import de.tuberlin.dima.ml.pact.io.SingleValueDataSource;
@@ -35,16 +37,22 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
 
   @Override
   public String getDescription() {
-    return "Parameters: <numSubStasks> <inputPathTrain> <inputPathTest> <outputPath> <numFeatures> <labelIndex> <iterations> <addPerIteration> <Optional: baseModel (base64 encoded)>";
+    return "Parameters: <numSubStasks> <inputPathTrain> <inputPathTest> <isMultiLabel (true/false)> <positiveClass>"
+        + " <outputPath> <numFeatures> <newton tolerance> <newton max iterations> <regularization> <iterations> <addPerIteration>" 
+        + " <Optional: baseModel (base64 encoded)>";
   }
   
   public static String[] buildArgs(
       int numSubTasks, 
       String inputPathTrain, 
-      String inputPathTest, 
-      String outputPath, 
-      int numFeatures, 
-      int labelIndex,
+      String inputPathTest,
+      boolean isMultilabelInput,
+      int positiveClass,
+      String outputPath,
+      int numFeatures,
+      double newtonTolerance,
+      int newtonMaxIterations,
+      double regularization,
       int iterations,
       int addPerIteration,
       IncrementalModel baseModel) {
@@ -52,9 +60,13 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         Integer.toString(numSubTasks),
         inputPathTrain,
         inputPathTest,
+        Boolean.toString(isMultilabelInput),
+        Integer.toString(positiveClass),
         outputPath,
         Integer.toString(numFeatures),
-        Integer.toString(labelIndex),
+        Double.toString(newtonTolerance),
+        Integer.toString(newtonMaxIterations),
+        Double.toString(regularization),
         Integer.toString(iterations),
         Integer.toString(addPerIteration),
         PactUtils.encodeValueAsBase64(new PactIncrementalModel(baseModel))
@@ -67,16 +79,21 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
    */
   @Override
   public Plan getPlan(String... args) {
+    System.out.println("getPlan(" + Joiner.on(' ').join(args) + ")");
     // The default values just exist to be able to view this job in pact-web
     int numSubTasks = (args.length > 0 ? Integer.parseInt(args[0]) : 1);
     String inputPathTrain = (args.length > 1 ? args[1] : "");
     String inputPathTest = (args.length > 2 ? args[2] : "");
-    String outputPath = (args.length > 3 ? args[3] : "");
-    int numFeatures = (args.length > 4 ? Integer.parseInt(args[4]) : 0);
-    int labelIndex = (args.length > 5 ? Integer.parseInt(args[5]) : 0);
-    int iterations = (args.length > 6 ? Integer.parseInt(args[6]) : 1);
-    int addPerIteration = (args.length > 7 ? Integer.parseInt(args[7]) : 1);
-    IncrementalModel baseModel = (args.length > 8 ? PactUtils.decodeValueFromBase64(args[8], PactIncrementalModel.class).getValue() : new IncrementalModel(numFeatures));
+    boolean isMultilabelInput = (args.length > 3 ? Boolean.parseBoolean(args[3]) : true);
+    int positiveClass = (args.length > 4 ? Integer.parseInt(args[4]) : 0);
+    String outputPath = (args.length > 5 ? args[5] : "");
+    int numFeatures = (args.length > 6 ? Integer.parseInt(args[6]) : 0);
+    double newtonTolerance = (args.length > 7 ? Double.parseDouble(args[7]) : 0);
+    int newtonMaxIterations = (args.length > 8 ? Integer.parseInt(args[8]) : 0);
+    double regularization = (args.length > 9 ? Double.parseDouble(args[9]) : 0);
+    int iterations = (args.length > 10 ? Integer.parseInt(args[10]) : 1);
+    int addPerIteration = (args.length > 11 ? Integer.parseInt(args[11]) : 1);
+    IncrementalModel baseModel = (args.length > 12 ? PactUtils.decodeValueFromBase64(args[12], PactIncrementalModel.class).getValue() : new IncrementalModel(numFeatures));
     
     // ----- HINTS / OPTIMIZATION -----
 
@@ -87,17 +104,21 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     
     FileDataSource trainingVectors = new FileDataSource(
         LibsvmInputFormat.class, inputPathTrain, "Training Input Vectors");
-    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_POSITIVE_CLASS, labelIndex);
     trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_NUM_FEATURES,
         numFeatures);
-    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, true);
+    trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, isMultilabelInput);
+    if (isMultilabelInput) {
+      trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_POSITIVE_CLASS, positiveClass);
+    }
     
     FileDataSource testVectors = new FileDataSource(
         LibsvmInputFormat.class, inputPathTest, "Test Input Vectors");
-    testVectors.setParameter(LibsvmInputFormat.CONF_KEY_POSITIVE_CLASS, labelIndex);
     testVectors.setParameter(LibsvmInputFormat.CONF_KEY_NUM_FEATURES,
         numFeatures);
-    testVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, true);
+    testVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, isMultilabelInput);
+    if (isMultilabelInput) {
+      testVectors.setParameter(LibsvmInputFormat.CONF_KEY_POSITIVE_CLASS, positiveClass);
+    }
 
     // ----- Initial Base Model -----
     
@@ -151,6 +172,10 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         .input(trainComputeProbabilities)
         .name("Train: Train new Features (Reduce)")
         .build();
+    System.out.println("Newton tolerance: " + Double.toString(newtonTolerance));
+    trainDimensions.setParameter(TrainDimensions.CONF_KEY_NEWTON_MAX_ITERATIONS, newtonMaxIterations);
+    trainDimensions.setParameter(TrainDimensions.CONF_KEY_NEWTON_TOLERANCE, Double.toString(newtonTolerance));
+    trainDimensions.setParameter(TrainDimensions.CONF_KEY_REGULARIZATION, Double.toString(regularization));
     
     // ----- Workaround 1: Flatten Coefficients -----
     

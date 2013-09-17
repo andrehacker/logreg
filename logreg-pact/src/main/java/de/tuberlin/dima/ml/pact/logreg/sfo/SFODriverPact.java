@@ -20,9 +20,13 @@ public class SFODriverPact implements SFODriver {
 
   private String inputPathTrain;
   private String inputPathTest;
-  private int labelIndex;
+  private boolean isMultilabelInput;
+  private int positiveClass;
   private String outputPath;
   private int numFeatures;
+  private double newtonTolerance;
+  private int newtonMaxIterations;
+  private double regularization;
   private boolean runLocal;
   private String confPath;
   private String jarPath;
@@ -37,17 +41,25 @@ public class SFODriverPact implements SFODriver {
   public SFODriverPact(
       String inputPathTrain,
       String inputPathTest,
-      int labelIndex,
+      boolean isMultilabelInput,
+      int positiveClass,
       String outputPath,
       int numFeatures,
+      double newtonTolerance,
+      int newtonMaxIterations,
+      double regularization,
       boolean runLocal,
       String confPath,
       String jarPath) {
     this.inputPathTrain = inputPathTrain;
     this.inputPathTest = inputPathTest;
-    this.labelIndex = labelIndex;
+    this.isMultilabelInput = isMultilabelInput;
+    this.positiveClass = positiveClass;
     this.outputPath = outputPath;
     this.numFeatures = numFeatures;
+    this.newtonTolerance = newtonTolerance;
+    this.newtonMaxIterations = newtonMaxIterations;
+    this.regularization = regularization;
     this.runLocal = runLocal;
     this.confPath = confPath;
     this.jarPath = jarPath;
@@ -69,7 +81,21 @@ public class SFODriverPact implements SFODriver {
 
     // RUN
     JobRunner runner = new JobRunner();
-    String[] jobArgs = SFOPlanAssembler.buildArgs(numSubTasks, inputPathTrain, inputPathTest, outputPath, numFeatures, labelIndex, iterations, addPerIteration, this.baseModel);
+    String[] jobArgs = SFOPlanAssembler.buildArgs(
+        numSubTasks, 
+        inputPathTrain,
+        inputPathTest,
+        isMultilabelInput,
+        positiveClass,
+        outputPath,
+        numFeatures,
+        newtonTolerance,
+        newtonMaxIterations,
+        regularization,
+        iterations,
+        addPerIteration,
+        this.baseModel
+        );
     if (runLocal) {
       Plan sfoPlan = new SFOPlanAssembler().getPlan(jobArgs);
       runner.runLocal(sfoPlan);
