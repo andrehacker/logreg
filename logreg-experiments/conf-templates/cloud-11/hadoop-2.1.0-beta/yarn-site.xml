@@ -22,13 +22,12 @@
     yarn.resourcemanager.resource-tracker.address
     yarn.resourcemanager.scheduler.address
     yarn.resourcemanager.admin.address
-    yarn.resourcemanager.webapp.address
+    yarn.resourcemanager.webapp.address: 8088
   -->
   <property>
     <name>yarn.resourcemanager.hostname</name>
     <value>cloud-11</value>
   </property>
-
 
   <property>
     <name>yarn.resourcemanager.scheduler.class</name>

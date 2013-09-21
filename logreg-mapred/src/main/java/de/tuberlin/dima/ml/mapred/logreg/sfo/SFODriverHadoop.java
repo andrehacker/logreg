@@ -227,4 +227,9 @@ public class SFODriverHadoop implements SFODriver {
     return counters;
   }
 
+  @Override
+  public void resetModel() {
+    this.baseModel = new IncrementalModel(numFeatures);
+  }
+
 }

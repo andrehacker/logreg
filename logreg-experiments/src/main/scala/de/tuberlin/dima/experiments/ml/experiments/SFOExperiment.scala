@@ -218,6 +218,7 @@ object SFOExperiment extends Experiment {
             sut.removeOutputFolder(outputFolder)
           }
           
+          jobDriver.resetModel();
           logger.info("-------------------- RUN EXPERIMENT --------------------\n")
           if (iterations <= 1) {
             for (i <- 1 to driverIterations) {
@@ -225,6 +226,10 @@ object SFOExperiment extends Experiment {
               printTopGains(JavaConversions.asScalaBuffer(jobDriver.getGains()))
               jobDriver.addBestFeatures(addPerIteration)
               logTimers(jobDriver, experimentID)
+              
+              for (outputFolder <- outputToRemove) {
+                sut.removeOutputFolder(outputFolder)
+              }
             }
           } else {
             jobDriver.forwardFeatureSelection(dop * intraNodeDop, iterations, addPerIteration)

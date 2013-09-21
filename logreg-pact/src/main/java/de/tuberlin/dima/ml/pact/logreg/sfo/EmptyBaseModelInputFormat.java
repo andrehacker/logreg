@@ -23,7 +23,11 @@ public class EmptyBaseModelInputFormat extends RecordSequenceInputFormat {
   }
 
   @Override
-  public long getNumRecords() { return 1; }
+  public long getNumRecords() {
+	// Changing this to unknown causes that this input does no longer emit anything
+//    return BaseStatistics.NUM_RECORDS_UNKNOWN;
+    return 1;
+  }
 
   @Override
   public void fillNextRecord(PactRecord record, int recordNumber) {

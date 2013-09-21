@@ -21,7 +21,9 @@
   <!-- DIRECTORIES -->
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value>/data/users/ahacker/hadoop_experiments/data</value>
+    <value>/data/1/experiments/hdfs-data,/data/2/experiments/hdfs-data,/data/3/experiments/hdfs-data,/data/4/experiments/hdfs-data</value>
+    <valueAlexander>/data/1/journalpaper/hdfs-data,/data/2/journalpaper/hdfs-data,/data/3/journalpaper/hdfs-data,/data/4/journalpaper/hdfs-data</valueAlexander>
+    <valueold>/data/users/ahacker/hadoop_experiments/data</valueold>
   </property>
 
   <property>
@@ -82,7 +84,7 @@
 
   <property>
     <name>dfs.blocksize</name>
-    <value>64m</value>
+    <value>128m</value>
     <default>134217728</default>
     <description>
       The default block size for new files, in bytes.

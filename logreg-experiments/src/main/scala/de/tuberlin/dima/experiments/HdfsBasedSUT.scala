@@ -25,7 +25,7 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   val hadoopLog = getProperty("hadoop_log")
   val hadoopSlavesFile = getProperty("hadoop_slaves_file")
   val hadoopPidFolder = getProperty("hadoop_pid_folder")
-  val hdfsDataDir = getProperty("hdfs_data_dir")
+  val hdfsDataDirs = getProperty("hdfs_data_dir").split(",")
   val hdfsAddress = getProperty("hdfs_address")
   val hdfsNameNodeHostname = getProperty("hdfs_namenode_hostname")
 
@@ -86,10 +86,12 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
     // Delete data dir on all slaves
     val slaves = Source.fromFile(new File(hadoopSlavesFile)).getLines;
     for (slave <- slaves) {
-      logger.info("Delete " + hdfsDataDir + " on slave " + slave)
+      for (datadir <- hdfsDataDirs) {
+        logger.info("Delete " + datadir + " on slave " + slave)
 //      Process("ssh", Seq(user + "@" + slave, "rm -Rf " + hdfsDataDir)).!
 //      Seq("sh", "-c", "ulimit -n").!!;
-      bash("ssh " + user + "@" + slave + " 'rm -Rf " + hdfsDataDir + "'")
+        bash("ssh " + user + "@" + slave + " 'rm -Rf " + datadir + "'") 
+      }
     }
     
     if (isYarn) {
@@ -198,7 +200,8 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
       writer.println(slave)
       logger.info("- " + slave)
     }
-    writer.println("");
+    // TODO: Fix this in the start scripts!
+//    writer.println("");
     writer.close()
   }
   

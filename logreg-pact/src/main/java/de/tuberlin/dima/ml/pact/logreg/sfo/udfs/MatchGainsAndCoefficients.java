@@ -19,8 +19,9 @@ public class MatchGainsAndCoefficients extends MatchStub {
   public static final int IDX_OUT_GAIN = IDX_INPUT1_GAIN;
   public static final int IDX_OUT_COEFFICIENT = 2;
   public static final int IDX_OUT_KEY_CONST_ONE = 3;
+
+//  private static final Log logger = LogFactory.getLog(MatchGainsAndCoefficients.class);
   
-  // TODO _SFO: Define Constant fields
   @Override
   public void match(PactRecord gain, PactRecord coefficient,
       Collector<PactRecord> out) throws Exception {
@@ -28,7 +29,7 @@ public class MatchGainsAndCoefficients extends MatchStub {
     gain.copyFrom(coefficient, new int[] {IDX_INPUT2_COEFFICIENT}, 
         new int[] {IDX_OUT_COEFFICIENT});
     gain.setField(IDX_OUT_KEY_CONST_ONE, PactUtils.pactOne);
-
+    
     out.collect(gain);
   }
 

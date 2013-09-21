@@ -153,4 +153,10 @@ public class SFODriverPact implements SFODriver {
     return counters;
   }
 
+
+  @Override
+  public void resetModel() {
+    this.baseModel = new IncrementalModel(numFeatures);
+  }
+
 }

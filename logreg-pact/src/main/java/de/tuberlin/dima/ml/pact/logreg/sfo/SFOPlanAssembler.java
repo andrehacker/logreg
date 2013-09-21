@@ -98,8 +98,15 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     // ----- HINTS / OPTIMIZATION -----
 
     boolean giveBroadcastHints = true;
+//    boolean giveFineGradeCardinalityHints = true;
+    boolean giveCardinalityHints = true;
     boolean giveFineGradeDopHints = true;
-
+    if (iterations > 1) {
+      // dop has to be the same for all contracts when using iterations. Otherwise you receive this error:
+      // Error: All functions that are part of an iteration must have the same degree-of-parallelism as that iteration.
+      giveFineGradeDopHints = false;
+    }
+    
     // ----- Data Sources -----
     
     FileDataSource trainingVectors = new FileDataSource(
@@ -138,6 +145,11 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     if (giveFineGradeDopHints) {
       initialBaseModelContract.setDegreeOfParallelism(1);
     }
+    // TODO Cardinality hints
+//    if (giveFineGradeCardinalityHints) {
+//      initialBaseModelContract.getCompilerHints().setDistinctCount(new FieldSet(columnIndex), cardinality)
+//      initialBaseModelContract.getCompilerHints().setAvgNumRecordsPerDistinctFields(fieldSet, avgNumRecords)
+//    }
 
     // ----- Iterations -----
     
@@ -145,6 +157,7 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     BulkIteration iteration = null;
     if (iterations > 1) {
       iteration = new BulkIteration("Forward Feature Selection");
+//    iteration.setDegreeOfParallelism(numSubTasks);
       iteration.setInput(initialBaseModelContract);
       iteration.setMaximumNumberOfIterations(iterations);
       baseModelContract = iteration.getPartialSolution();
@@ -179,16 +192,12 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     
     // ----- Workaround 1: Flatten Coefficients -----
     
-    // Keyless-Reducer now works, but pact-web visualization fails to visualize jobs using the feature:(
 //    ReduceContract flattenCoefficients = ReduceContract.builder(ReduceFlattenToVector.class)
     ReduceContract flattenCoefficients = ReduceContract.builder(ReduceFlattenToVector.class, PactInteger.class, ReduceFlattenToVector.IDX_KEY_CONST_ONE)
         .input(trainDimensions)
         .name("Workaround: Flatten trained coefficients (Reduce)")
         .build();
     flattenCoefficients.setParameter(ReduceFlattenToVector.CONF_KEY_NUM_FEATURES, numFeatures);
-    if (giveFineGradeDopHints) {
-      flattenCoefficients.setDegreeOfParallelism(1);
-    }
     
     // ----- Workaround 2: Make 1 out of 2 records -----
 
@@ -235,7 +244,9 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
             .input2(trainDimensions)
             .name("Match Gains and Coefficients")
             .build();
-    matchGainsCoefficients.getCompilerHints().setAvgRecordsEmittedPerStubCall(1);
+    if (giveCardinalityHints) {
+      matchGainsCoefficients.getCompilerHints().setAvgRecordsEmittedPerStubCall(1);
+    }
     
     FileDataSink dataSink = null;
     if (iterations > 1) {

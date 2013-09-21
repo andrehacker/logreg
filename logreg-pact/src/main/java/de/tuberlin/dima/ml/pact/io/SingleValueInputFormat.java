@@ -68,6 +68,7 @@ public class SingleValueInputFormat implements
       }
       @Override
       public long getNumberOfRecords() {
+//        return BaseStatistics.NUM_RECORDS_UNKNOWN;
         return 1;
       }
       @Override

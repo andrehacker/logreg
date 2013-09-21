@@ -72,7 +72,7 @@ public class ApplyBest extends CoGroupStub {
       baseModel.addDimensionToModel(gains.get(i).getDimension(), gains.get(i).getCoefficient());
     }
     
-    PactRecord recordOut = new PactRecord(1);
+    PactRecord recordOut = new PactRecord(2);
     recordOut.setField(IDX_OUT_BASEMODEL, new PactIncrementalModel(baseModel));
     recordOut.setField(IDX_OUT_KEY_CONST_ONE, PactUtils.pactOne);
     out.collect(recordOut);

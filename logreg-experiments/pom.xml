@@ -34,6 +34,14 @@
       <artifactId>logreg-pact</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <!--
+    <dependency>
+      <groupId>eu.stratosphere</groupId>
+      <artifactId>nephele-management</artifactId>
+      <version>0.2-ozone</version>
+      <scope>compile</scope>
+    </dependency>
+    -->
 
     <dependency>
       <groupId>org.scala-lang</groupId>

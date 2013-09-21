@@ -83,18 +83,19 @@
                high-throughput RAIDs.-->
         <!-- Uncomment if you want to change the default value -->
         <!-- Problem: Temp dir needs to be created manually before starting -->
-        <!--
         <property>
                 <key>taskmanager.tmp.dirs</key>
-                <value>/data/users/ahacker/stratosphere_experiments/taskmanager-temp-dir</value>
+                <value>/data/1/journalpaper/tm-local:/data/2/stratosphere/tm-local:/data/3/stratosphere/tm-local:/data/4/stratosphere/tm-local</value>
+                <valueold>/data/users/ahacker/stratosphere_experiments/taskmanager-temp-dir</valueold>
                 <alexander>/data/1/journalpaper/tm-local:/data/2/stratosphere/tm-local:/data/3/stratosphere/tm-local:/data/4/stratosphere/tm-local</alexander>
         </property>
-        -->
 
         <!-- The number of network buffers used by the TaskManager -->
         <property>
                 <key>channel.network.numberOfBuffers</key>
-                <value>10240</value>
+                <value>32768</value>
+                <value-old>10240</value-old>
+                <!-- Alexanders setting didn't work for me: Could not start data nodes due to lack of heap space -->
                 <alexander>32768</alexander>
                 <default>2048</default>
         </property>
@@ -108,7 +109,8 @@
 
         <property>
                 <key>jobmanager.rpc.numhandler</key>
-                <value>12</value>
+                <value>25</value>
+                <value-old>12</value-old>
                 <default>8</default>
                 <alexander>25</alexander>
         </property>

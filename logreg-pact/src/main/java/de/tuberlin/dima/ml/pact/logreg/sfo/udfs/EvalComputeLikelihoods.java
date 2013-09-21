@@ -25,6 +25,9 @@ public class EvalComputeLikelihoods extends CrossStub {
   public static final int IDX_OUT_LL_BASE = EvalSumLikelihoods.IDX_LL_BASE;
   public static final int IDX_OUT_LL_NEW = EvalSumLikelihoods.IDX_LL_NEW;
   
+  private boolean baseModelCached = false;
+  private IncrementalModel baseModel = null;
+
   private final PactRecord recordOut = new PactRecord(3);
 
   @Override
@@ -34,7 +37,12 @@ public class EvalComputeLikelihoods extends CrossStub {
     int y = testRecord.getField(IDX_INPUT1_INPUT_RECORD, PactInteger.class).getValue();
     Vector xi = testRecord.getField(IDX_INPUT1_LABEL, PactVector.class).getValue();
     
-    IncrementalModel baseModel = baseModelAndCoefficients.getField(IDX_INPUT2_BASEMODEL, PactIncrementalModel.class).getValue();
+    // Optimization: Cache basemodel, will always be the same
+    if (!baseModelCached) {
+      baseModel = baseModelAndCoefficients.getField(IDX_INPUT2_BASEMODEL, PactIncrementalModel.class).getValue();
+      baseModelCached = true;
+    }
+
     Vector coefficients = baseModelAndCoefficients.getField(IDX_INPUT2_TRAINED_COEFFICIENTS, PactVector.class).getValue();
     
 //    System.out.println("EVAL CROSS: y=" + y + " xi-non-zeros=" + xi.getNumNonZeroElements() + " baseModel-non-zeros=" + baseModel.getW().getNumNonZeroElements() + " coefficients-non-zeros=" + coefficients.getNumNonZeroElements());

@@ -36,12 +36,12 @@ manglePathList() {
 }
 
 # The default Java heap size for the Nephele Job Manager in MB
-DEFAULT_NEPHELE_JM_HEAP=1024
 #DEFAULT_NEPHELE_JM_HEAP=256
+DEFAULT_NEPHELE_JM_HEAP=512
 
 # The default Java heap size for the Nephele Task Manager in MB
-DEFAULT_NEPHELE_TM_HEAP=29696
 #DEFAULT_NEPHELE_TM_HEAP=512
+DEFAULT_NEPHELE_TM_HEAP=1536
 
 # Optional Nephele parameters
 #NEPHELE_OPTS=""
@@ -92,12 +92,12 @@ fi
 
 # Define NEPHELE_JM_HEAP if it is not already set
 if [ -z "${NEPHELE_JM_HEAP+x}" ]; then
-  NEPHELE_JM_HEAP=$DEFAULT_NEPHELE_JM_HEAP
+	NEPHELE_JM_HEAP=$DEFAULT_NEPHELE_JM_HEAP
 fi
 
 # Define NEPHELE_TM_HEAP if it is not already set
 if [ -z "${NEPHELE_TM_HEAP+x}" ]; then
-  NEPHELE_TM_HEAP=$DEFAULT_NEPHELE_TM_HEAP
+	NEPHELE_TM_HEAP=$DEFAULT_NEPHELE_TM_HEAP
 fi
 
 # Define the main directory of the Nephele installation
@@ -152,6 +152,3 @@ rotateLogFile() {
                 mv "$log" "$log.$num";
         fi
 }
-
-# Hardcoded: Overwrite PID folder
-NEPHELE_PID_DIR=/tmp/pids-stratosphere-0.2-ozone

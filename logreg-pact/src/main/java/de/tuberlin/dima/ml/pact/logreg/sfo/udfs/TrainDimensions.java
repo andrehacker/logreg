@@ -3,9 +3,6 @@ package de.tuberlin.dima.ml.pact.logreg.sfo.udfs;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.google.common.collect.Lists;
 
 import de.tuberlin.dima.ml.logreg.sfo.NewtonSingleFeatureOptimizer;
@@ -41,7 +38,7 @@ public class TrainDimensions extends ReduceStub {
   private double lambda;
   private double tolerance;
   
-  private static final Log logger = LogFactory.getLog(TrainDimensions.class);
+//  private static final Log logger = LogFactory.getLog(TrainDimensions.class);
   
   private final PactRecord recordOut = new PactRecord(3);
   

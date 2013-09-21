@@ -29,4 +29,9 @@ public interface SFODriver {
    */
   public Map<String, Long> getAllCounters();
   
+  /**
+   * Reset the model to the initial (empty) model
+   */
+  public void resetModel();
+  
 }

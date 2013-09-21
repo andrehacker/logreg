@@ -20,21 +20,30 @@ public class TrainComputeProbabilities extends CrossStub {
   
   public static final int IDX_INPUT2_BASEMODEL = 0;
 
-  // This contract is chained (hardcoded)
   public static final int IDX_OUT_DIMENSION = TrainDimensions.IDX_DIMENSION;
   public static final int IDX_OUT_LABEL = TrainDimensions.IDX_LABEL;
   public static final int IDX_OUT_XID = TrainDimensions.IDX_XID;
   public static final int IDX_OUT_PI = TrainDimensions.IDX_PI;
   
+  private boolean baseModelCached = false;
+  private IncrementalModel baseModel = null;
+
   private final PactRecord recordOut = new PactRecord();
 
+//  private static final Log logger = LogFactory.getLog(TrainComputeProbabilities.class);
+  
   @Override
   public void cross(PactRecord trainingVector, PactRecord model,
       Collector<PactRecord> out) throws Exception {
 
     int y = trainingVector.getField(IDX_INPUT1_INPUT_RECORD, PactInteger.class).getValue();
     Vector xi = trainingVector.getField(IDX_INPUT1_LABEL, PactVector.class).getValue();
-    IncrementalModel baseModel = model.getField(IDX_INPUT2_BASEMODEL, PactIncrementalModel.class).getValue();
+
+    // Optimization: Cache basemodel, will always be the same
+    if (!baseModelCached) {
+      baseModel = model.getField(IDX_INPUT2_BASEMODEL, PactIncrementalModel.class).getValue();
+      baseModelCached = true;
+    }
     
 //    System.out.println("TRAIN CROSS: y=" + y + " xi non-zeros=" + xi.getNumNonZeroElements());
     
