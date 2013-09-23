@@ -7,6 +7,7 @@ import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.logreg.sfo.SFOGlobalSettings;
 import de.tuberlin.dima.ml.pact.logreg.sfo.PactIncrementalModel;
 import de.tuberlin.dima.ml.pact.types.PactVector;
+import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.pact.common.stubs.Collector;
 import eu.stratosphere.pact.common.stubs.CrossStub;
 import eu.stratosphere.pact.common.type.PactRecord;
@@ -29,6 +30,12 @@ public class EvalComputeLikelihoods extends CrossStub {
   private IncrementalModel baseModel = null;
 
   private final PactRecord recordOut = new PactRecord(3);
+  
+  @Override
+  public void open(Configuration parameters) throws Exception {
+	// When using iterations, the udf instance will stay the same. We have to deserialize again.
+	baseModelCached = false;
+  }
 
   @Override
   public void cross(PactRecord testRecord, PactRecord baseModelAndCoefficients,

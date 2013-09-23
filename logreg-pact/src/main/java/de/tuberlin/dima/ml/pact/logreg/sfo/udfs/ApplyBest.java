@@ -66,7 +66,8 @@ public class ApplyBest extends CoGroupStub {
 
     logger.info("Best coefficients:");
     printTopGains(gains);
-    
+
+    logger.info("Old base model usedDimensions size: " + baseModel.getUsedDimensions().size());
     for (int i=0; i<addPerIteration; ++i) {
       logger.info("Add to basemodel: dim=" + gains.get(i).getDimension() + " coefficient=" + gains.get(i).getCoefficient());
       baseModel.addDimensionToModel(gains.get(i).getDimension(), gains.get(i).getCoefficient());

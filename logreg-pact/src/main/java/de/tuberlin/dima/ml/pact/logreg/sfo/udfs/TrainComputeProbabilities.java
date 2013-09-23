@@ -7,6 +7,7 @@ import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import de.tuberlin.dima.ml.logreg.sfo.SFOGlobalSettings;
 import de.tuberlin.dima.ml.pact.logreg.sfo.PactIncrementalModel;
 import de.tuberlin.dima.ml.pact.types.PactVector;
+import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.pact.common.stubs.Collector;
 import eu.stratosphere.pact.common.stubs.CrossStub;
 import eu.stratosphere.pact.common.type.PactRecord;
@@ -33,6 +34,12 @@ public class TrainComputeProbabilities extends CrossStub {
 //  private static final Log logger = LogFactory.getLog(TrainComputeProbabilities.class);
   
   @Override
+  public void open(Configuration parameters) throws Exception {
+	// When using iterations, the udf instance will stay the same. We have to deserialize again.
+	baseModelCached = false;
+  }
+  
+  @Override
   public void cross(PactRecord trainingVector, PactRecord model,
       Collector<PactRecord> out) throws Exception {
 
@@ -45,7 +52,7 @@ public class TrainComputeProbabilities extends CrossStub {
       baseModelCached = true;
     }
     
-//    System.out.println("TRAIN CROSS: y=" + y + " xi non-zeros=" + xi.getNumNonZeroElements());
+//    logger.info("TRAIN CROSS: y=" + y + " xi non-zeros=" + xi.getNumNonZeroElements());
     
     double pi = LogRegMath.predict(xi, baseModel.getW(), SFOGlobalSettings.INTERCEPT);
     for (Vector.Element feature : xi.nonZeroes()) {
