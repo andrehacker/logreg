@@ -19,7 +19,6 @@ import com.google.common.io.Closeables;
 
 import de.tuberlin.dima.ml.logreg.sfo.FeatureGain;
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
-import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
 
 public class SFOToolsHadoop {
   
@@ -34,12 +33,11 @@ public class SFOToolsHadoop {
    * TODO Improvement: Appending only every single added dimension would be nice
    * to reduce startup costs
    */
-  static void writeBaseModel(IncrementalModel baseModel, String hdfsAddress) throws IOException {
-    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress);
+  static void writeBaseModel(IncrementalModel baseModel, Configuration conf) throws IOException {
     
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer writer = null;
-    String baseModelPath = hdfsAddress + "/" + BASE_MODEL_PATH;
+    String baseModelPath = fs.getUri() + "/" + BASE_MODEL_PATH;
     System.out.println("Write basemodel to " + baseModelPath);
     try {
       writer = SequenceFile.createWriter(fs, conf, new Path(baseModelPath),
@@ -54,8 +52,8 @@ public class SFOToolsHadoop {
     System.out.println("READ BASE MODEL FS.DEFAULTFS: " + conf.get("fs.defaultFS"));
     IncrementalModel baseModel = null;
     FileSystem fs = FileSystem.get(conf);
-//    String baseModelPath = "hdfs://localhost:9000/" + BASE_MODEL_PATH;
-    String baseModelPath = conf.get("fs.defaultFS") + "/" + BASE_MODEL_PATH;
+//    String baseModelPath = conf.get("fs.defaultFS") + "/" + BASE_MODEL_PATH;
+    String baseModelPath = fs.getUri() + "/" + BASE_MODEL_PATH;
     System.out.println("Read basemodel from " + baseModelPath);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(baseModelPath), conf);
     try {
@@ -70,11 +68,11 @@ public class SFOToolsHadoop {
     return baseModel;
   }
   
-  static List<FeatureGain> readEvalResult(String path, String hdfsAddress) throws IOException {
+  static List<FeatureGain> readEvalResult(String path, Configuration conf) throws IOException {
     
     List<FeatureGain> list = Lists.newArrayList();
     
-    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress);
+//    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress);
     
     Path dir = new Path(path);
     FileSystem fs = FileSystem.get(conf);

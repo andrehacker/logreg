@@ -39,9 +39,10 @@ public class SFODriverHadoop implements SFODriver {
   private String testOutputPath;
   
   private String hadoopConfDir;
-  private String jobTrackerAddress;
-  private String hdfsAddress;
+//  private String jobTrackerAddress;
+//  private String hdfsAddress;
   private String jarPath;   // might be empty
+//  private Configuration configuration;
 
   private int numFeatures;
   private double newtonTolerance;
@@ -72,9 +73,10 @@ public class SFODriverHadoop implements SFODriver {
       double newtonTolerance,
       int newtonMaxIterations,
       double regularization,
-      String jobTrackerAddress,
-      String hdfsAddress,
+//      String jobTrackerAddress,
+//      String hdfsAddress,
       String hadoopConfDir,
+//      Configuration configuration,
       String jarPath) {
     this.trainInputFile = trainInputFile;
     this.testInputFile = testInputFile;
@@ -86,9 +88,10 @@ public class SFODriverHadoop implements SFODriver {
     this.newtonTolerance = newtonTolerance;
     this.newtonMaxIterations = newtonMaxIterations;
     this.regularization = regularization;
-    this.jobTrackerAddress = jobTrackerAddress;
-    this.hdfsAddress = hdfsAddress;
+//    this.jobTrackerAddress = jobTrackerAddress;
+//    this.hdfsAddress = hdfsAddress;
     this.hadoopConfDir = hadoopConfDir;
+//    this.configuration = configuration;
     this.jarPath = jarPath;
 
     // Create empty model
@@ -119,20 +122,25 @@ public class SFODriverHadoop implements SFODriver {
     final Stopwatch stopTrain = new Stopwatch();
     final Stopwatch stopTest = new Stopwatch();
     final Stopwatch stopReadResults = new Stopwatch();
+    
+    // Read configuration from config folder
+    Configuration configuration = HadoopUtils.createConfigurationFromConfDir(hadoopConfDir);
 
     // Make base model available for train/test mappers
-    SFOToolsHadoop.writeBaseModel(baseModel, hdfsAddress);
+    SFOToolsHadoop.writeBaseModel(baseModel, configuration);
 
     // ----- TRAIN -----
     stopTotal.start();
     stopTrain.start();
 //    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress, jarPath);
-    Configuration conf = HadoopUtils.createConfigurationUsingConfDir(hadoopConfDir, jarPath);
+//    Configuration conf = HadoopUtils.createConfigurationFromConfDir(hadoopConfDir, jarPath);
+    
+    HadoopUtils.addJarToConfiguration(configuration, jarPath);
 
 //    private double newtonTolerance;
 //    private int newtonMaxIterations;
 //    private double regularization;
-    ToolRunner.run(conf, new SFOTrainJob(
+    ToolRunner.run(configuration, new SFOTrainJob(
           trainInputFile,
           isMultilabelInput,
           positiveClass,
@@ -149,7 +157,7 @@ public class SFODriverHadoop implements SFODriver {
 
     // ----- TEST -----
     stopTest.start();
-    ToolRunner.run(conf, new SFOEvalJob(testInputFile, isMultilabelInput, positiveClass, testOutputPath, numReduceTasks,
+    ToolRunner.run(configuration, new SFOEvalJob(testInputFile, isMultilabelInput, positiveClass, testOutputPath, numReduceTasks,
         numFeatures, trainOutputPath), null);
     stopTest.stop(); stopTotal.stop();
     counters.put(COUNTER_KEY_TEST_TIME, stopTest.elapsed(TimeUnit.MILLISECONDS));
@@ -158,7 +166,7 @@ public class SFODriverHadoop implements SFODriver {
 
     // ----- READ RESULTS -----
     stopReadResults.start();
-    gains = SFOToolsHadoop.readEvalResult(testOutputPath, hdfsAddress);
+    gains = SFOToolsHadoop.readEvalResult(testOutputPath, configuration);
     stopReadResults.stop();
     counters.put(COUNTER_KEY_READ_RESULT_GAINS, stopReadResults.elapsed(TimeUnit.MILLISECONDS));
     Collections.sort(gains, Collections.reverseOrder());
@@ -173,9 +181,13 @@ public class SFODriverHadoop implements SFODriver {
    */
   @Override
   public void addBestFeatures(int n) throws IOException {
+    
+    // Read configuration from config folder
+    Configuration configuration = HadoopUtils.createConfigurationFromConfDir(hadoopConfDir);
+    
     // Read coefficients
-    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress);
-    List<Double> coefficients = SFOToolsHadoop.readTrainedCoefficients(conf,
+//    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress);
+    List<Double> coefficients = SFOToolsHadoop.readTrainedCoefficients(configuration,
         numFeatures, trainOutputPath);
 
     // Add best to base model
@@ -190,7 +202,7 @@ public class SFODriverHadoop implements SFODriver {
     }
 
     // Write updated model to hdfs
-    SFOToolsHadoop.writeBaseModel(baseModel, hdfsAddress);
+    SFOToolsHadoop.writeBaseModel(baseModel, configuration);
 
     System.out.println("- New base model: " + baseModel.getW().toString());
   }
@@ -207,7 +219,6 @@ public class SFODriverHadoop implements SFODriver {
    */
   @Override
   public void retrainBaseModel() {
-    // TODO Major: Retrain Base Model!
     System.out.println("Retraining base model not yet implemented");
   }
 

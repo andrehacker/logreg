@@ -72,7 +72,7 @@
   <!-- NODE MANAGER MEMORY -->
   <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
-    <value>8192</value>
+    <value>29696</value>
     <default>8192</default>
     <description>Amount of physical memory, in MB, that can be allocated for containers.
       (Defines total available resources on the NodeManager to be made available to running containers)</description>
@@ -95,6 +95,10 @@
     <name>yarn.scheduler.minimum-allocation-mb</name>
     <value>1024</value>
     <default>1024</default>
+    <tuning-note>
+        Yarn can only allocate containers with a size that is the multiple of this. Makes sense to leave this at default, so that the maximum memory can be used (yarn.nodemanager.resource.memory-mb)
+        mapreduce.map.memory.mb and mapreduce.map.reduce.mb can define more fine grade how much memory they want
+    </tuning-note>
     <description>The minimum allocation for every container request at the RM, in MBs. Memory requests lower than this won't take effect, and the specified value will get allocated at minimum.</description>
   </property>
 

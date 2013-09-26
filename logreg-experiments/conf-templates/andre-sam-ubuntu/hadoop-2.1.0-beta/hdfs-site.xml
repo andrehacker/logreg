@@ -56,4 +56,17 @@
     </description>
   </property>
 
+  <property>
+    <name>dfs.blocksize</name>
+    <value>64m</value>
+    <default>134217728</default>
+    <description>
+      The default block size for new files, in bytes.
+      You can use the following suffix (case insensitive):
+      k(kilo), m(mega), g(giga), t(tera), p(peta), e(exa) to specify the size (such as 128k, 512m, 1g, etc.),
+      Or provide complete size in bytes (such as 134217728 for 128 MB).
+    </description>
+  </property>
+
+
 </configuration>

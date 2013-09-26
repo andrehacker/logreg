@@ -17,6 +17,9 @@ import de.tuberlin.dima.ml.mapred.logreg.sfo.SFODriverHadoop
 import de.tuberlin.dima.ml.pact.logreg.sfo.SFODriverPact
 import com.google.common.base.Throwables
 import scala.collection.JavaConversions
+import org.apache.hadoop.conf.Configuration
+import de.tuberlin.dima.ml.mapred.util.HadoopUtils
+import org.apache.hadoop.fs.FileSystem
 
 object SFOExperiment extends Experiment {
   
@@ -49,7 +52,6 @@ object SFOExperiment extends Experiment {
     
       val sysConfPath = if (args.length>=2) { args(0) }
           else {
-  //          "/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-1.2.1.properties"
             "/home/andre/dev/logreg-repo/logreg-experiments/conf-templates/andre-sam-ubuntu/sysconf-hadoop-2.1.0-beta.properties" 
           }
       val experimentConfPath = if (args.length>=2) args(1)
@@ -61,7 +63,6 @@ object SFOExperiment extends Experiment {
       // --------------- EXPERIMENT PARAMETERS ----------
       
       val experimentName = getProperty("experiment_name")
-      
       val currentSut = getProperty("sut")
   
       // --------------- JOB PARAMETERS ----------
@@ -104,9 +105,8 @@ object SFOExperiment extends Experiment {
       
       // --------------- JOB DRIVER ----------
   
-      val jobTrackerAddress = getSysProperty("hadoop_jobtracker_address")
-      val hdfsAddress = getSysProperty("hdfs_address")
-      val hadoopConfDir = getSysProperty("hadoop_conf")
+//      val jobTrackerAddress = getSysProperty("hadoop_jobtracker_address")
+      val hadoopConfPath = getSysProperty("hadoop_conf")
       
       val sfoDriverHadoop = new SFODriverHadoop(
         inputTrainHadoop,
@@ -119,9 +119,8 @@ object SFOExperiment extends Experiment {
         newtonTolerance,
         newtonMaxIterations,
         regularization,
-        jobTrackerAddress,
-        hdfsAddress,
-        hadoopConfDir,
+        hadoopConfPath,
+//        configuration,
         jarPathHadoop)
       
       val ozoneConfPath = getSysProperty("ozone_conf")

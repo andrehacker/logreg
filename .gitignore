@@ -26,3 +26,6 @@ target
 # output folders
 */output-aim3*
 */output-sfo*
+
+# Logfiles (experiments)
+*.log

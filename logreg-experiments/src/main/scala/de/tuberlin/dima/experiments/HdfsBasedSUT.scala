@@ -26,10 +26,11 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   val hadoopSlavesFile = getProperty("hadoop_slaves_file")
   val hadoopPidFolder = getProperty("hadoop_pid_folder")
   val hdfsDataDirs = getProperty("hdfs_data_dir").split(",")
-  val hdfsAddress = getProperty("hdfs_address")
+//  val hdfsAddress = getProperty("hdfs_address")
   val hdfsNameNodeHostname = getProperty("hdfs_namenode_hostname")
 
-  val CONF_KEY_HDFS_ADDRESS = "fs.default.name"
+//  val CONF_KEY_HDFS_ADDRESS = "fs.default.name"
+//  val CONF_KEY_HDFS_ADDRESS = "fs.defaultFS" // for yarn only
   val SEARCH_STRING_DATANODE_CONNECTED = "registerdatanode"
   
   override def deploy() = {
@@ -157,10 +158,10 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   
   override def fsLoadData(localPath: String, destinationPath: String): Boolean = {
     
-    logger.info("-------------------- LOAD DATA --------------------\n")
-    logger.info("Copy {} to {} using hdfs {}", localPath, destinationPath, hdfsAddress)
-    
     val fs = getHDFSFileSystem
+    
+    logger.info("-------------------- LOAD DATA --------------------\n")
+    logger.info("Copy {} to {} using hdfs (uri): {}", localPath, destinationPath, fs.getUri())
     
     // See copy method in http://svn.apache.org/viewvc/hadoop/common/tags/release-1.2.1/src/core/org/apache/hadoop/fs/FileUtil.java?view=markup
     // Old: ${HDFS_BIN}/hadoop fs -copyFromLocal $INPUT $OUTPUT
@@ -224,7 +225,10 @@ abstract class HdfsBasedSUT(confFile: String) extends SUT(confFile) {
   
   protected def getHDFSFileSystem(): FileSystem = {
     val hdfsConf = new Configuration()
-    hdfsConf.set(CONF_KEY_HDFS_ADDRESS, hdfsAddress)
+    // To load fs.default.name or fs.defaultFS
+    hdfsConf.addResource(new Path(hadoopConfPath + "/core-site.xml"))
+    // To load the blocksize and maybe other hdfs settings (defined by client!)
+    hdfsConf.addResource(new Path(hadoopConfPath + "/hdfs-site.xml"))
     FileSystem.get(hdfsConf)
   }
   

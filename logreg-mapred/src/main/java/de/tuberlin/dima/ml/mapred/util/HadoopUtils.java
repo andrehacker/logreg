@@ -31,7 +31,31 @@ public class HadoopUtils {
     // Add local file to distributed cache
     DistributedCache.addCacheFile(cachePath.toUri(), conf);
   }
+
+  /**
+   * Create a Configuration object with all properties defined in the hadoop config folder. 
+   */
+  public static Configuration createConfigurationFromConfDir(String confDir) {
+    Configuration conf = new Configuration();
+    conf.addResource(new Path(confDir + "/core-site.xml"));
+    conf.addResource(new Path(confDir + "/mapred-site.xml"));
+    conf.addResource(new Path(confDir + "/hdfs-site.xml"));
+    conf.addResource(new Path(confDir + "/yarn-site.xml"));
+    System.out.println("Add resource: " + confDir + "/yarn-site.xml");
+    return conf;
+  }
   
+  public static void addJarToConfiguration(Configuration configuration, String jarPath) {
+    if (!"".equals(jarPath))
+      configuration.set("mapred.jar", jarPath);
+  }
+  
+  @Deprecated
+  public static Configuration createConfiguration(String hdfsAddress, String jobtrackerAddress) {
+    return createConfiguration(hdfsAddress, jobtrackerAddress, "");
+  }
+  
+  @Deprecated
   public static Configuration createConfiguration(String hdfsAddress, String jobtrackerAddress, String jarPath) {
     // TODO: These properties no longer work for yarn (I guess)
     Configuration conf = new Configuration();
@@ -42,29 +66,6 @@ public class HadoopUtils {
     if (!"".equals(jarPath))
       conf.set("mapred.jar", jarPath);
     return conf;
-  }
-
-  /**
-   * Automatically add core-site mapred-site and hdfs-site to config 
-   */
-  public static Configuration createConfigurationUsingConfDir(String confDir, String jarPath) {
-    Configuration conf = new Configuration();
-    conf.addResource(new Path(confDir + "/core-site.xml"));
-    conf.addResource(new Path(confDir + "/mapred-site.xml"));
-    conf.addResource(new Path(confDir + "/hdfs-site.xml"));
-    conf.addResource(new Path(confDir + "/yarn-site.xml"));
-    System.out.println("Add resource: " + confDir + "/yarn-site.xml");
-    if (!"".equals(jarPath))
-      conf.set("mapred.jar", jarPath);
-    return conf;
-  }
-  
-  public static Configuration createConfiguration(String hdfsAddress, String jobtrackerAddress) {
-    return createConfiguration(hdfsAddress, jobtrackerAddress, "");
-  }
-  
-  public static Configuration createConfiguration(String hdfsAddress) {
-    return createConfiguration(hdfsAddress, "");
   }
   
   

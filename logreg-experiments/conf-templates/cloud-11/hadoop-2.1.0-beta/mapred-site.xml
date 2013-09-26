@@ -27,8 +27,8 @@ STATUS: Compared with mapred-default.xml
   <!-- DIRECTORIES -->
   <property>
     <name>mapreduce.cluster.local.dir</name>
-    <value>${hadoop.tmp.dir}/mapred/local</value>
-    <!--<value>/data/1/journalpaper/mapred-local,/data/2/journalpaper/mapred-local,/data/3/journalpaper/mapred-local,/data/4/journalpaper/mapred-local,/data/journalpaper/jm-mapred-local</value>-->
+    <value>/data/1/journalpaper/mapred-local,/data/2/journalpaper/mapred-local,/data/3/journalpaper/mapred-local,/data/4/journalpaper/mapred-local,/data/journalpaper/jm-mapred-local</value>
+    <!--<value>${hadoop.tmp.dir}/mapred/local</value>-->
   </property>
   <!-- DIRECTORIES END -->
 
@@ -53,8 +53,11 @@ STATUS: Compared with mapred-default.xml
 
   <property>
     <name>mapreduce.map.memory.mb</name>
-    <value>2560</value>
+    <value>2048</value>
     <default>???</default>
+    <tuning-note>
+        This should be a multiple of yarn.scheduler.minimum-allocation-mb, because yarn can only allocate containers with sizes that are a multiple of yarn.scheduler.minimum-allocation-mb.
+    </tuning-note>
     <description>
       Used to specify how much memory you need for map (or reduce) task containers.
       Used by the scheduler when negotiating for resources in the cluster, and by the node manager, which runs and monitors the task containers.
@@ -62,14 +65,14 @@ STATUS: Compared with mapred-default.xml
   </property>
   <property>
     <name>mapreduce.map.java.opts</name>
-    <value>-Xmx2048m</value>
+    <value>-Xmx1800m</value>
     <default>-Xmx1024M</default>
     <description>Heap size settings for map tasks</description>
   </property>
 
   <property>
     <name>mapreduce.reduce.memory.mb</name>
-    <value>2560</value>
+    <value>2048</value>
     <default>???</default>
     <description>
       Used to specify how much memory you need for map (or reduce) task containers.
@@ -78,7 +81,7 @@ STATUS: Compared with mapred-default.xml
   </property>
   <property>
     <name>mapreduce.reduce.java.opts</name>
-    <value>-Xmx2048m</value>
+    <value>-Xmx1800m</value>
     <default>-Xmx1024M</default>
     <description>Heap size settings for reduce tasks</description>
   </property>
@@ -130,6 +133,14 @@ STATUS: Compared with mapred-default.xml
     </description>
   </property>
 
+  <property>
+    <name>mapreduce.jobtracker.handler.count</name>
+    <value>10</value>
+    <default>10</default>
+    <description>
+      The number of server threads for the JobTracker. This should be roughly 4% of the number of tasktracker nodes. 
+    </description>
+  </property>
 
   <property>
     <name>mapreduce.job.ubertask.enable</name>
@@ -148,14 +159,14 @@ STATUS: Compared with mapred-default.xml
 
   <property>
     <name>mapreduce.tasktracker.map.tasks.maximum</name>
-    <value>8</value>
+    <value>16</value>
     <default>2</default>
     <description>The maximum number of map tasks that will be run simultaneously by a task tracker.</description>
   </property>
 
   <property>
     <name>mapreduce.tasktracker.reduce.tasks.maximum</name>
-    <value>8</value>
+    <value>16</value>
     <default>2</default>
     <description>The maximum number of reduce tasks that will be run simultaneously by a task tracker.</description>
   </property>
