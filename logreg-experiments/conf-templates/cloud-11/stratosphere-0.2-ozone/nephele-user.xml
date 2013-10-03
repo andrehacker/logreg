@@ -95,7 +95,6 @@
                 <key>channel.network.numberOfBuffers</key>
                 <value>32768</value>
                 <value-old>10240</value-old>
-                <!-- Alexanders setting didn't work for me: Could not start data nodes due to lack of heap space -->
                 <alexander>32768</alexander>
                 <default>2048</default>
         </property>
@@ -104,6 +103,7 @@
         <property>
                 <key>channel.network.bufferSizeInBytes</key>
                 <value>32768</value>
+                <webspam>131072</webspam>
                 <default>32768</default>
         </property>
 
@@ -120,13 +120,12 @@
                 <value>false</value>
         </property>
 
-        <!-- Used by Alexander. Still supported? -->
-        <!--
+        <!-- Defaults to nephele instance memory size. See https://github.com/dimalabs/ozone/commit/9e12c3ce0f368c9bd76090c6c9871a417c4d7760#diff-c17ed0157a698fe0fffec6342bb344af -->
         <property>
                 <key>taskmanager.memory.size</key>
-                <value>22528</value>
+                <value>20480</value>
+                <alexander>22528</alexander>
         </property>
-        -->
 
         <!-- Used by Alexander. Still supported? -->
         <!--

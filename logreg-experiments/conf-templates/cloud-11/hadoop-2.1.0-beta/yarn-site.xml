@@ -40,6 +40,9 @@
     <name>yarn.nodemanager.aux-services</name>
     <value>mapreduce.shuffle</value>
     <description>Shuffle service that needs to be set for Map Reduce applications. (does not work without this setting)</description>
+    <hadoopbook>YARN doesn’t have tasktrackers to serve map outputs to reduce tasks, so for this function it relies on shuffle handlers, which are long-running auxiliary services running in
+node managers. Since YARN is a general-purpose service the shuffle handlers need to
+be explictly enabled in the  yarn-site.xml</hadoopbook>
   </property>
 
   <!-- LOG AGGREGATION -->

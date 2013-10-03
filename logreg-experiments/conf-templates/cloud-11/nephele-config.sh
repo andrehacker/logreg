@@ -36,10 +36,10 @@ manglePathList() {
 }
 
 # The default Java heap size for the Nephele Job Manager in MB
-DEFAULT_NEPHELE_JM_HEAP=1024
+DEFAULT_NEPHELE_JM_HEAP=2048
 #DEFAULT_NEPHELE_JM_HEAP=256
 
-# The default Java heap size for the Nephele Task Manager in MB
+# The default Java heap size for the Nephele Task Manager in MB: 29696
 DEFAULT_NEPHELE_TM_HEAP=29696
 #DEFAULT_NEPHELE_TM_HEAP=512
 
@@ -74,6 +74,8 @@ this="$bin/$script"
 if [ -z "${JAVA_HOME+x}" ]; then
         JAVA_HOME=/usr/lib/jvm/java-6-sun/
 fi
+# Added by AH
+JAVA_HOME=/usr/lib/jvm/java-7-oracle
 
 if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
     JAVA_RUN=java

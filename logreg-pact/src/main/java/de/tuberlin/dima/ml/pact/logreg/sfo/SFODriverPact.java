@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -37,6 +41,8 @@ public class SFODriverPact implements SFODriver {
   private Map<String, Long> counters = Maps.newHashMap();
   public static final String COUNTER_KEY_TOTAL_WALLCLOCK = "total-wall-clock";
   private static final String COUNTER_KEY_READ_RESULT = "read-result-gains-and-coefficients";
+  
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
   
   public SFODriverPact(
       String inputPathTrain,
@@ -96,6 +102,8 @@ public class SFODriverPact implements SFODriver {
         addPerIteration,
         this.baseModel
         );
+    logger.info("Job Args: " + Joiner.on(' ').join(jobArgs));
+    
     if (runLocal) {
       Plan sfoPlan = new SFOPlanAssembler().getPlan(jobArgs);
       runner.runLocal(sfoPlan);

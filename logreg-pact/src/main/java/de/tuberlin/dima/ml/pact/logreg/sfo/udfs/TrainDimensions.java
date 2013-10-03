@@ -38,6 +38,9 @@ public class TrainDimensions extends ReduceStub {
   private double lambda;
   private double tolerance;
   
+  // ATTENTION: This does not make the trained coefficients vector smaller - we always allocate a dense vector with numDimensions!
+  private static final int THRESHOLD_MIN_NUM_RECORDS = 0;
+  
 //  private static final Log logger = LogFactory.getLog(TrainDimensions.class);
   
   private final PactRecord recordOut = new PactRecord(3);
@@ -74,6 +77,10 @@ public class TrainDimensions extends ReduceStub {
           record.getField(IDX_XID, PactDouble.class).getValue(), 
           record.getField(IDX_LABEL, PactInteger.class).getValue(), 
           record.getField(IDX_PI, PactDouble.class).getValue()));
+    }
+    
+    if (cache.size() < THRESHOLD_MIN_NUM_RECORDS) {
+      return;
     }
     
     // Train single dimension using Newton Raphson

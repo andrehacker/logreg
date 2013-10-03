@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Stopwatch;
 
 import eu.stratosphere.nephele.configuration.ConfigConstants;
@@ -28,6 +31,8 @@ public class JobRunner {
   
   private long lastWallClockRuntime = 0;    // runtime as seen from the client
   private long lastNetRuntime = 0;  // net runtime of the JobEvent
+  
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
   
   /**
    * Run a Stratosphere job on a local instance of Nephele (a bit like Hadoop
@@ -131,6 +136,8 @@ public class JobRunner {
       }
       
       Client client = new Client(config);
+      
+      printPlanJson(prog, client);
 
       // Client.run(...)
       //  - compiles the PactProgram to a OptimizedPlan using
@@ -165,6 +172,25 @@ public class JobRunner {
     }
   }
   
+  private void printPlanJson(PactProgram program, Client client) {
+	
+	String jsonPlan = null;
+	try {
+		jsonPlan = client.getOptimizerPlanAsJSON(program);
+	} catch (ProgramInvocationException e) {
+		e.printStackTrace();
+	} catch (ErrorInPlanAssemblerException e) {
+	  e.printStackTrace();
+	}
+	
+	if(jsonPlan != null) {
+		System.out.println("-------------------- PACT Execution Plan ---------------------");
+		System.out.println(jsonPlan);
+		System.out.println("--------------------------------------------------------------");
+	} else {
+		System.err.println("JSON plan could not be compiled.");
+	}
+  }
   
 
   /**

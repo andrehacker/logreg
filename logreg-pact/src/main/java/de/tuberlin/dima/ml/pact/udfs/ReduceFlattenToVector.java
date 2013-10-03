@@ -34,6 +34,8 @@ public class ReduceFlattenToVector extends ReduceStub {
   public static final String CONF_KEY_NUM_FEATURES = "parameter.NUM_FEATURES";
   private int numFeatures;
   
+//  private static final Log logger = LogFactory.getLog(ReduceFlattenToVector.class);
+  
   @Override
   public void open(Configuration parameters) throws Exception {
     super.open(parameters);

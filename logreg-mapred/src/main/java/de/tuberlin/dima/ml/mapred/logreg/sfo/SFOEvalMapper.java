@@ -21,7 +21,7 @@ public class SFOEvalMapper extends Mapper<LongWritable, Text, IntWritable, Doubl
   
   private static IntWritable outputKey = new IntWritable();
   private static DoublePairWritable outputValue = new DoublePairWritable();
-
+  
   private boolean isMultilabelInput;
   private int positiveClass;
   private int numFeatures;
@@ -34,7 +34,7 @@ public class SFOEvalMapper extends Mapper<LongWritable, Text, IntWritable, Doubl
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-
+    
     this.isMultilabelInput = Boolean.parseBoolean(context.getConfiguration().get(SFOEvalJob.CONF_KEY_IS_MULTILABEL_INPUT));
     this.positiveClass = Integer.parseInt(context.getConfiguration().get(SFOEvalJob.CONF_KEY_POSITIVE_CLASS));
     this.numFeatures = Integer.parseInt(context.getConfiguration().get(SFOEvalJob.CONF_KEY_NUM_FEATURES));
@@ -47,7 +47,7 @@ public class SFOEvalMapper extends Mapper<LongWritable, Text, IntWritable, Doubl
   
   @Override
   public void map(LongWritable ignore, Text line, Context context) throws IOException, InterruptedException {
-
+	
     Vector xi = new RandomAccessSparseVector(numFeatures);
     int y;
     if (isMultilabelInput) {
@@ -55,7 +55,7 @@ public class SFOEvalMapper extends Mapper<LongWritable, Text, IntWritable, Doubl
     } else {
       y = LibSvmVectorReader.readVectorSingleLabel(xi, line.toString());
     }
-
+    
     // Emit log-likelihood for new and old model (not prediction as in singh's paper)
     // See SFOJob comments for description
     // 1) Compute log-likelihood for current x_i using the base model (without new coefficient)
