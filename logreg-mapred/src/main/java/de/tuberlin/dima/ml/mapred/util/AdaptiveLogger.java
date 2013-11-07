@@ -4,15 +4,17 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
+ * TODO DELETE THIS CLASS - don't need it, We can either always work with the
+ * logger, or always work with std-out. Hadoop will log both.
+ * 
  * Wrapper class for Logger
  * 
- * Detects if we run in localmode and logs to System.out in this case
- * Eclipse will highlight the output then (easy to see)
- * Otherwise it logs to log4j
+ * Detects if we run in localmode and logs to System.out in this case Eclipse
+ * will highlight the output then (easy to see) Otherwise it logs to log4j
  * 
  * TODO Finish! Need a reference to Configuration instance to detect local mode.
  * 
- * Would be nice to get rid of this class and use sl4j only  
+ * Would be nice to get rid of this class and use sl4j only
  */
 public class AdaptiveLogger {
   

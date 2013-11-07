@@ -21,6 +21,18 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 
+/**
+ * This UDF adds the best feature to the base model.
+
+ * As the first input, it receives a tuple (log-likelihood-gain, trained-coefficient) for each feature.
+ * The second input is the current base model.
+ * The output is new base model, extended by the feature with the highest gain. 
+ * 
+ * We tried to make the first input sorted, so that we can just read the k best records we want to add.
+ * However, sorting did not work.
+ * 
+ * @author André Hacker
+ */
 public class ApplyBest extends CoGroupStub {
 
   public static final int IDX_INPUT1_DIMENSION = MatchGainsAndCoefficients.IDX_OUT_DIMENSION;
@@ -52,33 +64,31 @@ public class ApplyBest extends CoGroupStub {
 
     IncrementalModel baseModel = modelRecord.next().getField(IDX_INPUT2_BASEMODEL, PactIncrementalModel.class).getValue();
 	
-	// TODO Guava Orderning http://www.michaelpollmeier.com/selecting-top-k-items-from-a-list-efficiently-in-java-groovy/
-    if (true == false) {
-      PactRecord gainAndCoefficientRecord = null;
-      List<FeatureGain> gains = Lists.newArrayList();
-      while (gainsAndCoefficients.hasNext()) {
-        gainAndCoefficientRecord = gainsAndCoefficients.next();
-        int dim = gainAndCoefficientRecord.getField(IDX_INPUT1_DIMENSION, PactInteger.class).getValue();
-        double gain = gainAndCoefficientRecord.getField(IDX_INPUT1_GAIN, PactDouble.class).getValue();
-        double coefficient = gainAndCoefficientRecord.getField(IDX_INPUT1_COEFFICIENT, PactDouble.class).getValue();
-        gains.add(new FeatureGain(dim, gain, coefficient));
-      }
-      Collections.sort(gains, Collections.reverseOrder());
-  
-      logger.info("Best coefficients:");
-      printTopGains(gains);
-  
-      logger.info("Old base model usedDimensions size: " + baseModel.getUsedDimensions().size());
-      for (int i=0; i<addPerIteration; ++i) {
-        logger.info("Add to basemodel: dim=" + gains.get(i).getDimension() + " coefficient=" + gains.get(i).getCoefficient());
-        baseModel.addDimensionToModel(gains.get(i).getDimension(), gains.get(i).getCoefficient());
-      }
-      
-      PactRecord recordOut = new PactRecord(2);
-      recordOut.setField(IDX_OUT_BASEMODEL, new PactIncrementalModel(baseModel));
-      recordOut.setField(IDX_OUT_KEY_CONST_ONE, PactUtils.pactOne);
-      out.collect(recordOut);
+	// Optional: Use Guava Orderning to get top k features: http://www.michaelpollmeier.com/selecting-top-k-items-from-a-list-efficiently-in-java-groovy/
+    PactRecord gainAndCoefficientRecord = null;
+    List<FeatureGain> gains = Lists.newArrayList();
+    while (gainsAndCoefficients.hasNext()) {
+      gainAndCoefficientRecord = gainsAndCoefficients.next();
+      int dim = gainAndCoefficientRecord.getField(IDX_INPUT1_DIMENSION, PactInteger.class).getValue();
+      double gain = gainAndCoefficientRecord.getField(IDX_INPUT1_GAIN, PactDouble.class).getValue();
+      double coefficient = gainAndCoefficientRecord.getField(IDX_INPUT1_COEFFICIENT, PactDouble.class).getValue();
+      gains.add(new FeatureGain(dim, gain, coefficient));
     }
+    Collections.sort(gains, Collections.reverseOrder());
+
+    logger.info("Best coefficients:");
+    printTopGains(gains);
+
+    logger.info("Old base model usedDimensions size: " + baseModel.getUsedDimensions().size());
+    for (int i=0; i<addPerIteration; ++i) {
+      logger.info("Add to basemodel: dim=" + gains.get(i).getDimension() + " coefficient=" + gains.get(i).getCoefficient());
+      baseModel.addDimensionToModel(gains.get(i).getDimension(), gains.get(i).getCoefficient());
+    }
+    
+    PactRecord recordOut = new PactRecord(2);
+    recordOut.setField(IDX_OUT_BASEMODEL, new PactIncrementalModel(baseModel));
+    recordOut.setField(IDX_OUT_KEY_CONST_ONE, PactUtils.pactOne);
+    out.collect(recordOut);
   }
   
   private void printTopGains(List<FeatureGain> gains) {

@@ -6,30 +6,20 @@ import java.util.List;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.log4j.Logger;
 
 import com.google.common.collect.Lists;
 
 import de.tuberlin.dima.ml.logreg.LogRegMath;
 import de.tuberlin.dima.ml.logreg.sfo.LogRegSFOTraining;
-import de.tuberlin.dima.ml.mapred.GlobalSettings;
-import de.tuberlin.dima.ml.mapred.util.AdaptiveLogger;
 
 public class SFOTrainReducer extends
     Reducer<IntWritable, SFOIntermediateWritable, IntWritable, DoubleWritable> {
-
-  private static final AdaptiveLogger log = new AdaptiveLogger(
-      Logger.getLogger(SFOTrainReducer.class.getName()), GlobalSettings.LOG_LEVEL);
-  
-//  private double newtonTolerance;
-//  private int newtonMaxIterations;
-//  private double regularization;
 
   private int newtonMaxIterations;
   private double newtonTolerance;
   private double regularization;
 
-  private static final int DEBUG_DIMENSION = -1;
+  private static final int DEBUG_DIMENSION = -1; // 8609; // 196; //10394; // 12219;
   
   @Override
   protected void setup(Context context)
@@ -62,14 +52,15 @@ public class SFOTrainReducer extends
   public void reduce(IntWritable dim, Iterable<SFOIntermediateWritable> values,
       Context context) throws IOException, InterruptedException {
 
-    // log.debug("Reducer for d=" + dim.get());
-
     List<SFOIntermediateWritable> cache = Lists.newArrayList();
 
     double betad = 0;
     int iteration = 0;
     double lastUpdate = 0;
     boolean converged = false;
+    
+    int numPositives = 0; int numNegatives = 0;	// Debug
+//    System.out.println("TRAIN d=" + dim.get());
     while ((++iteration <= newtonMaxIterations) && !converged) {
 
       double batchGradient = 0;
@@ -79,6 +70,8 @@ public class SFOTrainReducer extends
 
         if (iteration == 1) {
           cache.add(new SFOIntermediateWritable(element));
+          numPositives += (element.getLabel()==1 ? 1 : 0);
+          numNegatives += (element.getLabel()==0 ? 1 : 0);
         }
 
         /*
@@ -86,7 +79,7 @@ public class SFOTrainReducer extends
          * directly. The used formula is the same as in the binning optimization
          * section, maybe it related to this.
          * 
-         * TODO Improvement: Why not transfer beta_d * x_id?
+         * TODO We could also transfer beta_d * x_id here
          */
         double xDotw = Math.log(element.getPi() / (1 - element.getPi()));
 
@@ -94,8 +87,6 @@ public class SFOTrainReducer extends
          * Compute the 1st and 2nd derivate
          * 
          * See LogRegMath.logisticFunction how we handle Numeric issues
-         * 
-         * TODO Bug: Why does Singh not use (xDotw + element.getXid() * betad)??
          */
         double piNew = LogRegMath.logisticFunction(
             xDotw + (element.getXid() * betad));
@@ -111,9 +102,6 @@ public class SFOTrainReducer extends
        * 
        * If first and/or second derivate is zero we probably already converged
        * to the optimum and should stop (otherwise we divide by zero)
-       * 
-       * TODO Why does Ng use another error-function (and derivate) where we
-       * divide by N?
        */
 //      betad = newtonUpdate(betad, lastUpdate, )
       if (batchGradientSecond == 0) {
@@ -131,9 +119,10 @@ public class SFOTrainReducer extends
       }
 
       if (dim.get() == DEBUG_DIMENSION)
-        log.debug("- DEBUG: d=" + dim.get() + " iteration=" + iteration
+    	// logger.info
+    	System.out.println("- DEBUG: d=" + dim.get() + " iteration=" + iteration
             + " cacheSize=" + cache.size() + " grad=" + batchGradient
-            + " gradSecond=" + batchGradientSecond + " new beta_d=" + betad);
+            + " gradSecond=" + batchGradientSecond + " new beta_d=" + betad + " numPositives: " + numPositives + " numNegatives: " + numNegatives);
     }
 
     // Write trained coefficient

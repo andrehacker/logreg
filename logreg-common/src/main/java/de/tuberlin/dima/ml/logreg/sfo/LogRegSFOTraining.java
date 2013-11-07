@@ -5,13 +5,17 @@ import org.apache.mahout.math.Vector;
 
 import de.tuberlin.dima.ml.logreg.LogRegMath;
 
+/**
+ * Old (outdated) class.
+ * Contains training methods for a sequential SFO implementation
+ * 
+ * @author André Hacker
+ */
 public class LogRegSFOTraining {
   
   public static Vector trainNewtonSFO(Matrix X, Vector y, Vector w, int maxIterations, double initialWeight, double penalty, boolean debug) {
     
     int rowCount = X.numRows();
-    
-//    this.w = w; // TODO Refactoring: Make this nicer
     
     double penaltyDivN = penalty/rowCount;
     
@@ -37,7 +41,6 @@ public class LogRegSFOTraining {
       // using NG's derivation from http://openclassroom.stanford.edu/MainFolder/DocumentPage.php?course=MachineLearning&doc=exercises/ex5/ex5.html
       // equal to Singhs definition, except the division by n
       // Apply only to the the dimension under training
-      // TODO Avoid penalty on bias and apply real formula (also normalizes before)
       batchGradient += penaltyDivN * w.getQuick(w.size()-1);
       
       // Apply regularization to 2nd derivation

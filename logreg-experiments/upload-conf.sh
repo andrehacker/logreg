@@ -20,5 +20,5 @@ scp conf-templates/cloud-11/nephele-config.sh ahacker@cloud-11.dima.tu-berlin.de
 scp run-sfo-cloud11.sh ahacker@cloud-11.dima.tu-berlin.de:~/experiments/
 ssh ahacker@cloud-11.dima.tu-berlin.de 'chmod -R g+x experiments/run-sfo-cloud11.sh'
 
-ssh ahacker@cloud-11.dima.tu-berlin.de 'chgrp -R hadoop experiments'
-ssh ahacker@cloud-11.dima.tu-berlin.de 'chmod -R g+w experiments'
+ssh ahacker@cloud-11.dima.tu-berlin.de 'chgrp -R hadoop experiments/conf-templates'
+ssh ahacker@cloud-11.dima.tu-berlin.de 'chmod -R g+w experiments/conf-templates'

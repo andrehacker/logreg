@@ -12,21 +12,23 @@ import de.tuberlin.dima.ml.RegressionModel;
 import de.tuberlin.dima.ml.logreg.LogRegMath;
 
 /**
- * Keeps a model that can be extended feature by feature
- * Needed for forward feature selection.
- * Keeps track of the used features (base model) and the unused/remaining features
+ * Keeps a model that can be extended feature by feature. To be used in a
+ * forward feature selection scenario. It owns the current model and keeps track
+ * of the features in the model. In this implementation, the model is a vector
+ * of coefficients that can be used for linear models, e.g. logistic regression.
  * 
- * Assumptions:
- * - We ignore the interception term.
- * 
- * TODO Maybe I don't need unusedDimensions at all, because they are just the rest?!
- * TODO Tradeoff: Either let w also include unused features, or extract only the used
- * V1 (big w): No costs for extraction of used features in w. Requires knowledge of total features. Might take longer to multiply (depends on implementation of sparse vector)
- * V2 (small w): Use DenseVector. Fast to multiply (if basemodel is small).
+ * Tradeoff: Either let w also include unused features, or extract only the used
+ * V1 (big w): No costs for extraction of used features in w. Requires knowledge
+ * of total features. Might take longer to multiply (depends on implementation
+ * of sparse vector) V2 (small w): Use DenseVector. Fast to multiply (if
+ * basemodel is small).
  */
 public class IncrementalModel implements RegressionModel, ClassificationModel {
   
+  // current model, in most cases a sparse vector
   private Vector w;
+  
+  // list with the indices of all features in the model
   private List<Integer> usedDimensions;
 
   /**

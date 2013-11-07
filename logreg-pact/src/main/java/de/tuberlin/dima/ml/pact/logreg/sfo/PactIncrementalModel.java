@@ -14,8 +14,7 @@ import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
 import eu.stratosphere.pact.common.type.Value;
 
 /**
- * TODO Refactoring: Avoid redundant code, implement for Writable and Value and
- * move to common instead
+ * Wrapper to make an incremental model usable within PACT
  */
 public class PactIncrementalModel implements Value {
   

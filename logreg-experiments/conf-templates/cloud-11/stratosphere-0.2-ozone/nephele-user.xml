@@ -104,6 +104,7 @@
                 <key>channel.network.bufferSizeInBytes</key>
                 <value>32768</value>
                 <webspam>131072</webspam>
+                <rcv1>32768</rcv1>
                 <default>32768</default>
         </property>
 
@@ -124,6 +125,8 @@
         <property>
                 <key>taskmanager.memory.size</key>
                 <value>20480</value>
+                <webspam>15360</webspam>
+                <rcv1>20480</rcv1>
                 <alexander>22528</alexander>
         </property>
 

@@ -14,7 +14,7 @@ import de.tuberlin.dima.ml.util.MLUtils;
 import de.tuberlin.dima.ml.validation.Validation;
 
 /**
- * Sequential version of SFO algorithm.
+ * Sequential version of SFO algorithm (outdated)
  * 
  * Works with a csv input, internally represents data as Matrix
  */

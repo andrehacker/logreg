@@ -30,6 +30,7 @@
   <property>
     <name>io.file.buffer.size</name>
     <value>524288</value>
+    <description>Size of read/write buffer used in SequenceFiles</description>
   </property>
 
   <property>

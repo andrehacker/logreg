@@ -2,9 +2,18 @@ package de.tuberlin.dima.ml.logreg.sfo;
 
 import com.google.common.primitives.Doubles;
 
+/**
+ * Wraps the gain and trained coefficient for a single feature (dimension). Will
+ * be populated after the feature was evaluated.
+ * 
+ * The gain refers to the gain in any metric (e.g. log-likelihood) when adding
+ * this feature to an existing model (base model)
+ * 
+ * @author André Hacker
+ */
 public class FeatureGain implements Comparable<FeatureGain> {
   private int dimension;
-  private double gain; // currently log-likelihood gain
+  private double gain;
   private double coefficient;
 
   public FeatureGain(int dimension, double gain) {

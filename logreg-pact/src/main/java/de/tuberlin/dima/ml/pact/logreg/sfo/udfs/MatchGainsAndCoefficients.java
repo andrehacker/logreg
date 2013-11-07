@@ -6,6 +6,12 @@ import eu.stratosphere.pact.common.stubs.MatchStub;
 import eu.stratosphere.pact.common.stubs.StubAnnotation.ConstantFields;
 import eu.stratosphere.pact.common.type.PactRecord;
 
+/**
+ * This UDF is used to join the trained coefficients and the gain for each
+ * dimensions, since both are the output of different UDFs.
+ * 
+ * @author André Hacker
+ */
 @ConstantFields({0, 1})
 public class MatchGainsAndCoefficients extends MatchStub {
   

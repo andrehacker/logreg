@@ -19,15 +19,13 @@ import com.google.common.base.Preconditions;
 import eu.stratosphere.pact.common.type.Value;
 
 /**
- * PactVector encapsulates an Vector (mahout)
+ * PactVector encapsulates an mahout vector.
  * The vector can have different internal implementations
  * (dense, sparse random access, sparse sequential access)
  * 
  * Copy of the VectorWritable from mahout 0.8 snapshot (2013-07-18)
  * 
- * TODO What is the advantage of CopyableValue vs Value?
- * 
- * @author Andre Hacker
+ * @author André Hacker
  */
 public class PactVector implements Value {
 

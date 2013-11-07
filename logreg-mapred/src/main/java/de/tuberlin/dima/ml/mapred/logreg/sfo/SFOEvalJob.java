@@ -1,5 +1,7 @@
 package de.tuberlin.dima.ml.mapred.logreg.sfo;
 
+import java.net.URI;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -7,7 +9,6 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import de.tuberlin.dima.ml.mapred.AbstractHadoopJob;
-import de.tuberlin.dima.ml.mapred.writables.DoublePairWritable;
 
 /**
  * Validates the previously built models
@@ -31,6 +32,13 @@ public class SFOEvalJob extends AbstractHadoopJob {
   public static final String CONF_KEY_NUM_FEATURES = "num-features";
   public static final String CONF_KEY_POSITIVE_CLASS = "positive-class";
   public static final String CONF_KEY_TRAIN_OUTPUT = "train-output-path";
+  public static final String CONF_KEY_COLLECT_DATASET_STATS = "collect-dataset-stats";
+  
+  // Counter to compute sparsity (number non-zero values)
+  public static enum SFO_EVAL_COUNTER { 
+	NUM_NON_ZEROS
+  }
+  private static final boolean collectDatasetStats = false;
   
   private String inputFile;
   private boolean isMultilabelInput;
@@ -39,6 +47,7 @@ public class SFOEvalJob extends AbstractHadoopJob {
   private int numFeatures;
   private int positiveClass;
   private String trainOutputPath;
+  private String baseModelPath;
   
   public SFOEvalJob(
       String inputFile,
@@ -47,7 +56,8 @@ public class SFOEvalJob extends AbstractHadoopJob {
       String outputPath,
       int numReduceTasks,
       int numFeatures,
-      String trainOutputPath) {
+      String trainOutputPath,
+      String baseModelPath) {
     this.inputFile = inputFile;
     this.isMultilabelInput = isMultilabelInput;
     this.positiveClass = positiveClass;
@@ -55,6 +65,7 @@ public class SFOEvalJob extends AbstractHadoopJob {
     this.numReduceTasks = numReduceTasks;
     this.numFeatures = numFeatures;
     this.trainOutputPath = trainOutputPath;
+    this.baseModelPath = baseModelPath;
   }
   
   /**
@@ -70,20 +81,28 @@ public class SFOEvalJob extends AbstractHadoopJob {
         SFOEvalMapper.class, 
         SFOEvalReducer.class, 
         IntWritable.class,
-        DoublePairWritable.class,
+        DoubleWritable.class,
         IntWritable.class,
         DoubleWritable.class,
         TextInputFormat.class,  // SequenceFileInputFormat.class,
         SequenceFileOutputFormat.class,
         inputFile,
         outputPath);
-
+    
+    // This might not always be ideal, 
+    // e.g. if the number of dimensions is large 
+    // and there are only few records per dimension
+    job.setCombinerClass(SFOEvalReducer.class);
+    
     job.getConfiguration().set(CONF_KEY_IS_MULTILABEL_INPUT, Boolean.toString(isMultilabelInput));
     job.getConfiguration().set(CONF_KEY_NUM_FEATURES, Integer.toString(numFeatures));
     job.getConfiguration().set(CONF_KEY_POSITIVE_CLASS, Integer.toString(positiveClass));
     job.getConfiguration().set(CONF_KEY_TRAIN_OUTPUT, trainOutputPath);
+    job.getConfiguration().set(CONF_KEY_COLLECT_DATASET_STATS, Boolean.toString(collectDatasetStats));
     
 //    cleanupOutputDirectory(outputPath);
+
+    job.addCacheFile(new URI(baseModelPath));
     
     return job.waitForCompletion(true) ? 0 : 1;
   }

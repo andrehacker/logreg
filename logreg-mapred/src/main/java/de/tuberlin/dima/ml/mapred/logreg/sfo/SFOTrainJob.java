@@ -1,5 +1,7 @@
 package de.tuberlin.dima.ml.mapred.logreg.sfo;
 
+import java.net.URI;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -23,22 +25,24 @@ public class SFOTrainJob extends AbstractHadoopJob {
   public static final String CONF_KEY_NEWTON_MAX_ITERATIONS = "newton-max-iterations";
   public static final String CONF_KEY_NEWTON_TOLERANCE = "newton-tolerance";
   public static final String CONF_KEY_REGULARIZATION = "regularization";
+  public static final String CONF_KEY_COLLECT_DATASET_STATS = "collect-dataset-stats";
   
-  public static enum SFO_COUNTER { 
-    TRAIN_OVERFLOWS
+  // Counter to compute sparsity (number non-zero values)
+  public static enum SFO_TRAIN_COUNTER { 
+	NUM_NON_ZEROS
   }
+  private static final boolean collectDatasetStats = false;
   
   private String inputFile;
   private boolean isMultilabelInput;
   private int positiveClass;
   private String outputPath;
-  
   private int numReduceTasks;
-  
   private int numFeatures;
   private double newtonTolerance;
   private int newtonMaxIterations;
   private double regularization;
+  private String baseModelPath;
   
   public SFOTrainJob(
       String inputFile,
@@ -49,7 +53,8 @@ public class SFOTrainJob extends AbstractHadoopJob {
       double newtonTolerance,
       int newtonMaxIterations,
       double regularization,
-      int numReduceTasks
+      int numReduceTasks,
+      String baseModelPath
       ) {
     this.inputFile = inputFile;
     this.isMultilabelInput = isMultilabelInput;
@@ -60,6 +65,7 @@ public class SFOTrainJob extends AbstractHadoopJob {
     this.newtonMaxIterations = newtonMaxIterations;
     this.regularization = regularization;
     this.numReduceTasks = numReduceTasks;
+    this.baseModelPath = baseModelPath;
   }
   
   @Override
@@ -87,6 +93,9 @@ public class SFOTrainJob extends AbstractHadoopJob {
     job.getConfiguration().set(CONF_KEY_NEWTON_TOLERANCE, Double.toString(newtonTolerance));
     job.getConfiguration().set(CONF_KEY_NEWTON_MAX_ITERATIONS, Integer.toString(newtonMaxIterations));
     job.getConfiguration().set(CONF_KEY_REGULARIZATION, Double.toString(regularization));
+    job.getConfiguration().set(CONF_KEY_COLLECT_DATASET_STATS, Boolean.toString(collectDatasetStats));
+
+    job.addCacheFile(new URI(baseModelPath));
 
     //    cleanupOutputDirectory(outputPath);
     

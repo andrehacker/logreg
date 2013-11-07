@@ -16,6 +16,15 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 
+/**
+ * This UDF trains a single dimension at a time.
+ * 
+ * Let's assume we train dimension d: Then the input consists of N
+ * pre-aggregated PACT records, where N is the number of vectors of the original
+ * input that have a non-zero value for dimension d. See Singh et al. for details.
+ * 
+ * @author André Hacker
+ */
 @ConstantFields({0})
 public class TrainDimensions extends ReduceStub {
   

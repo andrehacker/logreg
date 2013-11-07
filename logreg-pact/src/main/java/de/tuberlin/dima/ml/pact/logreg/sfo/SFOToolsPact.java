@@ -19,11 +19,9 @@ import eu.stratosphere.nephele.fs.Path;
 public final class SFOToolsPact {
 
   /**
-   * TODO _SFO Major We needed to add dependency to nephele-hdfs for this. Could we not simply use the hdfs FileSystem object directly?
+   * Read the gains and coefficients from the output of the previously executed job.
    * 
    * @param outputPath Path with 
-   * @param gains Empty list
-   * @param coefficients List with numFeatures empty elements. Create with Arrays.asList(new Double[numFeatures])
    */
   public static List<FeatureGain> readGainsAndCoefficients(String outputPath) throws IOException, URISyntaxException {
     
@@ -44,6 +42,7 @@ public final class SFOToolsPact {
               Double.parseDouble(tokens[MatchGainsAndCoefficients.IDX_OUT_GAIN]),
               Double.parseDouble(tokens[MatchGainsAndCoefficients.IDX_OUT_COEFFICIENT])));
         }
+        reader.close();
       }
     } else {
       System.out.println("ERROR: Output folder does not exist, cannot read the gains and coefficients.");

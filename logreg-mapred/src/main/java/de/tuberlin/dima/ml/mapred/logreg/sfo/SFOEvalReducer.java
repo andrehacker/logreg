@@ -6,27 +6,32 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import de.tuberlin.dima.ml.mapred.writables.DoublePairWritable;
-
-public class SFOEvalReducer extends Reducer<IntWritable, DoublePairWritable, IntWritable, DoubleWritable> {
+public class SFOEvalReducer extends Reducer<IntWritable, DoubleWritable, IntWritable, DoubleWritable> {
   
 //  private static AdaptiveLogger log = new AdaptiveLogger(
 //      Logger.getLogger(SFOEvalReducer.class.getName()), GlobalSettings.LOG_LEVEL);
   
+  private static final int DEBUG_DIMENSION = -1; // 8609; // 196; //10394; //12219
+  
   @Override
-  public void reduce(IntWritable dim, Iterable<DoublePairWritable> values, Context context) throws IOException, InterruptedException {
+  public void reduce(IntWritable dim, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
     
 //    log.debug("Eval Reducer for d=" + dim.get());
     
-    double sumLlBase=0;
-    double sumLlNew=0;
-    for (DoublePairWritable element : values) {
-      sumLlBase += element.getFirst();
-      sumLlNew += element.getSecond();
+    double gain=0;
+    int count=0;
+    for (DoubleWritable element : values) {
+      gain += element.get();
+
+      if (dim.get() == DEBUG_DIMENSION) {
+        System.out.println("- gain += " + element.get());
+      }
+      ++count;
     }
-    double gain = sumLlNew - sumLlBase;
     context.write(dim, new DoubleWritable(gain));
 
-//    log.debug("- ll_base: " + sumLlBase + " ll_new: " + sumLlNew + " GAIN: " + gain);
+    if (dim.get() == DEBUG_DIMENSION) {
+      System.out.println("Eval for d " + dim.get() + ": count: " + count + " GAIN: " + gain);
+    }
   }
 }

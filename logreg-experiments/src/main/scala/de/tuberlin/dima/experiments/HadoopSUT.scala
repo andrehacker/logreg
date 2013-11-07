@@ -28,6 +28,7 @@ class HadoopSUT(confFile: String) extends HdfsBasedSUT(confFile) {
     
     // Delete Jobtracker logfiles
     bash("rm -Rf " + hadoopLog + "/hadoop-" + user + "-*tracker-*.log*")
+    if (isYarn) bash("rm -Rf " + hadoopLog + "/yarn-" + user + "-resourcemanager-*.log")
     
     // Start Hadoop MapRed
     if (isYarn) {

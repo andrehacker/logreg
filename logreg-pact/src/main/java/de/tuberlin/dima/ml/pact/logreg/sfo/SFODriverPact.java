@@ -20,6 +20,15 @@ import de.tuberlin.dima.ml.logreg.sfo.SFODriver;
 import de.tuberlin.dima.ml.pact.JobRunner;
 import eu.stratosphere.pact.common.plan.Plan;
 
+/**
+ * Implementation of SFO [1] for Stratosphere / PACT
+ * 
+ * @See {@link SFODriver} for a short documentation of SFS
+ * 
+ * [1] Singh, S., Kubica, J., Larsen, S., & Sorokina, D. (2009).
+ * Parallel Large Scale Feature Selection for Logistic Regression. Optimization,
+ * 1172–1183.
+ */
 public class SFODriverPact implements SFODriver {
 
   private String inputPathTrain;
@@ -27,7 +36,7 @@ public class SFODriverPact implements SFODriver {
   private boolean isMultilabelInput;
   private int positiveClass;
   private String outputPath;
-  private int numFeatures;
+  private int highestFeatureId;
   private double newtonTolerance;
   private int newtonMaxIterations;
   private double regularization;
@@ -44,13 +53,29 @@ public class SFODriverPact implements SFODriver {
   
   private Logger logger = LoggerFactory.getLogger(this.getClass());
   
+  /**
+   * Create an new driver, with an empty base model
+   * 
+   * @param inputPathTrain Path of training input file (libsvm format)
+   * @param inputPathTest Path of evaluation input file (libsvm format)
+   * @param isMultilabelInput True, if the input files are multi-lcass files, false otherwise
+   * @param positiveClass ID of the class used as positive class in a one-versus-all classifier (only relevant for multi-class)
+   * @param outputPath Output path of the whole job
+   * @param highestFeatureId Highest feature id. Typically equal to the number of features
+   * @param newtonTolerance Tolerance for Newton-Raphson, e.g. 0.000001. Convergene is assumed if the change in trained coefficient is smaller
+   * @param newtonMaxIterations Maximum number of Newton-Raphson iterations, e.g. 5
+   * @param regularization L2-regularization penalty term. Set to 0 for no regularization and increase for higher regularization. A high value keeps the coefficient smaller.
+   * @param runLocal False, to execute on a cluster, true to execute the job in local mode (via LocalExecutor)
+   * @param confPath Path to the config directory of Stratosphere
+   * @param jarPath Local path of the job jar file
+   */
   public SFODriverPact(
       String inputPathTrain,
       String inputPathTest,
       boolean isMultilabelInput,
       int positiveClass,
       String outputPath,
-      int numFeatures,
+      int highestFeatureId,
       double newtonTolerance,
       int newtonMaxIterations,
       double regularization,
@@ -62,7 +87,7 @@ public class SFODriverPact implements SFODriver {
     this.isMultilabelInput = isMultilabelInput;
     this.positiveClass = positiveClass;
     this.outputPath = outputPath;
-    this.numFeatures = numFeatures;
+    this.highestFeatureId = highestFeatureId;
     this.newtonTolerance = newtonTolerance;
     this.newtonMaxIterations = newtonMaxIterations;
     this.regularization = regularization;
@@ -71,7 +96,7 @@ public class SFODriverPact implements SFODriver {
     this.jarPath = jarPath;
 
     // Create empty model
-    this.baseModel = new IncrementalModel(numFeatures);
+    this.baseModel = new IncrementalModel(highestFeatureId);
   }
   
 
@@ -94,7 +119,7 @@ public class SFODriverPact implements SFODriver {
         isMultilabelInput,
         positiveClass,
         outputPath,
-        numFeatures,
+        highestFeatureId,
         newtonTolerance,
         newtonMaxIterations,
         regularization,
@@ -149,22 +174,19 @@ public class SFODriverPact implements SFODriver {
     return gains;
   }
 
-
   @Override
   public long getLastWallClockTime() {
     return counters.get(COUNTER_KEY_TOTAL_WALLCLOCK);
   }
-
 
   @Override
   public Map<String, Long> getAllCounters() {
     return counters;
   }
 
-
   @Override
   public void resetModel() {
-    this.baseModel = new IncrementalModel(numFeatures);
+    this.baseModel = new IncrementalModel(highestFeatureId);
   }
 
 }

@@ -80,10 +80,33 @@ public class LogRegMath {
    */
   public static double logLikelihood(double actual, double prediction) {
     if (prediction == 0) {
-      System.out.println("logLikelihood: log(0) detected and solved. prediction=" + prediction + " actual=" + actual);
+      System.out.println("logLikelihood: prediction == 0 detected and solved (would result in log(0)). prediction=" + prediction + " actual=" + actual);
       prediction = Double.MIN_VALUE;
     }
-    return (actual * Math.log(prediction)) + ((1 - actual) * (1 - Math.log(prediction)));
+    if (prediction == 1) {
+      System.out.println("logLikelihood: prediction == 1 detected and solved (would result in log(0)). prediction=" + prediction + " actual=" + actual);
+      prediction = 0.9999999D;
+    }
+//    if (prediction < 0) {
+//      System.out.println("logLikelihood: log(<0) detected and solved. prediction=" + prediction + " actual=" + actual);
+//      prediction = Double.MIN_VALUE;
+//    }
+//    if (prediction == Double.POSITIVE_INFINITY) {
+//      System.out.println("logLikelihood: prediction=positive infty detected and solved. prediction=" + prediction + " actual=" + actual);
+//      prediction = Double.MAX_VALUE;
+//    }
+//    if (prediction == Double.NaN) {
+//      System.out.println("logLikelihood: prediction=NaN detected and solved. prediction=" + prediction + " actual=" + actual);
+//      prediction = Double.MAX_VALUE;
+//    }
+//    return (actual * Math.log(prediction)) + ((1 - actual) * (1 - Math.log(prediction)));
+    return (actual * Math.log(prediction)) + ((1 - actual) * Math.log((1 - prediction)));
+  }
+  
+  public static void main(String[] args) {
+	double actual = 1;
+	double prediction = Double.MIN_VALUE;
+	System.out.println((actual * Math.log(prediction)) + ((1 - actual) * Math.log((1 - prediction))));
   }
 
   public static double computeSqError(Vector x, Vector w, double y) {

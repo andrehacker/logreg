@@ -14,6 +14,17 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactDouble;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 
+/**
+ * This UDF processes one input record at a time, where each record consists of
+ * a sparse vector x_i (the input) and the label (y_i).
+ * 
+ * It emits all values that are required for the subsequent training, which will
+ * be done independently for each dimension (see below in the code).
+ * 
+ * We use Cross because we need an instance of the base model in the UDF.
+ * 
+ * @author André Hacker
+ */
 public class TrainComputeProbabilities extends CrossStub {
   
   public static final int IDX_INPUT1_INPUT_RECORD = 0;
@@ -30,8 +41,6 @@ public class TrainComputeProbabilities extends CrossStub {
   private IncrementalModel baseModel = null;
 
   private final PactRecord recordOut = new PactRecord();
-
-//  private static final Log logger = LogFactory.getLog(TrainComputeProbabilities.class);
   
   @Override
   public void open(Configuration parameters) throws Exception {
@@ -39,11 +48,13 @@ public class TrainComputeProbabilities extends CrossStub {
 	baseModelCached = false;
   }
   
+  // This is inefficient - the system will send us a new copy of the model
+  // record for every call, although it is constant.
   @Override
   public void cross(PactRecord trainingVector, PactRecord model,
       Collector<PactRecord> out) throws Exception {
 
-    int y = trainingVector.getField(IDX_INPUT1_INPUT_RECORD, PactInteger.class).getValue();
+    int yi = trainingVector.getField(IDX_INPUT1_INPUT_RECORD, PactInteger.class).getValue();
     Vector xi = trainingVector.getField(IDX_INPUT1_LABEL, PactVector.class).getValue();
 
     // Optimization: Cache basemodel, will always be the same
@@ -52,13 +63,17 @@ public class TrainComputeProbabilities extends CrossStub {
       baseModelCached = true;
     }
     
-//    logger.info("TRAIN CROSS: y=" + y + " xi non-zeros=" + xi.getNumNonZeroElements());
-    
+    // Compute the prediction for the current input vector using the base model
     double pi = LogRegMath.predict(xi, baseModel.getW(), SFOGlobalSettings.INTERCEPT);
+    
+	// This loop iterates over all non-zero features in the current input record
+	// If there is a value for dimension d, we transmit this value together
+	// with the label and the prediction for the base model
+	// Only these values are needed for the subsequent training of the feature.
     for (Vector.Element feature : xi.nonZeroes()) {
       if (! baseModel.isFeatureUsed(feature.index())) {
         recordOut.setField(IDX_OUT_DIMENSION, new PactInteger(feature.index()));
-        recordOut.setField(IDX_OUT_LABEL, new PactInteger(y));
+        recordOut.setField(IDX_OUT_LABEL, new PactInteger(yi));
         recordOut.setField(IDX_OUT_XID, new PactDouble(feature.get()));
         recordOut.setField(IDX_OUT_PI, new PactDouble(pi));
         out.collect(recordOut);

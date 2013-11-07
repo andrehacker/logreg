@@ -101,7 +101,7 @@ STATUS: Compared with mapred-default.xml
 
   <property>
     <name>mapreduce.task.io.sort.mb</name>
-    <value>512</value>
+    <value>256</value>
     <default>100</default>
     <description>
       The total amount of buffer memory to use while sorting files, in megabytes.

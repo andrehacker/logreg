@@ -20,6 +20,8 @@ import scala.collection.JavaConversions
 import org.apache.hadoop.conf.Configuration
 import de.tuberlin.dima.ml.mapred.util.HadoopUtils
 import org.apache.hadoop.fs.FileSystem
+import com.google.common.base.Stopwatch
+import java.util.concurrent.TimeUnit
 
 object SFOExperiment extends Experiment {
   
@@ -36,15 +38,6 @@ object SFOExperiment extends Experiment {
    * - Make sure that ozone files in local repository are pointing to your hadoop version
    *   - Compile ozone with the hdfs dependencies you use (central ozone pom contains cloudera repository)
    * -Make sure that HADOOP_PREFIX and HADOOP_YARN_HOME does either not exist or point to correct directory (otherwise startup scripts call wrong scripts) 
-   * 
-   * Measure time
-   * - https://database.cs.brown.edu/svn/mr-benchmarks/ how they measure the time
-   *   - time -f %e hadoop jar ... 
-   * - jp-scripts
-   *   - startTS=`date +%s`
-   *   - hadoop jar ...
-   *   - endTS=`date +%s`
-   *   - (( jobDuration=$endTS - $startTS ))
    */
   def runExperiment(args: Array[String]) = {
     
@@ -105,7 +98,6 @@ object SFOExperiment extends Experiment {
       
       // --------------- JOB DRIVER ----------
   
-//      val jobTrackerAddress = getSysProperty("hadoop_jobtracker_address")
       val hadoopConfPath = getSysProperty("hadoop_conf")
       
       val sfoDriverHadoop = new SFODriverHadoop(
@@ -120,7 +112,6 @@ object SFOExperiment extends Experiment {
         newtonMaxIterations,
         regularization,
         hadoopConfPath,
-//        configuration,
         jarPathHadoop)
       
       val ozoneConfPath = getSysProperty("ozone_conf")
@@ -220,6 +211,7 @@ object SFOExperiment extends Experiment {
           jobDriver.resetModel();
           logger.info("-------------------- RUN EXPERIMENT --------------------\n")
           if (iterations <= 1) {
+            val stopDriver = new Stopwatch().start()
             for (i <- 1 to driverIterations) {
               jobDriver.computeGains(dop * intraNodeDop)
               printTopGains(JavaConversions.asScalaBuffer(jobDriver.getGains()))
@@ -230,6 +222,8 @@ object SFOExperiment extends Experiment {
                 sut.removeOutputFolder(outputFolder)
               }
             }
+            stopDriver.stop()
+            if (driverIterations > 1) logger.info("Time for all iterations: " + stopDriver.elapsed(TimeUnit.MILLISECONDS))
           } else {
             jobDriver.forwardFeatureSelection(dop * intraNodeDop, iterations, addPerIteration)
             logTimers(jobDriver, experimentID)
@@ -268,12 +262,11 @@ object SFOExperiment extends Experiment {
   
   // , datasetInfo: DatasetInfo
   def printTopGains(gains: scala.collection.mutable.Buffer[FeatureGain]) = {
-    for (i <- 0 until 10) {
+    val limit = 100
+    for (i <- 0 until limit) {
       logger.info("d " + gains.get(i).getDimension() 
           + " gain: " + gains.get(i).getGain() + " coefficient(pact-only): " + gains.get(i).getCoefficient())
       // + " (" + datasetInfo.getFeatureName(gains.get(i).getDimension())+ ")"
     }
   }
-
 }
-

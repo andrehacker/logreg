@@ -61,7 +61,8 @@ public abstract class RecordSequenceInputFormat implements InputFormat<PactRecor
     return new BaseStatistics() {
       @Override
       public long getTotalInputSize() {
-        return BaseStatistics.SIZE_UNKNOWN;
+//        return BaseStatistics.SIZE_UNKNOWN;
+    	return 1;
       }
       @Override
       public long getNumberOfRecords() {

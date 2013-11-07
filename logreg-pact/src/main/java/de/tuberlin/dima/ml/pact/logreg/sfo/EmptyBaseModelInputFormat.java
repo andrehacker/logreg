@@ -6,6 +6,15 @@ import de.tuberlin.dima.ml.pact.util.PactUtils;
 import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.pact.common.type.PactRecord;
 
+/**
+ * This input format always emits a single record holding an empty base model.
+ * 
+ * One could have used a file input for this, but I consider this way to be
+ * closer to my original itention (I don't want to add an dependency that the
+ * user has to care that the file exists...)
+ * 
+ * @author Andre Hacker
+ */
 public class EmptyBaseModelInputFormat extends RecordSequenceInputFormat {
   
   public static final int IDX_OUT_BASEMODEL = 0;

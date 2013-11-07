@@ -19,14 +19,7 @@ import de.tuberlin.dima.ml.logreg.sfo.SFODriver;
 import de.tuberlin.dima.ml.mapred.util.HadoopUtils;
 
 /**
- * Implements the Single Feature Optimization Algorithm as proposed by Singh et
- * al. [1] using Hadoop.
- * 
- * REFERENCES [1] Singh, S., Kubica, J., Larsen, S., & Sorokina, D. (2009).
- * Parallel Large Scale Feature Selection for Logistic Regression. Optimization,
- * 1172–1183. Retrieved from http://www.additivegroves.net/papers/fslr.pdf
- * 
- * @author André Hacker
+ * @See {@link SFODriver} documentation
  */
 public class SFODriverHadoop implements SFODriver {
 
@@ -39,10 +32,7 @@ public class SFODriverHadoop implements SFODriver {
   private String testOutputPath;
   
   private String hadoopConfDir;
-//  private String jobTrackerAddress;
-//  private String hdfsAddress;
   private String jarPath;   // might be empty
-//  private Configuration configuration;
 
   private int numFeatures;
   private double newtonTolerance;
@@ -58,10 +48,10 @@ public class SFODriverHadoop implements SFODriver {
   public static final String COUNTER_KEY_TRAIN_TIME = "train-wall-clock";
   public static final String COUNTER_KEY_TEST_TIME = "test-wall-clock";
   public static final String COUNTER_KEY_READ_RESULT_GAINS = "read-result-gains";
+  
+  // Temporary path for base model (needed for distributed cache only)
+  private static final String BASE_MODEL_PATH = "/sfo-base-model.seq";
 
-  /**
-   * Initializes a new empty base model
-   */
   public SFODriverHadoop(
       String trainInputFile,
       String testInputFile,
@@ -73,10 +63,7 @@ public class SFODriverHadoop implements SFODriver {
       double newtonTolerance,
       int newtonMaxIterations,
       double regularization,
-//      String jobTrackerAddress,
-//      String hdfsAddress,
       String hadoopConfDir,
-//      Configuration configuration,
       String jarPath) {
     this.trainInputFile = trainInputFile;
     this.testInputFile = testInputFile;
@@ -88,10 +75,7 @@ public class SFODriverHadoop implements SFODriver {
     this.newtonTolerance = newtonTolerance;
     this.newtonMaxIterations = newtonMaxIterations;
     this.regularization = regularization;
-//    this.jobTrackerAddress = jobTrackerAddress;
-//    this.hdfsAddress = hdfsAddress;
     this.hadoopConfDir = hadoopConfDir;
-//    this.configuration = configuration;
     this.jarPath = jarPath;
 
     // Create empty model
@@ -126,20 +110,16 @@ public class SFODriverHadoop implements SFODriver {
     // Read configuration from config folder
     Configuration configuration = HadoopUtils.createConfigurationFromConfDir(hadoopConfDir);
 
-    // Make base model available for train/test mappers
-    SFOToolsHadoop.writeBaseModel(baseModel, configuration);
+    // Make base model available for train/test mappers.
+    // Will be broadcasted via Distributed Cache when the job is started
+    SFOToolsHadoop.writeBaseModel(baseModel, configuration, BASE_MODEL_PATH);
 
     // ----- TRAIN -----
     stopTotal.start();
     stopTrain.start();
-//    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress, jarPath);
-//    Configuration conf = HadoopUtils.createConfigurationFromConfDir(hadoopConfDir, jarPath);
     
     HadoopUtils.addJarToConfiguration(configuration, jarPath);
 
-//    private double newtonTolerance;
-//    private int newtonMaxIterations;
-//    private double regularization;
     ToolRunner.run(configuration, new SFOTrainJob(
           trainInputFile,
           isMultilabelInput,
@@ -149,7 +129,8 @@ public class SFODriverHadoop implements SFODriver {
           newtonTolerance,
           newtonMaxIterations,
           regularization,
-          numReduceTasks
+          numReduceTasks,
+          BASE_MODEL_PATH
         ), null);
     stopTrain.stop();
     counters.put(COUNTER_KEY_TRAIN_TIME, stopTrain.elapsed(TimeUnit.MILLISECONDS));
@@ -158,7 +139,7 @@ public class SFODriverHadoop implements SFODriver {
     // ----- TEST -----
     stopTest.start();
     ToolRunner.run(configuration, new SFOEvalJob(testInputFile, isMultilabelInput, positiveClass, testOutputPath, numReduceTasks,
-        numFeatures, trainOutputPath), null);
+        numFeatures, trainOutputPath, BASE_MODEL_PATH), null);
     stopTest.stop(); stopTotal.stop();
     counters.put(COUNTER_KEY_TEST_TIME, stopTest.elapsed(TimeUnit.MILLISECONDS));
     counters.put(COUNTER_KEY_TOTAL_WALLCLOCK, stopTotal.elapsed(TimeUnit.MILLISECONDS));
@@ -187,8 +168,8 @@ public class SFODriverHadoop implements SFODriver {
     
     // Read coefficients
 //    Configuration conf = HadoopUtils.createConfiguration(hdfsAddress, jobTrackerAddress);
-    List<Double> coefficients = SFOToolsHadoop.readTrainedCoefficients(configuration,
-        numFeatures, trainOutputPath);
+    List<Double> coefficients = SFOToolsHadoop.readTrainedCoefficients(configuration, trainOutputPath,
+        numFeatures);
 
     // Add best to base model
     for (int i=0; i<n; ++i) {
@@ -202,7 +183,7 @@ public class SFODriverHadoop implements SFODriver {
     }
 
     // Write updated model to hdfs
-    SFOToolsHadoop.writeBaseModel(baseModel, configuration);
+    SFOToolsHadoop.writeBaseModel(baseModel, configuration, BASE_MODEL_PATH);
 
     System.out.println("- New base model: " + baseModel.getW().toString());
   }

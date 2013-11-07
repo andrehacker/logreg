@@ -2,8 +2,6 @@ package de.tuberlin.dima.ml.mapred.logreg.sfo;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -20,28 +18,26 @@ public class SFOTrainMapper extends Mapper<LongWritable, Text, IntWritable, SFOI
   
   private static IntWritable outputKey = new IntWritable();
   private static SFOIntermediateWritable outputValue = new SFOIntermediateWritable();
-  private static final Log LOG = LogFactory.getLog(SFOTrainMapper.class);
   
   private IncrementalModel baseModel;
 
   private boolean isMultilabelInput;
   private int positiveClass;
   private int numFeatures;
+  private boolean collectDatasetStats;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     
-    baseModel = SFOToolsHadoop.readBaseModel(context.getConfiguration());
-    
     this.isMultilabelInput = Boolean.parseBoolean(context.getConfiguration().get(SFOTrainJob.CONF_KEY_IS_MULTILABEL_INPUT));
     this.positiveClass =  Integer.parseInt(context.getConfiguration().get(SFOTrainJob.CONF_KEY_POSITIVE_CLASS));
     this.numFeatures = Integer.parseInt(context.getConfiguration().get(SFOTrainJob.CONF_KEY_NUM_FEATURES));
+    this.collectDatasetStats = Boolean.parseBoolean(context.getConfiguration().get(SFOEvalJob.CONF_KEY_COLLECT_DATASET_STATS));
     
-    System.out.println("STDOUT: Setup Train Mapper");
-    LOG.info("COMMONS_LOGGING: Setup Train Mapper");
+    // Read base model from Distributed cache
+    baseModel = SFOToolsHadoop.readBaseModelFromDC(context);
   }
-  
   
   @Override
   public void map(LongWritable ignore, Text line, Context context) throws IOException, InterruptedException {
@@ -56,12 +52,10 @@ public class SFOTrainMapper extends Mapper<LongWritable, Text, IntWritable, SFOI
     }
 
     // Compute prediction for current x_i using the base model
-    // TODO Improvement: Why not just compute and transmit beta * x_i ??
+    // We could also emit x * w instead - then we don't have to reverse engineer on the receiver side
     double pi = LogRegMath.predict(xi, baseModel.getW(), SFOGlobalSettings.INTERCEPT);
 //    double xDotW = xi.get().dot(model.getW()) + SFOJob.INTERCEPT;
     
-    // Go through all features in x, emit value.
-    // TODO Improvement: Why always transmit p_i ?? Because we need p_i for the specific x_i in reducer for each feature! Still lot of redundant traffic...
     for (Vector.Element feature : xi.nonZeroes()) {
       // New feature?
       if (! baseModel.isFeatureUsed(feature.index())) {
@@ -71,6 +65,9 @@ public class SFOTrainMapper extends Mapper<LongWritable, Text, IntWritable, SFOI
         outputValue.setPi(pi);
 //        outputValue.setPi(xDotW);
         context.write(outputKey, outputValue);
+      }
+      if (collectDatasetStats) {
+    	context.getCounter(SFOEvalJob.SFO_EVAL_COUNTER.NUM_NON_ZEROS).increment(1);
       }
     }
   }

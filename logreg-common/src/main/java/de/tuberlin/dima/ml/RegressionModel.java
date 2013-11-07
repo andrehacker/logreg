@@ -2,6 +2,13 @@ package de.tuberlin.dima.ml;
 
 import org.apache.mahout.math.Vector;
 
+/**
+ * Interface for a model for regression, i.e. a model that predicts a real value
+ * for a given input vector.
+ * 
+ * @author André Hacker
+ * 
+ */
 public interface RegressionModel {
 
   /**
@@ -12,9 +19,7 @@ public interface RegressionModel {
   double predict(Vector x);
 
   /**
-   * Predict the outcome for input x
-   * 
-   * Uses an explicite bias/interception term 
+   * Predict the outcome for input x using an explicit bias / interception term 
    */
   double predict(Vector x, double intercept);
 

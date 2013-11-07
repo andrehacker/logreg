@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.google.common.base.Joiner;
 
 import de.tuberlin.dima.ml.logreg.sfo.IncrementalModel;
+import de.tuberlin.dima.ml.logreg.sfo.SFODriver;
 import de.tuberlin.dima.ml.pact.io.LibsvmInputFormat;
 import de.tuberlin.dima.ml.pact.io.SingleValueDataSource;
 import de.tuberlin.dima.ml.pact.logreg.sfo.udfs.ApplyBest;
@@ -33,6 +34,14 @@ import eu.stratosphere.pact.compiler.PactCompiler;
 import eu.stratosphere.pact.generic.contract.BulkIteration;
 import eu.stratosphere.pact.generic.contract.Contract;
 
+/**
+ * Plan assembler for SFO (see {@link SFODriver}).
+ * 
+ * Depending on the parameters this plan will either use bulk iterations or not.
+ * If iterations=1, it will execute a single iteration
+ * 
+ * @author Andre Hacker
+ */
 public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription {
 
   @Override
@@ -42,6 +51,26 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
         + " <Optional: baseModel (base64 encoded)>";
   }
   
+  /**
+   * This method is a convenience method. It is very error prone to use the
+   * string-args so I added this constructor that can be used whenever this plan
+   * is executed from within code.
+   * 
+   * @param numSubTasks
+   * @param inputPathTrain Path of training input file (libsvm format)
+   * @param inputPathTest Path of evaluation input file (libsvm format)
+   * @param isMultilabelInput True, if the input files are multi-lcass files, false otherwise
+   * @param positiveClass ID of the class used as positive class in a one-versus-all classifier (only relevant for multi-class)
+   * @param outputPath Output path of the whole job
+   * @param numFeatures Highest feature id. Typically equal to the number of features
+   * @param newtonTolerance Tolerance for Newton-Raphson, e.g. 0.000001. Convergene is assumed if the change in trained coefficient is smaller
+   * @param newtonMaxIterations Maximum number of Newton-Raphson iterations, e.g. 5
+   * @param regularization L2-regularization penalty term. Set to 0 for no regularization and increase for higher regularization. A high value keeps the coefficient smaller.
+   * @param iterations number of iterations. The bulk iterations feature will only be used if iterations is greater than 1
+   * @param addPerIteration The number of features to be added to the base model. Only considered if iterations>1.
+   * @param baseModel The instance of the current base model
+   * @return the string array that can be used to start the job
+   */
   public static String[] buildArgs(
       int numSubTasks, 
       String inputPathTrain, 
@@ -73,14 +102,12 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     };
   }
 
-  /**
-   * TODO _SFO Major: This method currently only supports empty base models.
-   * TODO Optional: Transfer basemodel via config (does not work for iterations)
-   */
   @Override
   public Plan getPlan(String... args) {
     System.out.println("getPlan(" + Joiner.on(' ').join(args) + ")");
-    // The default values just exist to be able to view this job in pact-web
+    
+    // The default values just exist to be able to view this job in pact-web.
+    
     int numSubTasks = (args.length > 0 ? Integer.parseInt(args[0]) : 1);
     String inputPathTrain = (args.length > 1 ? args[1] : "");
     String inputPathTest = (args.length > 2 ? args[2] : "");
@@ -96,9 +123,8 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     IncrementalModel baseModel = (args.length > 12 ? PactUtils.decodeValueFromBase64(args[12], PactIncrementalModel.class).getValue() : new IncrementalModel(numFeatures));
     
     // ----- HINTS / OPTIMIZATION -----
-
+    
     boolean giveBroadcastHints = true;
-//    boolean giveFineGradeCardinalityHints = true;
     boolean giveCardinalityHints = true;
     boolean giveFineGradeDopHints = true;
     if (iterations > 1) {
@@ -110,7 +136,7 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     // ----- Data Sources -----
     
     FileDataSource trainingVectors = new FileDataSource(
-        LibsvmInputFormat.class, inputPathTrain, "Training Input Vectors");
+        LibsvmInputFormat.class, inputPathTrain, "Training Input");
     trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_NUM_FEATURES,
         numFeatures);
     trainingVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, isMultilabelInput);
@@ -119,7 +145,7 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     }
     
     FileDataSource testVectors = new FileDataSource(
-        LibsvmInputFormat.class, inputPathTest, "Test Input Vectors");
+        LibsvmInputFormat.class, inputPathTest, "Test Input");
     testVectors.setParameter(LibsvmInputFormat.CONF_KEY_NUM_FEATURES,
         numFeatures);
     testVectors.setParameter(LibsvmInputFormat.CONF_KEY_MULTI_LABEL_INPUT, isMultilabelInput);
@@ -132,7 +158,8 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     Contract initialBaseModelContract = null;
     if (baseModel != null && baseModel.getUsedDimensions().size() > 0) {
       try {
-        String baseModelTmpPath = "file:///tmp/tmp-base-model";
+//        String baseModelTmpPath = "file:///tmp/tmp-base-model";
+    	String baseModelTmpPath = "hdfs://cloud-11:45010/tmp-base-model";
         initialBaseModelContract = new SingleValueDataSource(new PactIncrementalModel(baseModel), baseModelTmpPath);
       } catch (IOException e) {
         e.printStackTrace();
@@ -145,11 +172,6 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     if (giveFineGradeDopHints) {
       initialBaseModelContract.setDegreeOfParallelism(1);
     }
-    // TODO Cardinality hints
-//    if (giveFineGradeCardinalityHints) {
-//      initialBaseModelContract.getCompilerHints().setDistinctCount(new FieldSet(columnIndex), cardinality)
-//      initialBaseModelContract.getCompilerHints().setAvgNumRecordsPerDistinctFields(fieldSet, avgNumRecords)
-//    }
 
     // ----- Iterations -----
     
@@ -210,6 +232,7 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
     basemodelAndCoefficients.setParameter(CrossTwoToOne.CONF_KEY_IDX_OUT_VALUE2, ReduceFlattenToVector.IDX_OUT_VECTOR);
     if (giveFineGradeDopHints) {
       basemodelAndCoefficients.setDegreeOfParallelism(1);
+      // Didn't find a way to specify that this contract emits just a single record
     }
     
     // ----- Cross: Eval Compute Likelihoods over records -----
@@ -246,6 +269,7 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
             .build();
     if (giveCardinalityHints) {
       matchGainsCoefficients.getCompilerHints().setAvgRecordsEmittedPerStubCall(1);
+//      matchGainsCoefficients.getCompilerHints().setAvgBytesPerRecord(??);
     }
     
     FileDataSink dataSink = null;
@@ -265,7 +289,7 @@ public class SFOPlanAssembler implements PlanAssembler, PlanAssemblerDescription
       if (giveFineGradeDopHints) {
         applyBest.setDegreeOfParallelism(1);
       }
-      // TODO _SFO: Sorting does not work!
+      // TODO Sorting of CoGroup did not work!
   //    sortAndApplyBest.setGroupOrderForInputOne(new Ordering(EvalSumLikelihoods.IDX_OUT_GAIN,
   //                PactDouble.class, Order.ASCENDING));
       

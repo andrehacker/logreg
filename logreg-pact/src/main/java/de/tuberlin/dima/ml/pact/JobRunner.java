@@ -184,11 +184,11 @@ public class JobRunner {
 	}
 	
 	if(jsonPlan != null) {
-		System.out.println("-------------------- PACT Execution Plan ---------------------");
-		System.out.println(jsonPlan);
-		System.out.println("--------------------------------------------------------------");
+	  logger.info("-------------------- PACT Execution Plan ---------------------");
+	  logger.info(jsonPlan);
+	  logger.info("--------------------------------------------------------------");
 	} else {
-		System.err.println("JSON plan could not be compiled.");
+	  logger.error("JSON plan could not be compiled.");
 	}
   }
   

@@ -48,7 +48,7 @@ be explictly enabled in the  yarn-site.xml</hadoopbook>
   <!-- LOG AGGREGATION -->
   <property>
     <name>yarn.log-aggregation-enable</name>
-    <value>true</value>
+    <value>false</value>
     <default>false</default>
     <description>Whether to enable log aggregation</description>
   </property>
